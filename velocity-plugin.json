@@ -1,0 +1,8 @@
+{
+  "id": "tnllistener",
+  "name": "TNLListener",
+  "version": "1.0",
+  "authors": ["NonSwag"],
+  "dependencies": [],
+  "main": "net.nonswag.tnl.bridge.Bridge"
+}

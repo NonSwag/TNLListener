@@ -1,0 +1,10 @@
+name: TNLListener
+version: "1.5"
+main: net.nonswag.tnl.listener.NMSMain
+author: NonSwag
+website: http://www.thenextlvl.net
+api-version: "1.13"
+authors:
+ - NonSwag
+commands:
+ bridge:
