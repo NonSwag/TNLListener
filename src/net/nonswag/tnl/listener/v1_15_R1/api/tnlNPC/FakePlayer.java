@@ -122,4 +122,34 @@ public class FakePlayer {
         }
         return new String[]{texture, signature};
     }
+
+    @Override
+    public String toString() {
+        return "FakePlayer{" +
+                "name='" + name + '\'' +
+                ", location=" + location +
+                ", receivers=" + Arrays.toString(receivers) +
+                ", server=" + server +
+                ", worldServer=" + worldServer +
+                ", profile=" + profile +
+                ", player=" + player +
+                ", skinValues=" + Arrays.toString(skinValues) +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FakePlayer that = (FakePlayer) o;
+        return name.equals(that.name) && location.equals(that.location) && Arrays.equals(receivers, that.receivers) && server.equals(that.server) && worldServer.equals(that.worldServer) && profile.equals(that.profile) && player.equals(that.player) && Arrays.equals(skinValues, that.skinValues);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(name, location, server, worldServer, profile, player);
+        result = 31 * result + Arrays.hashCode(receivers);
+        result = 31 * result + Arrays.hashCode(skinValues);
+        return result;
+    }
 }
