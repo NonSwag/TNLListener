@@ -15,7 +15,9 @@ import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import javax.annotation.Nonnull;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.UUID;
 
 public class FakePlayer {
 
@@ -34,7 +36,6 @@ public class FakePlayer {
         this.receivers = receivers;
         this.worldServer = ((CraftWorld) Objects.requireNonNull(getLocation().getWorld())).getHandle();
         this.profile = new GameProfile(UUID.randomUUID(), getName().isEmpty() ? "§7-§8/§7-" : getName());
-        this.profile.getProperties().put("textures", new Property("textures", getSkinValues()[0], getSkinValues()[1]));
         this.player = new EntityPlayer(getServer(), getWorldServer(), getProfile(), new PlayerInteractManager(getWorldServer()));
         this.player.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
     }
@@ -81,6 +82,7 @@ public class FakePlayer {
 
     public void setSkinValues(@Nonnull String[] skinValues) {
         this.skinValues = skinValues;
+        this.profile.getProperties().put("textures", new Property("textures", getSkinValues()[0], getSkinValues()[1]));
     }
 
     public void setSkin(@Nonnull String name) {
