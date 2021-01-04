@@ -48,14 +48,19 @@ public class PacketListener implements Listener {
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseEntity) {
-                if (((PacketPlayInUseEntity) event.getPacket()).b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)) {
+                if (!event.isCancelled()) {
                     Entity entity = ((PacketPlayInUseEntity) event.getPacket()).a(((CraftWorld) event.getPlayer().getWorld()).getHandle());
                     if (entity != null) {
+                        if (((PacketPlayInUseEntity) event.getPacket()).b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)) {
+                            EntityDamageByPlayerEvent damageEvent = new EntityDamageByPlayerEvent(event.getPlayer(), entity);
+                            NMSMain.callEvent(damageEvent);
+                            if (damageEvent.isCancelled()) {
+                                event.setCancelled(true);
+                            }
+                        }
                         PlayerInteractAtEntityEvent interactEvent = new PlayerInteractAtEntityEvent(event.getPlayer(), entity);
-                        EntityDamageByPlayerEvent damageEvent = new EntityDamageByPlayerEvent(event.getPlayer(), entity);
                         NMSMain.callEvent(interactEvent);
-                        NMSMain.callEvent(damageEvent);
-                        if (damageEvent.isCancelled() || interactEvent.isCancelled()) {
+                        if (interactEvent.isCancelled()) {
                             event.setCancelled(true);
                         }
                     }
