@@ -51,9 +51,11 @@ public class PacketListener implements Listener {
                 if (((PacketPlayInUseEntity) event.getPacket()).b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)) {
                     Entity entity = ((PacketPlayInUseEntity) event.getPacket()).a(((CraftWorld) event.getPlayer().getWorld()).getHandle());
                     if (entity != null) {
+                        PlayerInteractAtEntityEvent interactEvent = new PlayerInteractAtEntityEvent(event.getPlayer(), entity);
                         EntityDamageByPlayerEvent damageEvent = new EntityDamageByPlayerEvent(event.getPlayer(), entity);
+                        NMSMain.callEvent(interactEvent);
                         NMSMain.callEvent(damageEvent);
-                        if (damageEvent.isCancelled()) {
+                        if (damageEvent.isCancelled() || interactEvent.isCancelled()) {
                             event.setCancelled(true);
                         }
                     }
