@@ -12,148 +12,104 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 
+import javax.annotation.Nonnull;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
 
 public class FakePlayer {
 
-    private GameProfile profile;
-    private final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
-    private String name;
-    private Location location;
-    private WorldServer worldServer;
-    private String[] skinValues = {"", ""};
-    private boolean spawned = false;
-    private EntityPlayer player = null;
-    private List<TNLPlayer> receivers = new ArrayList<>();
+    @Nonnull private final String name;
+    @Nonnull private final Location location;
+    @Nonnull private final TNLPlayer[] receivers;
+    @Nonnull private final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
+    @Nonnull private final WorldServer worldServer;
+    @Nonnull private final GameProfile profile;
+    @Nonnull private final EntityPlayer player;
+    @Nonnull private String[] skinValues = {"", ""};
 
-    public FakePlayer(String name, Location location, TNLPlayer... receivers) {
-        new FakePlayer(name, location, Arrays.asList(receivers));
-    }
-
-    public FakePlayer(String name, Location location, List<TNLPlayer> receivers) {
-        setName(name);
-        setLocation(location);
-        setReceivers(receivers);
-        setWorldServer(((CraftWorld) Objects.requireNonNull(getLocation().getWorld())).getHandle());
-    }
-
-    public List<TNLPlayer> getReceivers() {
-        return receivers;
-    }
-
-    public FakePlayer setReceivers(List<TNLPlayer> receivers) {
-        this.receivers = receivers;
-        return this;
-    }
-
-    public boolean isSpawned() {
-        return spawned;
-    }
-
-    private FakePlayer setSpawned(boolean spawned) {
-        this.spawned = spawned;
-        return this;
-    }
-
-    public WorldServer getWorldServer() {
-        return worldServer;
-    }
-
-    public FakePlayer setWorldServer(WorldServer worldServer) {
-        this.worldServer = worldServer;
-        return this;
-    }
-
-    public FakePlayer setLocation(Location location) {
+    public FakePlayer(@Nonnull String name, @Nonnull Location location, @Nonnull TNLPlayer... receivers) {
+        this.name = name;
         this.location = location;
-        return this;
+        this.receivers = receivers;
+        this.worldServer = ((CraftWorld) Objects.requireNonNull(getLocation().getWorld())).getHandle();
+        this.profile = new GameProfile(UUID.randomUUID(), getName().isEmpty() ? "§7-§8/§7-" : getName());
+        this.profile.getProperties().put("textures", new Property("textures", getSkinValues()[0], getSkinValues()[1]));
+        this.player = new EntityPlayer(getServer(), getWorldServer(), getProfile(), new PlayerInteractManager(getWorldServer()));
+        this.player.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
     }
 
-    public Location getLocation() {
-        return location;
-    }
-
-
+    @Nonnull
     public String getName() {
         return name;
     }
 
-    public FakePlayer setName(String name) {
-        this.name = name;
-        return this;
+    @Nonnull
+    public Location getLocation() {
+        return location;
     }
 
+    @Nonnull
+    public TNLPlayer[] getReceivers() {
+        return receivers;
+    }
+
+    @Nonnull
     public MinecraftServer getServer() {
         return server;
     }
 
+    @Nonnull
+    public WorldServer getWorldServer() {
+        return worldServer;
+    }
+
+    @Nonnull
     public GameProfile getProfile() {
         return profile;
     }
 
-    private FakePlayer setProfile(GameProfile profile) {
-        if (!isSpawned()) {
-            this.profile = profile;
-        } else {
-            NMSMain.stacktrace("Can't change the game profile an already existing fake player");
-        }
-        return this;
-    }
-
+    @Nonnull
     public EntityPlayer getPlayer() {
         return player;
     }
 
-    public FakePlayer setPlayer(EntityPlayer player) {
-        this.player = player;
-        return this;
+    @Nonnull
+    public String[] getSkinValues() {
+        return skinValues;
+    }
+
+    public void setSkinValues(@Nonnull String[] skinValues) {
+        this.skinValues = skinValues;
+    }
+
+    public void setSkin(@Nonnull String name) {
+        setSkinValues(getSkin(name));
     }
 
     public void spawn() {
-        try {
-            if (!isSpawned()) {
-                setProfile(new GameProfile(UUID.randomUUID(), getName() == null ? "§7-§8/§7-" : getName()));
-                getProfile().getProperties().put("textures", new Property("textures", getSkinValues()[0], getSkinValues()[1]));
-                setPlayer(new EntityPlayer(getServer(), getWorldServer(), getProfile(), new PlayerInteractManager(getWorldServer())));
-                getPlayer().setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
-                for (TNLPlayer receiver : getReceivers()) {
-                    receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, getPlayer()));
-                    receiver.sendPacket(new PacketPlayOutNamedEntitySpawn(getPlayer()));
-                    receiver.sendPacket(new PacketPlayOutEntityHeadRotation(getPlayer(), ((byte) (getPlayer().yaw * 256 / 360))));
-                }
-                setSpawned(true);
-            } else {
-                NMSMain.stacktrace("Can't spawn an already existing fake player");
-            }
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        for (TNLPlayer receiver : getReceivers()) {
+            receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, getPlayer()));
+            receiver.sendPacket(new PacketPlayOutNamedEntitySpawn(getPlayer()));
+            receiver.sendPacket(new PacketPlayOutEntityHeadRotation(getPlayer(), ((byte) (getPlayer().yaw * 256 / 360))));
         }
     }
 
     public void deSpawn() {
-        if (isSpawned()) {
-            for (TNLPlayer receiver : getReceivers()) {
-                receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, getPlayer()));
-                receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, getPlayer()));
-                receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_GAME_MODE, getPlayer()));
-                receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, getPlayer()));
-            }
-            setSpawned(false);
-        } else {
-            NMSMain.stacktrace("Can't deSpawn an not existing fake player");
+        for (TNLPlayer receiver : getReceivers()) {
+            receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, getPlayer()));
+            receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, getPlayer()));
+            receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_GAME_MODE, getPlayer()));
+            receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, getPlayer()));
         }
     }
 
-    private String[] getSkin(String playerName) {
+    @Nonnull
+    private String[] getSkin(@Nonnull String player) {
         String texture = "";
         String signature = "";
         try {
-            if (playerName == null) {
-                playerName = getName();
-            }
-            URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + playerName);
+            URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + player);
             InputStreamReader reader = new InputStreamReader(url.openStream());
             String uuid = new JsonParser().parse(reader).getAsJsonObject().get("id").getAsString();
             URL url1 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid + "?unsigned=false");
@@ -165,65 +121,5 @@ public class FakePlayer {
             NMSMain.stacktrace(t);
         }
         return new String[]{texture, signature};
-    }
-
-    private String[] getSkinValues() {
-        return skinValues;
-    }
-
-    private FakePlayer setSkinValues(String[] skinValues) {
-        if (!isSpawned()) {
-            this.skinValues = skinValues;
-        } else {
-            NMSMain.stacktrace("Can't change the skin of an already existing fake player");
-        }
-        return this;
-    }
-
-    public FakePlayer setSkin(String name) {
-        if (!isSpawned()) {
-            setSkinValues(getSkin(name == null ? getName() : name));
-        } else {
-            NMSMain.stacktrace("Can't change the skin of an already existing fake player");
-        }
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return "FakePlayer{" +
-                "profile=" + profile +
-                ", server=" + server +
-                ", name='" + name + '\'' +
-                ", location=" + location +
-                ", worldServer=" + worldServer +
-                ", skinValues=" + Arrays.toString(skinValues) +
-                ", spawned=" + spawned +
-                ", player=" + player +
-                ", receivers=" + receivers +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FakePlayer that = (FakePlayer) o;
-        return spawned == that.spawned &&
-                Objects.equals(profile, that.profile) &&
-                Objects.equals(server, that.server) &&
-                Objects.equals(name, that.name) &&
-                Objects.equals(location, that.location) &&
-                Objects.equals(worldServer, that.worldServer) &&
-                Arrays.equals(skinValues, that.skinValues) &&
-                Objects.equals(player, that.player) &&
-                Objects.equals(receivers, that.receivers);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(profile, server, name, location, worldServer, spawned, player, receivers);
-        result = 31 * result + Arrays.hashCode(skinValues);
-        return result;
     }
 }

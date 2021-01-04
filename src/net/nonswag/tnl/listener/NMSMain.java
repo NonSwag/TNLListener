@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -147,7 +148,7 @@ public class NMSMain extends JavaPlugin {
         new ConfigUtil.ConfigurationSection("items.epic-custom-name", getEpicItemName()).createIfAbsent();
         new ConfigUtil.ConfigurationSection("cloud.bridge.address", getProxyProtocolAddress().getAsString()).createIfAbsent();
         new ConfigUtil.ConfigurationSection("cloud.bridge.forwarding-secret", getForwardingSecret()).createIfAbsent();
-        new ConfigUtil.ConfigurationSection("servers", "example-server-1, example-server-2, example-server-3").createIfAbsent();
+        new ConfigUtil.ConfigurationSection("servers", new ArrayList<>(Arrays.asList("example-server-1", "example-server-2", "example-server-3"))).createIfAbsent();
 
         List<String> servers = ConfigUtil.getConfig().getStringList("servers");
         for (String server : servers) {
