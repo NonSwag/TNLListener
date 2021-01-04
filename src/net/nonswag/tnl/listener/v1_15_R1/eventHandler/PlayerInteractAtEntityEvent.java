@@ -1,6 +1,5 @@
 package net.nonswag.tnl.listener.v1_15_R1.eventHandler;
 
-import net.minecraft.server.v1_15_R1.Entity;
 import net.nonswag.tnl.listener.v1_15_R1.api.playerAPI.TNLPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
@@ -14,13 +13,13 @@ public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
 
     @Nonnull private static final HandlerList handlers = new HandlerList();
     @Nonnull private final TNLPlayer player;
-    @Nonnull private final Entity entity;
+    private final int entityId;
     private boolean cancelled = false;
 
-    public PlayerInteractAtEntityEvent(@Nonnull TNLPlayer player, @Nonnull Entity entity) {
+    public PlayerInteractAtEntityEvent(@Nonnull TNLPlayer player, int entityId) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
-        this.entity = entity;
+        this.entityId = entityId;
     }
 
     @Nonnull
@@ -28,9 +27,8 @@ public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
         return player;
     }
 
-    @Nonnull
-    public Entity getEntity() {
-        return entity;
+    public int getEntityId() {
+        return entityId;
     }
 
     @Override
@@ -56,9 +54,9 @@ public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
 
     @Override
     public String toString() {
-        return "PlayerInteractAtFakePlayerEvent{" +
+        return "PlayerInteractAtEntityEvent{" +
                 "player=" + player +
-                ", entity=" + entity +
+                ", entityId=" + entityId +
                 ", cancelled=" + cancelled +
                 '}';
     }
@@ -68,11 +66,11 @@ public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PlayerInteractAtEntityEvent that = (PlayerInteractAtEntityEvent) o;
-        return cancelled == that.cancelled && player.equals(that.player) && entity.equals(that.entity);
+        return entityId == that.entityId && cancelled == that.cancelled && player.equals(that.player);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, entity, cancelled);
+        return Objects.hash(player, entityId, cancelled);
     }
 }

@@ -32,6 +32,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedEvent;
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.*;
@@ -1139,6 +1140,10 @@ public final class TNLPlayer {
 
     public World getWorld() {
         return player.getWorld();
+    }
+
+    public WorldServer getWorldServer() {
+        return ((CraftWorld) player.getWorld()).getHandle();
     }
 
     public void setRotation(float v, float v1) {
