@@ -151,20 +151,22 @@ public class NMSMain extends JavaPlugin {
 
         List<String> servers = ConfigUtil.getConfig().getStringList("servers");
         for (String server : servers) {
-            String value = ConfigUtil.getConfig().getString(server);
+            String value = ConfigUtil.getConfig().getString("server." + server);
             if (value == null || value.isEmpty()) {
-                new ConfigUtil.ConfigurationSection(server, "host:port").create();
+                new ConfigUtil.ConfigurationSection("server." + server, "host:port").create();
             } else {
                 if (value.equalsIgnoreCase("host:port")) {
                     NMSMain.stacktrace("You have to setup the server '" + server + "' correctly");
                 } else {
                     try {
-                        new Server(server, new InetSocketAddress(value.split(":")[0], Integer.parseInt(value.split(":")[1])));
+                        Server s = new Server(server, new InetSocketAddress(value.split(":")[0], Integer.parseInt(value.split(":")[1])));
+                        NMSMain.print("Initialized new server '" + s.toString() + "'");
                     } catch (Throwable t) {
                         NMSMain.stacktrace(t, "Failed to load server '" + server + "'",
                                 "The ip-address format is 'host:port' (example localhost:25565)");
                     }
                 }
+
             }
         }
 
