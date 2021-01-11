@@ -1,9 +1,12 @@
 package net.nonswag.tnl.listener.api.server;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Objects;
 
 public class Server {
 
@@ -48,6 +51,7 @@ public class Server {
         return online;
     }
 
+    @Nullable
     public static Server wrap(String name) {
         return servers.get(name);
     }
@@ -57,6 +61,8 @@ public class Server {
         return "Server{" +
                 "name='" + name + '\'' +
                 ", inetSocketAddress=" + inetSocketAddress +
+                ", online=" + online +
+                ", playerCount=" + playerCount +
                 '}';
     }
 
@@ -65,13 +71,12 @@ public class Server {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Server server = (Server) o;
-        return Objects.equals(name, server.name) &&
-                Objects.equals(inetSocketAddress, server.inetSocketAddress);
+        return online == server.online && playerCount == server.playerCount && name.equals(server.name) && inetSocketAddress.equals(server.inetSocketAddress);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, inetSocketAddress);
+        return Objects.hash(name, inetSocketAddress, online, playerCount);
     }
 
     @Nonnull
