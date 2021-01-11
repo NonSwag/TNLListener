@@ -1,40 +1,51 @@
 package net.nonswag.tnl.listener.api.server;
 
+import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.*;
 
 public class Server {
 
-    private final String name;
-    private final InetSocketAddress inetSocketAddress;
-    private static final HashMap<String, Server> servers = new HashMap<>();
+    @Nonnull private static final HashMap<String, Server> servers = new HashMap<>();
 
-    public Server(String name, InetSocketAddress inetSocketAddress) {
+    @Nonnull private final String name;
+    @Nonnull private final InetSocketAddress inetSocketAddress;
+
+    private final boolean online;
+    private final int playerCount;
+
+    public Server(@Nonnull String name, @Nonnull InetSocketAddress inetSocketAddress) {
         this.name = name;
         this.inetSocketAddress = inetSocketAddress;
+        this.playerCount = -1;
+        boolean b;
+        try {
+            Socket socket = new Socket(getInetSocketAddress().getAddress(), getInetSocketAddress().getPort());
+            b = true;
+        } catch (Throwable ignored) {
+            b = false;
+        }
+        this.online = b;
         servers.put(this.getName(), this);
     }
 
-    public boolean isOnline() {
-        try {
-            Socket socket = new Socket(getInetSocketAddress().getAddress(), getInetSocketAddress().getPort());
-            return true;
-        } catch (Throwable ignored) {
-            return false;
-        }
-    }
-
-    public InetSocketAddress getInetSocketAddress() {
-        return inetSocketAddress;
-    }
-
+    @Nonnull
     public String getName() {
         return name;
     }
 
-    public static Collection<Server> getServers() {
-        return servers.values();
+    @Nonnull
+    public InetSocketAddress getInetSocketAddress() {
+        return inetSocketAddress;
+    }
+
+    public int getPlayerCount() {
+        return playerCount;
+    }
+
+    public boolean isOnline() {
+        return online;
     }
 
     public static Server wrap(String name) {
@@ -61,5 +72,10 @@ public class Server {
     @Override
     public int hashCode() {
         return Objects.hash(name, inetSocketAddress);
+    }
+
+    @Nonnull
+    public static Collection<Server> getServers() {
+        return servers.values();
     }
 }
