@@ -17,11 +17,13 @@ public class Server {
 
     private final boolean online;
     private final int playerCount;
+    private final int maxPlayerCount;
 
     public Server(@Nonnull String name, @Nonnull InetSocketAddress inetSocketAddress) {
         this.name = name;
         this.inetSocketAddress = inetSocketAddress;
         this.playerCount = -1;
+        this.maxPlayerCount = -1;
         boolean b;
         try {
             Socket socket = new Socket(getInetSocketAddress().getAddress(), getInetSocketAddress().getPort());
@@ -47,6 +49,10 @@ public class Server {
         return playerCount;
     }
 
+    public int getMaxPlayerCount() {
+        return maxPlayerCount;
+    }
+
     public boolean isOnline() {
         return online;
     }
@@ -63,6 +69,7 @@ public class Server {
                 ", inetSocketAddress=" + inetSocketAddress +
                 ", online=" + online +
                 ", playerCount=" + playerCount +
+                ", maxPlayerCount=" + maxPlayerCount +
                 '}';
     }
 
@@ -71,12 +78,12 @@ public class Server {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Server server = (Server) o;
-        return online == server.online && playerCount == server.playerCount && name.equals(server.name) && inetSocketAddress.equals(server.inetSocketAddress);
+        return online == server.online && playerCount == server.playerCount && maxPlayerCount == server.maxPlayerCount && name.equals(server.name) && inetSocketAddress.equals(server.inetSocketAddress);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, inetSocketAddress, online, playerCount);
+        return Objects.hash(name, inetSocketAddress, online, playerCount, maxPlayerCount);
     }
 
     @Nonnull
