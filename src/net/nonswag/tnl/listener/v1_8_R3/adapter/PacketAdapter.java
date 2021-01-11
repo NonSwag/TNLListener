@@ -2,7 +2,7 @@ package net.nonswag.tnl.listener.v1_8_R3.adapter;
 
 import io.netty.channel.*;
 import net.nonswag.tnl.listener.NMSMain;
-import net.nonswag.tnl.listener.v1_8_R3.eventHandler.PlayerPacketEvent;
+import net.nonswag.tnl.listener.v1_8_R3.eventhandler.PlayerPacketEvent;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 

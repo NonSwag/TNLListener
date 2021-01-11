@@ -1,6 +1,6 @@
 package net.nonswag.tnl.bridge.handler;
 
-import net.nonswag.tnl.bridge.packetAPI.Packet;
+import net.nonswag.tnl.bridge.packet.Packet;
 import net.nonswag.tnl.listener.NMSMain;
 
 import java.io.OutputStream;

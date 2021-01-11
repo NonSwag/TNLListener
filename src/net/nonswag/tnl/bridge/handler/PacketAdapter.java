@@ -1,7 +1,7 @@
 package net.nonswag.tnl.bridge.handler;
 
-import net.nonswag.tnl.bridge.packetAPI.PacketUtil;
-import net.nonswag.tnl.cloud.api.systemAPI.Console;
+import net.nonswag.tnl.bridge.packet.PacketUtil;
+import net.nonswag.tnl.cloud.api.system.Console;
 import net.nonswag.tnl.listener.enumerations.InternetProtocolAddress;
 
 import java.io.BufferedReader;

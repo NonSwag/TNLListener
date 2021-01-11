@@ -1,6 +1,6 @@
 package net.nonswag.tnl.bridge.handler;
 
-import net.nonswag.tnl.listener.api.serverAPI.Server;
+import net.nonswag.tnl.listener.api.server.Server;
 
 import javax.annotation.Nonnull;
 import java.net.Socket;

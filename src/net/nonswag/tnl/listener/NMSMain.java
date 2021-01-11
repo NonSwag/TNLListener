@@ -1,7 +1,7 @@
 package net.nonswag.tnl.listener;
 
-import net.nonswag.tnl.listener.api.bridgeAPI.ProxyServer;
-import net.nonswag.tnl.listener.api.serverAPI.Server;
+import net.nonswag.tnl.listener.api.bridge.ProxyServer;
+import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.commands.BridgeCommand;
 import net.nonswag.tnl.listener.enumerations.InternetProtocolAddress;
 import net.nonswag.tnl.listener.listeners.CommandListener;
@@ -560,44 +560,83 @@ public class NMSMain extends JavaPlugin {
 
     public static void stacktrace(Throwable throwable, String... strings) {
         if (isDebug()) {
-            Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] An error has occurred");
-            if (strings != null && strings.length > 0) {
-                for (String string : strings) {
-                    Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] " + string);
+            try {
+                Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] An error has occurred");
+                if (strings != null && strings.length > 0) {
+                    for (String string : strings) {
+                        Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] " + string);
+                    }
                 }
-            }
-            if (throwable != null) {
-                if (throwable.getMessage() != null) {
-                    Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] " + throwable.getMessage());
+                if (throwable != null) {
+                    if (throwable.getMessage() != null) {
+                        Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] " + throwable.getMessage());
+                    }
+                    if (throwable.getCause() != null) {
+                        Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] " + throwable.getCause().getMessage());
+                    }
+                    Bukkit.getLogger().severe("########## MORE INFORMATION ##########");
+                    throwable.printStackTrace();
+                    Bukkit.getLogger().severe("########## LESS INFORMATION ##########");
                 }
-                if (throwable.getCause() != null) {
-                    Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] " + throwable.getCause().getMessage());
+            } catch (Throwable t) {
+                System.err.println("[TNLListener" + getVersion() + "] An error has occurred");
+                if (strings != null && strings.length > 0) {
+                    for (String string : strings) {
+                        System.err.println("[TNLListener" + getVersion() + "] " + string);
+                    }
                 }
-                Bukkit.getLogger().severe("########## MORE INFORMATION ##########");
-                throwable.printStackTrace();
-                Bukkit.getLogger().severe("########## LESS INFORMATION ##########");
+                if (throwable != null) {
+                    if (throwable.getMessage() != null) {
+                        System.err.println("[TNLListener" + getVersion() + "] " + throwable.getMessage());
+                    }
+                    if (throwable.getCause() != null) {
+                        System.err.println("[TNLListener" + getVersion() + "] " + throwable.getCause().getMessage());
+                    }
+                    System.err.println("########## MORE INFORMATION ##########");
+                    throwable.printStackTrace();
+                    System.err.println("########## LESS INFORMATION ##########");
+                }
             }
         }
     }
 
     public static void stacktrace(String... strings) {
         if (isDebug() && strings != null && strings.length > 0) {
-            Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] An error has occurred");
-            for (String string : strings) {
-                Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] " + string);
+            try {
+                Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] An error has occurred");
+                for (String string : strings) {
+                    Bukkit.getLogger().severe("[TNLListener" + getVersion() + "] " + string);
+                }
+            } catch (Throwable t) {
+                System.err.println("[TNLListener" + getVersion() + "] An error has occurred");
+                for (String string : strings) {
+                    System.err.println("[TNLListener" + getVersion() + "] " + string);
+                }
             }
         }
     }
 
     public static void warn(String... strings) {
-        for (String string : strings) {
-            Bukkit.getLogger().warning("[TNLListener" + getVersion() + "] " + string);
+        try {
+            for (String string : strings) {
+                Bukkit.getLogger().warning("[TNLListener" + getVersion() + "] " + string);
+            }
+        } catch (Throwable t) {
+            for (String string : strings) {
+                System.out.println("[TNLListener" + getVersion() + "] " + string);
+            }
         }
     }
 
     public static void print(String... strings) {
-        for (String string : strings) {
-            Bukkit.getLogger().info("[TNLListener" + getVersion() + "] " + string);
+        try {
+            for (String string : strings) {
+                Bukkit.getLogger().info("[TNLListener" + getVersion() + "] " + string);
+            }
+        } catch (Throwable t) {
+            for (String string : strings) {
+                System.out.println("[TNLListener" + getVersion() + "] " + string);
+            }
         }
     }
 

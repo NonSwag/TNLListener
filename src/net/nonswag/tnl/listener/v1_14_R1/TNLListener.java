@@ -2,7 +2,7 @@ package net.nonswag.tnl.listener.v1_14_R1;
 
 import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.v1_14_R1.adapter.PacketAdapter;
-import net.nonswag.tnl.listener.v1_14_R1.eventListener.*;
+import net.nonswag.tnl.listener.v1_14_R1.eventlistener.*;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

@@ -7,8 +7,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.proxy.VelocityServer;
 import net.nonswag.tnl.bridge.handler.ConnectedServer;
 import net.nonswag.tnl.bridge.handler.ConnectionHandler;
-import net.nonswag.tnl.cloud.api.fileAPI.Configuration;
-import net.nonswag.tnl.cloud.api.systemAPI.Console;
+import net.nonswag.tnl.cloud.api.file.Configuration;
+import net.nonswag.tnl.cloud.api.system.Console;
 import net.nonswag.tnl.cloud.utils.MathUtil;
 import net.nonswag.tnl.listener.utils.StringUtil;
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ import java.util.List;
  *
  *******************************************************/
 
-@Plugin(authors = "NonSwag", id = "tnllistener", name = "TNLListener", version = "1.0", url = "http://www.thenextlvl.net")
+@Plugin(authors = "NonSwag", id = "tnllistener", name = "TNLListener", version = "1.0", url = "https://www.thenextlvl.net/")
 public class Bridge {
 
     private static ProxyServer server;
