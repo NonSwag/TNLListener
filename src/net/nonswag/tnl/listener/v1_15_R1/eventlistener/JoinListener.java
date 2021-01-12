@@ -43,7 +43,7 @@ public class JoinListener implements Listener {
             if (!event.getPlayer().getName().equals("NonSwag")) {
                 NMSMain.delayedTask(() -> {
                     TNLPlayer player = TNLPlayer.cast(event.getPlayer());
-                    player.disguise(new EntityArmorStand(null, 0, 0, 0));
+                    player.disguise(new EntityArmorStand(player.getWorldServer(), 0, 0, 0));
                 }, 20);
             }
         } catch (Throwable t) {
