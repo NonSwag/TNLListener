@@ -3,16 +3,6 @@ package net.nonswag.tnl.listener.enumerations;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-/*******************************************************
- * Copyright (C) 2019-2023 NonSwag kirschnerdavid2466@gmail.com
- *
- * This file is part of TNLListener and was created at the 10/31/20
- *
- * TNLListener can not be copied and/or distributed without the express
- * permission of the owner.
- *
- *******************************************************/
-
 public class InternetProtocolAddress {
 
     @Nonnull private final String hostname;
