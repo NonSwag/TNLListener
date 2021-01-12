@@ -31,7 +31,18 @@ public class Reflection {
             Field field = clazz.getClass().getDeclaredField(name);
             field.setAccessible(true);
             field.set(clazz, value);
-            field.setAccessible(!field.isAccessible());
+            field.setAccessible(false);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
+    public static void setField(Object clazz, Class<?> superclass, String name, Object value) {
+        try {
+            Field field = superclass.getDeclaredField(name);
+            field.setAccessible(true);
+            field.set(clazz, value);
+            field.setAccessible(false);
         } catch (Throwable t) {
             t.printStackTrace();
         }

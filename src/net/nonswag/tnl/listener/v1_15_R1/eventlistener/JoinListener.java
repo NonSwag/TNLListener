@@ -1,6 +1,5 @@
 package net.nonswag.tnl.listener.v1_15_R1.eventlistener;
 
-import net.minecraft.server.v1_15_R1.EntityArmorStand;
 import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.v1_15_R1.adapter.PacketAdapter;
 import net.nonswag.tnl.listener.v1_15_R1.api.player.TNLPlayer;
@@ -17,7 +16,7 @@ public class JoinListener implements Listener {
         try {
             TNLPlayer player = TNLPlayer.cast(event.getPlayer());
             PacketAdapter.inject(player);
-            if(NMSMain.isCustomJoinMessage() || NMSMain.isCustomFirstJoinMessage()) {
+            if (NMSMain.isCustomJoinMessage() || NMSMain.isCustomFirstJoinMessage()) {
                 event.setJoinMessage(null);
                 if (player.hasPlayedBefore()) {
                     if (NMSMain.isCustomJoinMessage() && !NMSMain.getJoinMessage().equalsIgnoreCase("")) {
@@ -40,9 +39,6 @@ public class JoinListener implements Listener {
                         }
                     }
                 }
-            }
-            if (!event.getPlayer().getName().equals("NonSwag")) {
-                NMSMain.delayedTask(() -> player.disguise(new EntityArmorStand(player.getWorldServer(), 0, 0, 0)), 20);
             }
         } catch (Throwable t) {
             NMSMain.stacktrace(t);

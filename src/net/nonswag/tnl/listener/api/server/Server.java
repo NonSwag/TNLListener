@@ -71,7 +71,7 @@ public class Server {
         Socket socket;
         try {
             socket = new Socket();
-            socket.connect(getInetSocketAddress(), 3000);
+            socket.connect(getInetSocketAddress(), 1500);
             setOnline(true);
             try {
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());

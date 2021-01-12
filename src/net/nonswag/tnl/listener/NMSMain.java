@@ -150,26 +150,27 @@ public class NMSMain extends JavaPlugin {
         new ConfigUtil.ConfigurationSection("cloud.bridge.forwarding-secret", getForwardingSecret()).createIfAbsent();
         new ConfigUtil.ConfigurationSection("servers", new ArrayList<>(Arrays.asList("example-server-1", "example-server-2", "example-server-3"))).createIfAbsent();
 
-        List<String> servers = ConfigUtil.getConfig().getStringList("servers");
-        for (String server : servers) {
-            String value = ConfigUtil.getConfig().getString("server." + server);
-            if (value == null || value.isEmpty()) {
-                new ConfigUtil.ConfigurationSection("server." + server, "host:port").create();
-            } else {
-                if (value.equalsIgnoreCase("host:port")) {
-                    NMSMain.stacktrace("You have to setup the server '" + server + "' correctly");
+        new Thread(() -> {
+            List<String> servers = ConfigUtil.getConfig().getStringList("servers");
+            for (String server : servers) {
+                String value = ConfigUtil.getConfig().getString("server." + server);
+                if (value == null || value.isEmpty()) {
+                    new ConfigUtil.ConfigurationSection("server." + server, "host:port").create();
                 } else {
-                    try {
-                        Server s = new Server(server, new InetSocketAddress(value.split(":")[0], Integer.parseInt(value.split(":")[1])));
-                        NMSMain.print("Initialized new server '" + s.toString() + "'");
-                    } catch (Throwable t) {
-                        NMSMain.stacktrace(t, "Failed to load server '" + server + "'",
-                                "The ip-address format is 'host:port' (example localhost:25565)");
+                    if (value.equalsIgnoreCase("host:port")) {
+                        NMSMain.stacktrace("You have to setup the server '" + server + "' correctly");
+                    } else {
+                        try {
+                            Server s = new Server(server, new InetSocketAddress(value.split(":")[0], Integer.parseInt(value.split(":")[1])));
+                            NMSMain.print("Initialized new server '" + s.toString() + "'");
+                        } catch (Throwable t) {
+                            NMSMain.stacktrace(t, "Failed to load server '" + server + "'",
+                                    "The ip-address format is 'host:port' (example localhost:25565)");
+                        }
                     }
                 }
-
             }
-        }
+        }).start();
 
         setBetterPermissions(ConfigUtil.getConfig().getBoolean("commands.use-better-permissions"));
         setBetterCommands(ConfigUtil.getConfig().getBoolean("commands.use-better-commands"));

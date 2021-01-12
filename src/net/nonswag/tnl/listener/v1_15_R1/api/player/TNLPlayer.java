@@ -534,10 +534,10 @@ public final class TNLPlayer {
 
     public void disguise(net.minecraft.server.v1_15_R1.EntityLiving entity, TNLPlayer receiver) {
         if (!this.equals(receiver)) {
-            receiver.sendPacket(new PacketPlayOutEntityDestroy(receiver.getEntityId()));
+            receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
             entity.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
-            entity.world = receiver.getWorldServer();
-            Reflection.setField(entity, "id", this.getEntityId());
+            entity.world = this.getWorldServer();
+            Reflection.setField(entity, net.minecraft.server.v1_15_R1.Entity.class, "id", this.getEntityId());
             receiver.sendPacket(new PacketPlayOutSpawnEntityLiving(entity));
         }
     }
