@@ -1,7 +1,15 @@
 package net.nonswag.tnl.listener.api.server;
 
+import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.serializer.PacketSerializer;
+import org.bukkit.Bukkit;
+import org.json.JSONObject;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Collection;
@@ -15,24 +23,15 @@ public class Server {
     @Nonnull private final String name;
     @Nonnull private final InetSocketAddress inetSocketAddress;
 
-    private final boolean online;
-    private final int playerCount;
-    private final int maxPlayerCount;
+    private boolean online = false;
+    private int playerCount = 0;
+    private int maxPlayerCount = Bukkit.getMaxPlayers();
 
     public Server(@Nonnull String name, @Nonnull InetSocketAddress inetSocketAddress) {
         this.name = name;
         this.inetSocketAddress = inetSocketAddress;
-        this.playerCount = -1;
-        this.maxPlayerCount = -1;
-        boolean b;
-        try {
-            Socket socket = new Socket(getInetSocketAddress().getAddress(), getInetSocketAddress().getPort());
-            b = true;
-        } catch (Throwable ignored) {
-            b = false;
-        }
-        this.online = b;
         servers.put(this.getName(), this);
+        this.update();
     }
 
     @Nonnull
@@ -53,8 +52,55 @@ public class Server {
         return maxPlayerCount;
     }
 
+    private void setOnline(boolean online) {
+        this.online = online;
+    }
+
+    private void setPlayerCount(int playerCount) {
+        this.playerCount = playerCount;
+    }
+
+    private void setMaxPlayerCount(int maxPlayerCount) {
+        this.maxPlayerCount = maxPlayerCount;
+    }
+
     public boolean isOnline() {
         return online;
+    }
+
+    public void update() {
+        Socket socket;
+        try {
+            socket = new Socket();
+            socket.connect(getInetSocketAddress(), 3000);
+            setOnline(true);
+            try {
+                DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+                DataInputStream input = new DataInputStream(socket.getInputStream());
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                DataOutputStream handshake = new DataOutputStream(buffer);
+                handshake.writeByte(0x00);
+                PacketSerializer.writeVarInt(handshake, 754);
+                PacketSerializer.writeString(handshake, getInetSocketAddress().getHostName());
+                handshake.writeShort(getInetSocketAddress().getPort());
+                PacketSerializer.writeVarInt(handshake, 1);
+                byte[] handshakeMessage = buffer.toByteArray();
+                PacketSerializer.writeVarInt(output, handshakeMessage.length);
+                output.write(handshakeMessage);
+                output.writeByte(0x01);
+                output.writeByte(0x00);
+                byte[] in = new byte[PacketSerializer.readVarInt(input)];
+                input.readFully(in);
+                JSONObject object = new JSONObject(new String(in).substring(3));
+                JSONObject players = object.getJSONObject("players");
+                setMaxPlayerCount(players.getInt("max"));
+                setPlayerCount(players.getInt("online"));
+            } catch (Throwable t) {
+                NMSMain.stacktrace(t);
+            }
+        } catch (Throwable ignored) {
+            setOnline(false);
+        }
     }
 
     @Nullable
