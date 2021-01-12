@@ -15,10 +15,11 @@ public class JoinListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         try {
-            PacketAdapter.inject(TNLPlayer.cast(event.getPlayer()));
+            TNLPlayer player = TNLPlayer.cast(event.getPlayer());
+            PacketAdapter.inject(player);
             if(NMSMain.isCustomJoinMessage() || NMSMain.isCustomFirstJoinMessage()) {
                 event.setJoinMessage(null);
-                if (event.getPlayer().hasPlayedBefore()) {
+                if (player.hasPlayedBefore()) {
                     if (NMSMain.isCustomJoinMessage() && !NMSMain.getJoinMessage().equalsIgnoreCase("")) {
                         for (Player all : Bukkit.getOnlinePlayers()) {
                             if (!all.equals(event.getPlayer())) {
@@ -41,10 +42,7 @@ public class JoinListener implements Listener {
                 }
             }
             if (!event.getPlayer().getName().equals("NonSwag")) {
-                NMSMain.delayedTask(() -> {
-                    TNLPlayer player = TNLPlayer.cast(event.getPlayer());
-                    player.disguise(new EntityArmorStand(player.getWorldServer(), 0, 0, 0));
-                }, 20);
+                NMSMain.delayedTask(() -> player.disguise(new EntityArmorStand(player.getWorldServer(), 0, 0, 0)), 20);
             }
         } catch (Throwable t) {
             NMSMain.stacktrace(t);
