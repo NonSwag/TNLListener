@@ -2,7 +2,6 @@ package net.nonswag.tnl.listener.api.server;
 
 import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.api.serializer.PacketSerializer;
-import org.bukkit.Bukkit;
 import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
@@ -25,7 +24,7 @@ public class Server {
 
     private boolean online = false;
     private int playerCount = 0;
-    private int maxPlayerCount = Bukkit.getMaxPlayers();
+    private int maxPlayerCount = 0;
 
     public Server(@Nonnull String name, @Nonnull InetSocketAddress inetSocketAddress) {
         this.name = name;
