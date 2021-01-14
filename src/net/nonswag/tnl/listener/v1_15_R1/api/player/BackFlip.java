@@ -7,7 +7,7 @@ import org.bukkit.Bukkit;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-class BackFlip {
+public class BackFlip {
 
     @Nonnull private final TNLPlayer player;
 
