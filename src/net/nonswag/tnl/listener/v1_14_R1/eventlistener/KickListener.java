@@ -25,7 +25,7 @@ public class KickListener implements Listener {
                     if (!all.equals(event.getPlayer())) {
                         all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getKickMessage().replace("%player%", event.getPlayer().getName()).replace("%reason%", event.getReason()));
                     } else {
-                        all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getQuitMessage().replace("%player%", NMSMain.getPlayerDirect()).replace("%reason%", event.getReason()));
+                        all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getQuitMessage().replace("%player%", NMSMain.getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())).replace("%reason%", event.getReason()));
                     }
                 }
             }

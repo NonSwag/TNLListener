@@ -18,7 +18,7 @@ public class QuitListener implements Listener {
                     if (!all.equals(event.getPlayer())) {
                         all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getQuitMessage().replace("%player%", event.getPlayer().getName()));
                     } else {
-                        all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getQuitMessage().replace("%player%", NMSMain.getPlayerDirect()));
+                        all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getQuitMessage().replace("%player%", NMSMain.getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())));
                     }
                 }
             }
