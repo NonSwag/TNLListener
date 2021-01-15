@@ -289,26 +289,16 @@ public final class TNLPlayer {
     }
 
     public void sendPacket(Packet<?> packet) {
-        getPlayerConnection().sendPacket(packet);
+        if (Bukkit.isPrimaryThread()) {
+            getPlayerConnection().sendPacket(packet);
+        } else {
+            NMSMain.runTask(() -> getPlayerConnection().sendPacket(packet));
+        }
     }
 
     public void sendPackets(Packet<?>... packets) {
         for (Packet<?> packet : packets) {
             sendPacket(packet);
-        }
-    }
-
-    public void sendPacket(boolean async, Packet<?> packet) {
-        if (async) {
-            NMSMain.runTask(() -> getPlayerConnection().sendPacket(packet));
-        } else {
-            sendPacket(packet);
-        }
-    }
-
-    public void sendPackets(boolean async, Packet<?>... packets) {
-        for (Packet<?> packet : packets) {
-            sendPacket(async, packet);
         }
     }
 
