@@ -6,17 +6,17 @@ import net.nonswag.tnl.listener.v1_15_R1.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.v1_15_R1.eventlistener.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 public abstract class TNLListener {
 
     @Nonnull private static final HashMap<World, String> worldAliasHashMap = new HashMap<>();
-    @Nonnull private static final HashMap<UUID, TNLPlayer> playerHashMap = new HashMap<>();
+    @Nonnull private static final HashMap<Player, TNLPlayer> playerHashMap = new HashMap<>();
 
     public static void onEnable() {
         try {
@@ -48,7 +48,7 @@ public abstract class TNLListener {
     }
 
     @Nonnull
-    public static HashMap<UUID, TNLPlayer> getPlayerHashMap() {
+    public static HashMap<Player, TNLPlayer> getPlayerHashMap() {
         return playerHashMap;
     }
 }

@@ -5,9 +5,11 @@ import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.v1_15_R1.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.v1_15_R1.eventhandler.PlayerPacketEvent;
 
+import javax.annotation.Nonnull;
+
 public class PacketAdapter {
 
-    public static void uninject(TNLPlayer player) {
+    public static void uninject(@Nonnull TNLPlayer player) {
         try {
             Channel channel = player.getNetworkManager().channel;
             if (channel.pipeline().get(player.getName() + "-TNLListener") != null) {
@@ -19,12 +21,10 @@ public class PacketAdapter {
         }
     }
 
-    public static void inject(TNLPlayer player) {
+    public static void inject(@Nonnull TNLPlayer player) {
         try {
-            if (player == null || player.getNetworkManager() == null || !player.isOnline()) {
-                if (player == null) {
-                    NMSMain.stacktrace("Failed to inject '-/-', the player can't be null");
-                } else if (player.getPlayerConnection() == null) {
+            if (player.getNetworkManager() == null || !player.isOnline()) {
+                if (player.getPlayerConnection() == null) {
                     NMSMain.stacktrace("Failed to inject " + player.getName(), "The player connection can't be null");
                     player.disconnect(NMSMain.getPrefix() + "\n" +
                             "§cThere are some unaccepted values in your connection");

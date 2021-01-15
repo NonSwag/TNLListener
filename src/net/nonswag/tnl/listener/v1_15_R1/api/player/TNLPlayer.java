@@ -79,10 +79,10 @@ public final class TNLPlayer {
 
     @Nonnull
     public static TNLPlayer cast(@Nonnull Player player) {
-        if (!TNLListener.getPlayerHashMap().containsKey(player.getUniqueId())) {
-            TNLListener.getPlayerHashMap().put(player.getUniqueId(), new TNLPlayer(player));
+        if (!TNLListener.getPlayerHashMap().containsKey(player)) {
+            TNLListener.getPlayerHashMap().put(player, new TNLPlayer(player));
         }
-        return TNLListener.getPlayerHashMap().get(player.getUniqueId());
+        return TNLListener.getPlayerHashMap().get(player);
     }
 
     @Nonnull
@@ -184,19 +184,19 @@ public final class TNLPlayer {
     }
 
     public boolean isOnline() {
-        return player.isOnline();
+        return getPlayer().isOnline();
     }
 
     public boolean isBanned() {
-        return player.isBanned();
+        return getPlayer().isBanned();
     }
 
     public boolean isWhitelisted() {
-        return player.isWhitelisted();
+        return getPlayer().isWhitelisted();
     }
 
     public void setWhitelisted(boolean b) {
-        player.setWhitelisted(b);
+        getPlayer().setWhitelisted(b);
     }
 
     @Nonnull
@@ -205,90 +205,90 @@ public final class TNLPlayer {
     }
 
     public long getFirstPlayed() {
-        return player.getFirstPlayed();
+        return getPlayer().getFirstPlayed();
     }
 
     public long getLastPlayed() {
-        return player.getLastPlayed();
+        return getPlayer().getLastPlayed();
     }
 
     public boolean hasPlayedBefore() {
-        return player.hasPlayedBefore();
+        return getPlayer().hasPlayedBefore();
     }
 
     public void incrementStatistic(Statistic statistic) throws IllegalArgumentException {
-        player.incrementStatistic(statistic);
+        getPlayer().incrementStatistic(statistic);
     }
 
     public void decrementStatistic(Statistic statistic) throws IllegalArgumentException {
-        player.decrementStatistic(statistic);
+        getPlayer().decrementStatistic(statistic);
     }
 
     public void incrementStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-        player.incrementStatistic(statistic, i);
+        getPlayer().incrementStatistic(statistic, i);
     }
 
     public void decrementStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-        player.decrementStatistic(statistic, i);
+        getPlayer().decrementStatistic(statistic, i);
     }
 
     public void setStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-        player.setStatistic(statistic, i);
+        getPlayer().setStatistic(statistic, i);
     }
 
     public int getStatistic(Statistic statistic) throws IllegalArgumentException {
-        return player.getStatistic(statistic);
+        return getPlayer().getStatistic(statistic);
     }
 
     public void incrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-        player.incrementStatistic(statistic, material);
+        getPlayer().incrementStatistic(statistic, material);
     }
 
     public void decrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-        player.decrementStatistic(statistic, material);
+        getPlayer().decrementStatistic(statistic, material);
     }
 
     public int getStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-        return player.getStatistic(statistic, material);
+        return getPlayer().getStatistic(statistic, material);
     }
 
     public void incrementStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-        player.incrementStatistic(statistic, material, i);
+        getPlayer().incrementStatistic(statistic, material, i);
     }
 
     public void decrementStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-        player.decrementStatistic(statistic, material, i);
+        getPlayer().decrementStatistic(statistic, material, i);
     }
 
     public void setStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-        player.setStatistic(statistic, material, i);
+        getPlayer().setStatistic(statistic, material, i);
     }
 
     public void incrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-        player.incrementStatistic(statistic, entityType);
+        getPlayer().incrementStatistic(statistic, entityType);
     }
 
     public void decrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-        player.decrementStatistic(statistic, entityType);
+        getPlayer().decrementStatistic(statistic, entityType);
     }
 
     public int getStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-        return player.getStatistic(statistic, entityType);
+        return getPlayer().getStatistic(statistic, entityType);
     }
 
     public void incrementStatistic(Statistic statistic, EntityType entityType, int i) throws IllegalArgumentException {
-        player.incrementStatistic(statistic, entityType, i);
+        getPlayer().incrementStatistic(statistic, entityType, i);
     }
 
     public void decrementStatistic(Statistic statistic, EntityType entityType, int i) {
-        player.decrementStatistic(statistic, entityType, i);
+        getPlayer().decrementStatistic(statistic, entityType, i);
     }
 
     public void setStatistic(Statistic statistic, EntityType entityType, int i) {
-        player.setStatistic(statistic, entityType, i);
+        getPlayer().setStatistic(statistic, entityType, i);
     }
 
-    public void sendPacket(Packet<?> packet) {
+    public void sendPacket(@Nonnull Packet<?> packet) {
         if (Bukkit.isPrimaryThread()) {
             getPlayerConnection().sendPacket(packet);
         } else {
@@ -296,18 +296,18 @@ public final class TNLPlayer {
         }
     }
 
-    public void sendPackets(Packet<?>... packets) {
+    public void sendPackets(@Nonnull Packet<?>... packets) {
         for (Packet<?> packet : packets) {
             sendPacket(packet);
         }
     }
 
     public void sendMessage(String s) {
-        player.sendMessage(s);
+        getPlayer().sendMessage(s);
     }
 
     public void sendMessage(String[] strings) {
-        player.sendMessage(strings);
+        getPlayer().sendMessage(strings);
     }
 
     public void disconnect() {
@@ -315,11 +315,17 @@ public final class TNLPlayer {
     }
 
     public void disconnect(String kickMessage) {
-        NMSMain.runTask(() -> {
+        if (Bukkit.isPrimaryThread()) {
             if (!getPlayerConnection().processedDisconnect) {
                 getPlayerConnection().disconnect(kickMessage);
             }
-        });
+        } else {
+            NMSMain.runTask(() -> {
+                if (!getPlayerConnection().processedDisconnect) {
+                    getPlayerConnection().disconnect(kickMessage);
+                }
+            });
+        }
     }
 
     public List<String> getPermissions() {
@@ -371,140 +377,140 @@ public final class TNLPlayer {
     }
 
     public String getName() {
-        return player.getName();
+        return getPlayer().getName();
     }
 
     public PlayerInventory getInventory() {
-        return player.getInventory();
+        return getPlayer().getInventory();
     }
 
     public Inventory getEnderChest() {
-        return player.getEnderChest();
+        return getPlayer().getEnderChest();
     }
 
     public MainHand getMainHand() {
-        return player.getMainHand();
+        return getPlayer().getMainHand();
     }
 
     public boolean setWindowProperty(InventoryView.Property property, int i) {
-        return player.setWindowProperty(property, i);
+        return getPlayer().setWindowProperty(property, i);
     }
 
     public InventoryView getOpenInventory() {
-        return player.getOpenInventory();
+        return getPlayer().getOpenInventory();
     }
 
     public InventoryView openInventory(Inventory inventory) {
-        return player.openInventory(inventory);
+        return getPlayer().openInventory(inventory);
     }
 
     public InventoryView openWorkbench(Location location, boolean b) {
-        return player.openWorkbench(location, b);
+        return getPlayer().openWorkbench(location, b);
     }
 
     public InventoryView openEnchanting(Location location, boolean b) {
-        return player.openEnchanting(location, b);
+        return getPlayer().openEnchanting(location, b);
     }
 
     public void openInventory(InventoryView inventoryView) {
-        player.openInventory(inventoryView);
+        getPlayer().openInventory(inventoryView);
     }
 
     public InventoryView openMerchant(Villager villager, boolean b) {
-        return player.openMerchant(villager, b);
+        return getPlayer().openMerchant(villager, b);
     }
 
     public InventoryView openMerchant(Merchant merchant, boolean b) {
-        return player.openMerchant(merchant, b);
+        return getPlayer().openMerchant(merchant, b);
     }
 
     public void closeInventory() {
-        player.closeInventory();
+        getPlayer().closeInventory();
     }
 
     public void setItemOnCursor(ItemStack itemStack) {
-        player.setItemOnCursor(itemStack);
+        getPlayer().setItemOnCursor(itemStack);
     }
 
     public int getCooldown(Material material) {
-        return player.getCooldown(material);
+        return getPlayer().getCooldown(material);
     }
 
     public void setCooldown(Material material, int i) {
-        player.setCooldown(material, i);
+        getPlayer().setCooldown(material, i);
     }
 
     public int getSleepTicks() {
-        return player.getSleepTicks();
+        return getPlayer().getSleepTicks();
     }
 
     public Location getBedSpawnLocation() {
-        return player.getBedSpawnLocation();
+        return getPlayer().getBedSpawnLocation();
     }
 
     public void setBedSpawnLocation(Location location) {
-        player.setBedSpawnLocation(location);
+        getPlayer().setBedSpawnLocation(location);
     }
 
     public void setBedSpawnLocation(Location location, boolean b) {
-        player.setBedSpawnLocation(location, b);
+        getPlayer().setBedSpawnLocation(location, b);
     }
 
     public boolean sleep(Location location, boolean b) {
-        return player.sleep(location, b);
+        return getPlayer().sleep(location, b);
     }
 
     public void wakeup(boolean b) {
-        player.wakeup(b);
+        getPlayer().wakeup(b);
     }
 
     public Location getBedLocation() {
-        return player.getBedLocation();
+        return getPlayer().getBedLocation();
     }
 
     public GameMode getGameMode() {
-        return player.getGameMode();
+        return getPlayer().getGameMode();
     }
 
     public void setGameMode(GameMode gameMode) {
-        player.setGameMode(gameMode);
+        getPlayer().setGameMode(gameMode);
     }
 
     public boolean isBlocking() {
-        return player.isBlocking();
+        return getPlayer().isBlocking();
     }
 
     public boolean isHandRaised() {
-        return player.isHandRaised();
+        return getPlayer().isHandRaised();
     }
 
     public int getExpToLevel() {
-        return player.getExpToLevel();
+        return getPlayer().getExpToLevel();
     }
 
     public float getAttackCooldown() {
-        return player.getAttackCooldown();
+        return getPlayer().getAttackCooldown();
     }
 
     public boolean discoverRecipe(NamespacedKey namespacedKey) {
-        return player.discoverRecipe(namespacedKey);
+        return getPlayer().discoverRecipe(namespacedKey);
     }
 
     public int discoverRecipes(Collection<NamespacedKey> collection) {
-        return player.discoverRecipes(collection);
+        return getPlayer().discoverRecipes(collection);
     }
 
     public boolean undiscoverRecipe(NamespacedKey namespacedKey) {
-        return player.undiscoverRecipe(namespacedKey);
+        return getPlayer().undiscoverRecipe(namespacedKey);
     }
 
     public int undiscoverRecipes(Collection<NamespacedKey> collection) {
-        return player.undiscoverRecipes(collection);
+        return getPlayer().undiscoverRecipes(collection);
     }
 
     public void saveInventory(@NotNull String id) {
         mkdirInventories();
-        File file = new File("plugins/TNLListener/" + player.getUniqueId() + ".yml");
+        File file = new File("plugins/TNLListener/" + getPlayer().getUniqueId() + ".yml");
         try {
             if (!file.exists()) {
                 if (!file.createNewFile()) {
@@ -513,7 +519,7 @@ public final class TNLPlayer {
             }
             if (file.exists()) {
                 YamlConfiguration inventory = YamlConfiguration.loadConfiguration(file);
-                ItemStack[] contents = player.getInventory().getContents();
+                ItemStack[] contents = getPlayer().getInventory().getContents();
                 inventory.set(id, Arrays.asList(contents));
                 inventory.save(file);
                 NMSMain.callEvent(new InventorySafeEvent(!Bukkit.isPrimaryThread(), this, id));
@@ -602,25 +608,25 @@ public final class TNLPlayer {
     }
 
     public void sendBossBar(BossBar bossBar, long millis) {
-        if (getBossHashMap().get(player.getUniqueId()) != null) {
-            hideBossBar(getBossHashMap().get(player.getUniqueId()));
+        if (getBossHashMap().get(getPlayer().getUniqueId()) != null) {
+            hideBossBar(getBossHashMap().get(getPlayer().getUniqueId()));
         }
-        getBossHashMap().put(player.getUniqueId(), bossBar);
+        getBossHashMap().put(getPlayer().getUniqueId(), bossBar);
         sendBossBar(bossBar);
         new Thread(() -> {
             try {
                 Thread.sleep(millis);
             } catch (Throwable ignored) {
             }
-            if (getBossHashMap().get(player.getUniqueId()) != null
-                    && getBossHashMap().get(player.getUniqueId()).equals(bossBar)) {
-                hideBossBar(getBossHashMap().get(player.getUniqueId()));
+            if (getBossHashMap().get(getPlayer().getUniqueId()) != null
+                    && getBossHashMap().get(getPlayer().getUniqueId()).equals(bossBar)) {
+                hideBossBar(getBossHashMap().get(getPlayer().getUniqueId()));
             }
         }).start();
     }
 
     public void sendTitle(Title title) {
-        NMSMain.runTask(() -> this.player.sendTitle(title.getTitle(),
+        NMSMain.runTask(() -> this.getPlayer().sendTitle(title.getTitle(),
                 title.getSubtitle(),
                 title.getTimeIn(),
                 title.getTimeStay(),
@@ -647,14 +653,14 @@ public final class TNLPlayer {
                 DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
                 dataOutputStream.writeUTF("Connect");
                 dataOutputStream.writeUTF(server.getName());
-                player.sendPluginMessage(NMSMain.getPlugin(), "BungeeCord", byteArrayOutputStream.toByteArray());
-                player.sendMessage(NMSMain.getPrefix() + " §aConnecting you to server §6" + server.getName());
+                getPlayer().sendPluginMessage(NMSMain.getPlugin(), "BungeeCord", byteArrayOutputStream.toByteArray());
+                getPlayer().sendMessage(NMSMain.getPrefix() + " §aConnecting you to server §6" + server.getName());
             } else {
-                player.sendMessage(NMSMain.getPrefix() + " §cThe server §4" + server.getName() + "§c is Offline");
+                getPlayer().sendMessage(NMSMain.getPrefix() + " §cThe server §4" + server.getName() + "§c is Offline");
             }
         } catch (Throwable t) {
             NMSMain.stacktrace(t);
-            player.sendMessage(NMSMain.getPrefix() + " §cFailed to connect you to server §4" + server.getName());
+            getPlayer().sendMessage(NMSMain.getPrefix() + " §cFailed to connect you to server §4" + server.getName());
         }
     }
 
@@ -663,7 +669,7 @@ public final class TNLPlayer {
     }
 
     public void loadInventory(@NotNull String id) {
-        File file = new File("plugins/TNLListener/" + player.getUniqueId() + ".yml");
+        File file = new File("plugins/TNLListener/" + getPlayer().getUniqueId() + ".yml");
         try {
             if (file.exists()) {
                 YamlConfiguration inventory = YamlConfiguration.loadConfiguration(file);
@@ -702,75 +708,75 @@ public final class TNLPlayer {
     }
 
     public String getDisplayName() {
-        return player.getDisplayName();
+        return getPlayer().getDisplayName();
     }
 
     public void setDisplayName(String s) {
-        player.setDisplayName(s);
+        getPlayer().setDisplayName(s);
     }
 
     public String getPlayerListName() {
-        return player.getPlayerListName();
+        return getPlayer().getPlayerListName();
     }
 
     public void setPlayerListName(String s) {
-        player.setPlayerListName(s);
+        getPlayer().setPlayerListName(s);
     }
 
     public String getPlayerListHeader() {
-        return player.getPlayerListHeader();
+        return getPlayer().getPlayerListHeader();
     }
 
     public String getPlayerListFooter() {
-        return player.getPlayerListFooter();
+        return getPlayer().getPlayerListFooter();
     }
 
     public void setPlayerListHeader(String s) {
-        player.setPlayerListHeader(s);
+        getPlayer().setPlayerListHeader(s);
     }
 
     public void setPlayerListFooter(String s) {
-        player.setPlayerListFooter(s);
+        getPlayer().setPlayerListFooter(s);
     }
 
     public void setPlayerListHeaderFooter(String s, String s1) {
-        player.setPlayerListHeaderFooter(s, s1);
+        getPlayer().setPlayerListHeaderFooter(s, s1);
     }
 
     public void setCompassTarget(Location location) {
-        player.setCompassTarget(location);
+        getPlayer().setCompassTarget(location);
     }
 
     public Location getCompassTarget() {
-        return player.getCompassTarget();
+        return getPlayer().getCompassTarget();
     }
 
     public InetSocketAddress getAddress() {
-        return player.getAddress();
+        return getPlayer().getAddress();
     }
 
     public boolean isConversing() {
-        return player.isConversing();
+        return getPlayer().isConversing();
     }
 
     public void acceptConversationInput(String s) {
-        player.acceptConversationInput(s);
+        getPlayer().acceptConversationInput(s);
     }
 
     public boolean beginConversation(Conversation conversation) {
-        return player.beginConversation(conversation);
+        return getPlayer().beginConversation(conversation);
     }
 
     public void abandonConversation(Conversation conversation) {
-        player.abandonConversation(conversation);
+        getPlayer().abandonConversation(conversation);
     }
 
     public void abandonConversation(Conversation conversation, ConversationAbandonedEvent conversationAbandonedEvent) {
-        player.abandonConversation(conversation, conversationAbandonedEvent);
+        getPlayer().abandonConversation(conversation, conversationAbandonedEvent);
     }
 
     public void sendRawMessage(String s) {
-        player.sendRawMessage(s);
+        getPlayer().sendRawMessage(s);
     }
 
     public void sendRawMessage(String s, ChatMessageType chatMessageType) {
@@ -778,531 +784,539 @@ public final class TNLPlayer {
     }
 
     public void kickPlayer(String s) {
-        player.kickPlayer(s);
+        getPlayer().kickPlayer(s);
     }
 
     public void chat(String s) {
-        player.chat(s);
+        getPlayer().chat(s);
     }
 
     public boolean performCommand(String s) {
-        return player.performCommand(s);
+        return getPlayer().performCommand(s);
     }
 
     public boolean isSneaking() {
-        return player.isSneaking();
+        return getPlayer().isSneaking();
     }
 
     public void setSneaking(boolean b) {
-        player.setSneaking(b);
+        getPlayer().setSneaking(b);
     }
 
     public boolean isSprinting() {
-        return player.isSprinting();
+        return getPlayer().isSprinting();
     }
 
     public void setSprinting(boolean b) {
-        player.setSprinting(b);
+        getPlayer().setSprinting(b);
     }
 
     public void saveData() {
-        player.saveData();
+        getPlayer().saveData();
     }
 
     public void loadData() {
-        player.loadData();
+        getPlayer().loadData();
     }
 
     public void setSleepingIgnored(boolean b) {
-        player.setSleepingIgnored(b);
+        getPlayer().setSleepingIgnored(b);
     }
 
     public boolean isSleepingIgnored() {
-        return player.isSleepingIgnored();
+        return getPlayer().isSleepingIgnored();
     }
 
     public void playNote(Location location, Instrument instrument, Note note) {
-        player.playNote(location, instrument, note);
+        getPlayer().playNote(location, instrument, note);
     }
 
     public void playSound(Location location, Sound sound, float v, float v1) {
-        player.playSound(location, sound, v, v1);
+        getPlayer().playSound(location, sound, v, v1);
     }
 
     public void playSound(Location location, String s, float v, float v1) {
-        player.playSound(location, s, v, v1);
+        getPlayer().playSound(location, s, v, v1);
     }
 
     public void playSound(Location location, Sound sound, SoundCategory soundCategory, float v, float v1) {
-        player.playSound(location, sound, soundCategory, v, v1);
+        getPlayer().playSound(location, sound, soundCategory, v, v1);
     }
 
     public void playSound(Location location, String s, SoundCategory soundCategory, float v, float v1) {
-        player.playSound(location, s, soundCategory, v, v1);
+        getPlayer().playSound(location, s, soundCategory, v, v1);
     }
 
     public void stopSound(Sound sound) {
-        player.stopSound(sound);
+        getPlayer().stopSound(sound);
     }
 
     public void stopSound(String s) {
-        player.stopSound(s);
+        getPlayer().stopSound(s);
     }
 
     public void stopSound(Sound sound, SoundCategory soundCategory) {
-        player.stopSound(sound, soundCategory);
+        getPlayer().stopSound(sound, soundCategory);
     }
 
     public void stopSound(String s, SoundCategory soundCategory) {
-        player.stopSound(s, soundCategory);
+        getPlayer().stopSound(s, soundCategory);
     }
 
     public <T> void playEffect(Location location, Effect effect, T t) {
-        player.playEffect(location, effect, t);
+        getPlayer().playEffect(location, effect, t);
     }
 
     public void sendBlockChange(Location location, BlockData blockData) {
-        player.sendBlockChange(location, blockData);
+        getPlayer().sendBlockChange(location, blockData);
     }
 
     public void sendSignChange(Location location, String[] strings) throws IllegalArgumentException {
-        player.sendSignChange(location, strings);
+        getPlayer().sendSignChange(location, strings);
     }
 
     public void sendSignChange(Location location, String[] strings, DyeColor dyeColor) throws IllegalArgumentException {
-        player.sendSignChange(location, strings, dyeColor);
+        getPlayer().sendSignChange(location, strings, dyeColor);
     }
 
     public void sendMap(MapView mapView) {
-        player.sendMap(mapView);
+        getPlayer().sendMap(mapView);
     }
 
     public void updateInventory() {
-        player.updateInventory();
+        getPlayer().updateInventory();
     }
 
     public void setPlayerTime(long l, boolean b) {
-        player.setPlayerTime(l, b);
+        getPlayer().setPlayerTime(l, b);
     }
 
     public long getPlayerTime() {
-        return player.getPlayerTime();
+        return getPlayer().getPlayerTime();
     }
 
     public long getPlayerTimeOffset() {
-        return player.getPlayerTimeOffset();
+        return getPlayer().getPlayerTimeOffset();
     }
 
     public boolean isPlayerTimeRelative() {
-        return player.isPlayerTimeRelative();
+        return getPlayer().isPlayerTimeRelative();
     }
 
     public void resetPlayerTime() {
-        player.resetPlayerTime();
+        getPlayer().resetPlayerTime();
     }
 
     public void setPlayerWeather(WeatherType weatherType) {
-        player.setPlayerWeather(weatherType);
+        getPlayer().setPlayerWeather(weatherType);
     }
 
     public WeatherType getPlayerWeather() {
-        return player.getPlayerWeather();
+        return getPlayer().getPlayerWeather();
     }
 
     public void resetPlayerWeather() {
-        player.resetPlayerWeather();
+        getPlayer().resetPlayerWeather();
     }
 
     public void giveExp(int i) {
-        player.giveExp(i);
+        getPlayer().giveExp(i);
     }
 
     public void giveExpLevels(int i) {
-        player.giveExpLevels(i);
+        getPlayer().giveExpLevels(i);
     }
 
     public float getExp() {
-        return player.getExp();
+        return getPlayer().getExp();
     }
 
     public void setExp(float v) {
-        player.setExp(v);
+        getPlayer().setExp(v);
     }
 
     public int getLevel() {
-        return player.getLevel();
+        return getPlayer().getLevel();
     }
 
     public void setLevel(int i) {
-        player.setLevel(i);
+        getPlayer().setLevel(i);
     }
 
     public int getTotalExperience() {
-        return player.getTotalExperience();
+        return getPlayer().getTotalExperience();
     }
 
     public void setTotalExperience(int i) {
-        player.setTotalExperience(i);
+        getPlayer().setTotalExperience(i);
     }
 
     public void sendExperienceChange(float v) {
-        player.sendExperienceChange(v);
+        getPlayer().sendExperienceChange(v);
     }
 
     public void sendExperienceChange(float v, int i) {
-        player.sendExperienceChange(v, i);
+        getPlayer().sendExperienceChange(v, i);
     }
 
     public float getExhaustion() {
-        return player.getExhaustion();
+        return getPlayer().getExhaustion();
     }
 
     public void setExhaustion(float v) {
-        player.setExhaustion(v);
+        getPlayer().setExhaustion(v);
     }
 
     public float getSaturation() {
-        return player.getSaturation();
+        return getPlayer().getSaturation();
     }
 
     public void setSaturation(float v) {
-        player.setSaturation(v);
+        getPlayer().setSaturation(v);
     }
 
     public int getFoodLevel() {
-        return player.getFoodLevel();
+        return getPlayer().getFoodLevel();
     }
 
     public void setFoodLevel(int i) {
-        player.setFoodLevel(i);
+        getPlayer().setFoodLevel(i);
     }
 
     public boolean getAllowFlight() {
-        return player.getAllowFlight();
+        return getPlayer().getAllowFlight();
     }
 
     public void setAllowFlight(boolean b) {
-        player.setAllowFlight(b);
+        getPlayer().setAllowFlight(b);
     }
 
-    public void hidePlayer(Plugin plugin, Player player) {
-        this.player.hidePlayer(plugin, player);
+    public void hidePlayer(@Nonnull TNLPlayer player) {
+        hidePlayer(NMSMain.getPlugin(), player);
     }
 
-    public void showPlayer(Plugin plugin, Player player) {
-        this.player.showPlayer(plugin, player);
+    public void hidePlayer(@Nonnull Plugin plugin, @Nonnull TNLPlayer player) {
+        this.getPlayer().hidePlayer(plugin, player.getPlayer());
     }
 
-    public boolean canSee(Player player) {
-        return this.player.canSee(player);
+    public void showPlayer(@Nonnull TNLPlayer player) {
+        showPlayer(NMSMain.getPlugin(), player);
+    }
+
+    public void showPlayer(@Nonnull Plugin plugin, @Nonnull TNLPlayer player) {
+        this.getPlayer().showPlayer(plugin, player.getPlayer());
+    }
+
+    public boolean canSee(@Nonnull TNLPlayer player) {
+        return this.getPlayer().canSee(player.getPlayer());
     }
 
     public boolean isFlying() {
-        return player.isFlying();
+        return getPlayer().isFlying();
     }
 
     public void setFlying(boolean b) {
-        player.setFlying(b);
+        getPlayer().setFlying(b);
     }
 
     public void setFlySpeed(float v) throws IllegalArgumentException {
-        player.setFlySpeed(v);
+        getPlayer().setFlySpeed(v);
     }
 
     public void setWalkSpeed(float v) throws IllegalArgumentException {
-        player.setWalkSpeed(v);
+        getPlayer().setWalkSpeed(v);
     }
 
     public float getFlySpeed() {
-        return player.getFlySpeed();
+        return getPlayer().getFlySpeed();
     }
 
     public float getWalkSpeed() {
-        return player.getWalkSpeed();
+        return getPlayer().getWalkSpeed();
     }
 
     public void setResourcePack(String s) {
-        player.setResourcePack(s);
+        getPlayer().setResourcePack(s);
     }
 
     public void setResourcePack(String s, byte[] bytes) {
-        player.setResourcePack(s, bytes);
+        getPlayer().setResourcePack(s, bytes);
     }
 
     public org.bukkit.scoreboard.Scoreboard getScoreboard() {
-        return player.getScoreboard();
+        return getPlayer().getScoreboard();
     }
 
     public void setScoreboard(org.bukkit.scoreboard.Scoreboard scoreboard) throws IllegalArgumentException, IllegalStateException {
-        player.setScoreboard(scoreboard);
+        getPlayer().setScoreboard(scoreboard);
     }
 
     public boolean isHealthScaled() {
-        return player.isHealthScaled();
+        return getPlayer().isHealthScaled();
     }
 
     public void setHealthScaled(boolean b) {
-        player.setHealthScaled(b);
+        getPlayer().setHealthScaled(b);
     }
 
     public void setHealthScale(double v) throws IllegalArgumentException {
-        player.setHealthScale(v);
+        getPlayer().setHealthScale(v);
     }
 
     public double getHealthScale() {
-        return player.getHealthScale();
+        return getPlayer().getHealthScale();
     }
 
     public Entity getSpectatorTarget() {
-        return player.getSpectatorTarget();
+        return getPlayer().getSpectatorTarget();
     }
 
     public void setSpectatorTarget(Entity entity) {
-        player.setSpectatorTarget(entity);
+        getPlayer().setSpectatorTarget(entity);
     }
 
     public void sendTitle(String s, String s1, int i, int i1, int i2) {
-        player.sendTitle(s, s1, i, i1, i2);
+        getPlayer().sendTitle(s, s1, i, i1, i2);
     }
 
     public void resetTitle() {
-        player.resetTitle();
+        getPlayer().resetTitle();
     }
 
     public void spawnParticle(Particle particle, Location location, int i) {
-        player.spawnParticle(particle, location, i);
+        getPlayer().spawnParticle(particle, location, i);
     }
 
     public void spawnParticle(Particle particle, double v, double v1, double v2, int i) {
-        player.spawnParticle(particle, v, v1, v2, i);
+        getPlayer().spawnParticle(particle, v, v1, v2, i);
     }
 
     public <T> void spawnParticle(Particle particle, Location location, int i, T t) {
-        player.spawnParticle(particle, location, i, t);
+        getPlayer().spawnParticle(particle, location, i, t);
     }
 
     public <T> void spawnParticle(Particle particle, double v, double v1, double v2, int i, T t) {
-        player.spawnParticle(particle, v, v1, v2, i, t);
+        getPlayer().spawnParticle(particle, v, v1, v2, i, t);
     }
 
     public void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2) {
-        player.spawnParticle(particle, location, i, v, v1, v2);
+        getPlayer().spawnParticle(particle, location, i, v, v1, v2);
     }
 
     public void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5) {
-        player.spawnParticle(particle, v, v1, v2, i, v3, v4, v5);
+        getPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5);
     }
 
     public <T> void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2, T t) {
-        player.spawnParticle(particle, location, i, v, v1, v2, t);
+        getPlayer().spawnParticle(particle, location, i, v, v1, v2, t);
     }
 
     public <T> void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5, T t) {
-        player.spawnParticle(particle, v, v1, v2, i, v3, v4, v5, t);
+        getPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, t);
     }
 
     public void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2, double v3) {
-        player.spawnParticle(particle, location, i, v, v1, v2, v3);
+        getPlayer().spawnParticle(particle, location, i, v, v1, v2, v3);
     }
 
     public void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5, double v6) {
-        player.spawnParticle(particle, v, v1, v2, i, v3, v4, v5, v6);
+        getPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, v6);
     }
 
     public <T> void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2, double v3, T t) {
-        player.spawnParticle(particle, location, i, v, v1, v2, v3, t);
+        getPlayer().spawnParticle(particle, location, i, v, v1, v2, v3, t);
     }
 
     public <T> void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5, double v6, T t) {
-        player.spawnParticle(particle, v, v1, v2, i, v3, v4, v5, v6, t);
+        getPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, v6, t);
     }
 
     public AdvancementProgress getAdvancementProgress(Advancement advancement) {
-        return player.getAdvancementProgress(advancement);
+        return getPlayer().getAdvancementProgress(advancement);
     }
 
     public int getClientViewDistance() {
-        return player.getClientViewDistance();
+        return getPlayer().getClientViewDistance();
     }
 
     public String getLocale() {
-        return player.getLocale();
+        return getPlayer().getLocale();
     }
 
     public void updateCommands() {
-        player.updateCommands();
+        getPlayer().updateCommands();
     }
 
     public void openBook(ItemStack itemStack) {
-        player.openBook(itemStack);
+        getPlayer().openBook(itemStack);
     }
 
     public Location getLocation() {
-        return player.getLocation();
+        return getPlayer().getLocation();
     }
 
     public Location getLocation(Location location) {
-        return player.getLocation(location);
+        return getPlayer().getLocation(location);
     }
 
     public Location getTargetLocation(int i) {
-        return getLocation().clone().add(player.getLocation().getDirection().multiply(3));
+        return getLocation().clone().add(getPlayer().getLocation().getDirection().multiply(3));
     }
 
     public void setVelocity(Vector vector) {
-        player.setVelocity(vector);
+        getPlayer().setVelocity(vector);
     }
 
     public Vector getVelocity() {
-        return player.getVelocity();
+        return getPlayer().getVelocity();
     }
 
     public double getHeight() {
-        return player.getHeight();
+        return getPlayer().getHeight();
     }
 
     public double getWidth() {
-        return player.getWidth();
+        return getPlayer().getWidth();
     }
 
     public BoundingBox getBoundingBox() {
-        return player.getBoundingBox();
+        return getPlayer().getBoundingBox();
     }
 
     public boolean isOnGround() {
-        return player.isOnGround();
+        return getPlayer().isOnGround();
     }
 
     public World getWorld() {
-        return player.getWorld();
+        return getPlayer().getWorld();
     }
 
     public WorldServer getWorldServer() {
-        return ((CraftWorld) player.getWorld()).getHandle();
+        return ((CraftWorld) getPlayer().getWorld()).getHandle();
     }
 
     public void setRotation(float v, float v1) {
-        player.setRotation(v, v1);
+        getPlayer().setRotation(v, v1);
     }
 
     public boolean teleport(Location location) {
-        return player.teleport(location);
+        return getPlayer().teleport(location);
     }
 
     public boolean teleport(Location location, PlayerTeleportEvent.TeleportCause teleportCause) {
-        return player.teleport(location, teleportCause);
+        return getPlayer().teleport(location, teleportCause);
     }
 
     public boolean teleport(Entity entity) {
-        return player.teleport(entity);
+        return getPlayer().teleport(entity);
     }
 
     public boolean teleport(Entity entity, PlayerTeleportEvent.TeleportCause teleportCause) {
-        return player.teleport(entity, teleportCause);
+        return getPlayer().teleport(entity, teleportCause);
     }
 
     public List<Entity> getNearbyEntities(double v, double v1, double v2) {
-        return player.getNearbyEntities(v, v1, v2);
+        return getPlayer().getNearbyEntities(v, v1, v2);
     }
 
     public int getEntityId() {
-        return player.getEntityId();
+        return getPlayer().getEntityId();
     }
 
     public int getFireTicks() {
-        return player.getFireTicks();
+        return getPlayer().getFireTicks();
     }
 
     public int getMaxFireTicks() {
-        return player.getMaxFireTicks();
+        return getPlayer().getMaxFireTicks();
     }
 
     public void setFireTicks(int i) {
-        player.setFireTicks(i);
+        getPlayer().setFireTicks(i);
     }
 
     public void remove() {
-        player.remove();
+        getPlayer().remove();
     }
 
     public boolean isDead() {
-        return player.isDead();
+        return getPlayer().isDead();
     }
 
     public boolean isValid() {
-        return player.isValid();
+        return getPlayer().isValid();
     }
 
     public Server getServer() {
-        return player.getServer();
+        return getPlayer().getServer();
     }
 
     public List<Entity> getPassengers() {
-        return player.getPassengers();
+        return getPlayer().getPassengers();
     }
 
     public boolean addPassenger(Entity entity) {
-        return player.addPassenger(entity);
+        return getPlayer().addPassenger(entity);
     }
 
     public boolean removePassenger(Entity entity) {
-        return player.removePassenger(entity);
+        return getPlayer().removePassenger(entity);
     }
 
     public boolean isEmpty() {
-        return player.isEmpty();
+        return getPlayer().isEmpty();
     }
 
     public boolean eject() {
-        return player.eject();
+        return getPlayer().eject();
     }
 
     public float getFallDistance() {
-        return player.getFallDistance();
+        return getPlayer().getFallDistance();
     }
 
     public void setFallDistance(float v) {
-        player.setFallDistance(v);
+        getPlayer().setFallDistance(v);
     }
 
     public void setLastDamageCause(EntityDamageEvent entityDamageEvent) {
-        player.setLastDamageCause(entityDamageEvent);
+        getPlayer().setLastDamageCause(entityDamageEvent);
     }
 
     public EntityDamageEvent getLastDamageCause() {
-        return player.getLastDamageCause();
+        return getPlayer().getLastDamageCause();
     }
 
     public UUID getUniqueId() {
-        return player.getUniqueId();
+        return getPlayer().getUniqueId();
     }
 
     public int getTicksLived() {
-        return player.getTicksLived();
+        return getPlayer().getTicksLived();
     }
 
     public void setTicksLived(int i) {
-        player.setTicksLived(i);
+        getPlayer().setTicksLived(i);
     }
 
     public void playEffect(EntityEffect entityEffect) {
-        player.playEffect(entityEffect);
+        getPlayer().playEffect(entityEffect);
     }
 
     public EntityType getType() {
-        return player.getType();
+        return getPlayer().getType();
     }
 
     public boolean isInsideVehicle() {
-        return player.isInsideVehicle();
+        return getPlayer().isInsideVehicle();
     }
 
     public boolean leaveVehicle() {
-        return player.leaveVehicle();
+        return getPlayer().leaveVehicle();
     }
 
     public Entity getVehicle() {
-        return player.getVehicle();
+        return getPlayer().getVehicle();
     }
 
     public ProtocolVersion getVersion() {
@@ -1310,75 +1324,75 @@ public final class TNLPlayer {
     }
 
     public void setCustomNameVisible(boolean b) {
-        player.setCustomNameVisible(b);
+        getPlayer().setCustomNameVisible(b);
     }
 
     public boolean isCustomNameVisible() {
-        return player.isCustomNameVisible();
+        return getPlayer().isCustomNameVisible();
     }
 
     public void setGlowing(boolean b) {
-        player.setGlowing(b);
+        getPlayer().setGlowing(b);
     }
 
     public boolean isGlowing() {
-        return player.isGlowing();
+        return getPlayer().isGlowing();
     }
 
     public void setInvulnerable(boolean b) {
-        player.setInvulnerable(b);
+        getPlayer().setInvulnerable(b);
     }
 
     public boolean isInvulnerable() {
-        return player.isInvulnerable();
+        return getPlayer().isInvulnerable();
     }
 
     public boolean isSilent() {
-        return player.isSilent();
+        return getPlayer().isSilent();
     }
 
     public void setSilent(boolean b) {
-        player.setSilent(b);
+        getPlayer().setSilent(b);
     }
 
     public boolean hasGravity() {
-        return player.hasGravity();
+        return getPlayer().hasGravity();
     }
 
     public void setGravity(boolean b) {
-        player.setGravity(b);
+        getPlayer().setGravity(b);
     }
 
     public int getPortalCooldown() {
-        return player.getPortalCooldown();
+        return getPlayer().getPortalCooldown();
     }
 
     public void setPortalCooldown(int i) {
-        player.setPortalCooldown(i);
+        getPlayer().setPortalCooldown(i);
     }
 
     public Set<String> getScoreboardTags() {
-        return player.getScoreboardTags();
+        return getPlayer().getScoreboardTags();
     }
 
     public boolean addScoreboardTag(String s) {
-        return player.addScoreboardTag(s);
+        return getPlayer().addScoreboardTag(s);
     }
 
     public boolean removeScoreboardTag(String s) {
-        return player.removeScoreboardTag(s);
+        return getPlayer().removeScoreboardTag(s);
     }
 
     public PistonMoveReaction getPistonMoveReaction() {
-        return player.getPistonMoveReaction();
+        return getPlayer().getPistonMoveReaction();
     }
 
     public BlockFace getFacing() {
-        return player.getFacing();
+        return getPlayer().getFacing();
     }
 
     public Pose getPose() {
-        return player.getPose();
+        return getPlayer().getPose();
     }
 
     public BackFlip backflip() {
@@ -1386,338 +1400,361 @@ public final class TNLPlayer {
     }
 
     public Map<String, Object> serialize() {
-        return player.serialize();
+        return getPlayer().serialize();
     }
 
     public double getEyeHeight() {
-        return player.getEyeHeight();
+        return getPlayer().getEyeHeight();
     }
 
     public double getEyeHeight(boolean b) {
-        return player.getEyeHeight(b);
+        return getPlayer().getEyeHeight(b);
     }
 
     public Location getEyeLocation() {
-        return player.getEyeLocation();
+        return getPlayer().getEyeLocation();
     }
 
     public List<Block> getLineOfSight(Set<Material> set, int i) {
-        return player.getLineOfSight(set, i);
+        return getPlayer().getLineOfSight(set, i);
     }
 
     public Block getTargetBlock(Set<Material> set, int i) {
-        return player.getTargetBlock(set, i);
+        return getPlayer().getTargetBlock(set, i);
     }
 
     public List<Block> getLastTwoTargetBlocks(Set<Material> set, int i) {
-        return player.getLastTwoTargetBlocks(set, i);
+        return getPlayer().getLastTwoTargetBlocks(set, i);
     }
 
     public Block getTargetBlockExact(int i) {
-        return player.getTargetBlockExact(i);
+        return getPlayer().getTargetBlockExact(i);
     }
 
     public Block getTargetBlockExact(int i, FluidCollisionMode fluidCollisionMode) {
-        return player.getTargetBlockExact(i, fluidCollisionMode);
+        return getPlayer().getTargetBlockExact(i, fluidCollisionMode);
     }
 
     public RayTraceResult rayTraceBlocks(double v) {
-        return player.rayTraceBlocks(v);
+        return getPlayer().rayTraceBlocks(v);
     }
 
     public RayTraceResult rayTraceBlocks(double v, FluidCollisionMode fluidCollisionMode) {
-        return player.rayTraceBlocks(v, fluidCollisionMode);
+        return getPlayer().rayTraceBlocks(v, fluidCollisionMode);
     }
 
     public int getRemainingAir() {
-        return player.getRemainingAir();
+        return getPlayer().getRemainingAir();
     }
 
     public void setRemainingAir(int i) {
-        player.setRemainingAir(i);
+        getPlayer().setRemainingAir(i);
     }
 
     public int getMaximumAir() {
-        return player.getMaximumAir();
+        return getPlayer().getMaximumAir();
     }
 
     public void setMaximumAir(int i) {
-        player.setMaximumNoDamageTicks(i);
+        getPlayer().setMaximumNoDamageTicks(i);
     }
 
     public int getMaximumNoDamageTicks() {
-        return player.getMaximumNoDamageTicks();
+        return getPlayer().getMaximumNoDamageTicks();
     }
 
     public void setMaximumNoDamageTicks(int i) {
-        player.setMaximumNoDamageTicks(i);
+        getPlayer().setMaximumNoDamageTicks(i);
     }
 
     public double getLastDamage() {
-        return player.getLastDamage();
+        return getPlayer().getLastDamage();
     }
 
     public void setLastDamage(double v) {
-        player.setLastDamage(v);
+        getPlayer().setLastDamage(v);
     }
 
     public int getNoDamageTicks() {
-        return player.getNoDamageTicks();
+        return getPlayer().getNoDamageTicks();
     }
 
     public void setNoDamageTicks(int i) {
-        player.setNoDamageTicks(i);
+        getPlayer().setNoDamageTicks(i);
     }
 
     @Nullable
     public TNLPlayer getKiller() {
-        if (player.getKiller() != null) {
-            return TNLPlayer.cast(player.getKiller());
+        if (getPlayer().getKiller() != null) {
+            return TNLPlayer.cast(getPlayer().getKiller());
         }
         return null;
     }
 
     public boolean addPotionEffect(PotionEffect potionEffect) {
-        return player.addPotionEffect(potionEffect);
+        return getPlayer().addPotionEffect(potionEffect);
     }
 
     public boolean addPotionEffects(Collection<PotionEffect> collection) {
-        return player.addPotionEffects(collection);
+        return getPlayer().addPotionEffects(collection);
     }
 
     public boolean hasPotionEffect(PotionEffectType potionEffectType) {
-        return player.hasPotionEffect(potionEffectType);
+        return getPlayer().hasPotionEffect(potionEffectType);
     }
 
     public PotionEffect getPotionEffect(PotionEffectType potionEffectType) {
-        return player.getPotionEffect(potionEffectType);
+        return getPlayer().getPotionEffect(potionEffectType);
     }
 
     public void removePotionEffect(PotionEffectType potionEffectType) {
-        player.removePotionEffect(potionEffectType);
+        getPlayer().removePotionEffect(potionEffectType);
     }
 
     public Collection<PotionEffect> getActivePotionEffects() {
-        return player.getActivePotionEffects();
+        return getPlayer().getActivePotionEffects();
     }
 
     public boolean hasLineOfSight(Entity entity) {
-        return player.hasLineOfSight(entity);
+        return getPlayer().hasLineOfSight(entity);
     }
 
     public boolean getRemoveWhenFarAway() {
-        return player.getRemoveWhenFarAway();
+        return getPlayer().getRemoveWhenFarAway();
     }
 
     public void setRemoveWhenFarAway(boolean b) {
-        player.setRemoveWhenFarAway(b);
+        getPlayer().setRemoveWhenFarAway(b);
     }
 
     public EntityEquipment getEquipment() {
-        return player.getEquipment();
+        return getPlayer().getEquipment();
     }
 
     public void setCanPickupItems(boolean b) {
-        player.setCanPickupItems(b);
+        getPlayer().setCanPickupItems(b);
     }
 
     public boolean getCanPickupItems() {
-        return player.getCanPickupItems();
+        return getPlayer().getCanPickupItems();
     }
 
     public boolean isLeashed() {
-        return player.isLeashed();
+        return getPlayer().isLeashed();
     }
 
     public Entity getLeashHolder() throws IllegalStateException {
-        return player.getLeashHolder();
+        return getPlayer().getLeashHolder();
     }
 
     public boolean setLeashHolder(Entity entity) {
-        return player.setLeashHolder(entity);
+        return getPlayer().setLeashHolder(entity);
     }
 
     public boolean isGliding() {
-        return player.isGliding();
+        return getPlayer().isGliding();
     }
 
     public void setGliding(boolean b) {
-        player.setGliding(b);
+        getPlayer().setGliding(b);
     }
 
     public boolean isSwimming() {
-        return player.isSwimming();
+        return getPlayer().isSwimming();
     }
 
     public void setSwimming(boolean b) {
-        player.setSwimming(b);
+        getPlayer().setSwimming(b);
     }
 
     public boolean isRiptiding() {
-        return player.isRiptiding();
+        return getPlayer().isRiptiding();
     }
 
     public boolean isSleeping() {
-        return player.isSleeping();
+        return getPlayer().isSleeping();
     }
 
     public void setAI(boolean b) {
-        player.setAI(b);
+        getPlayer().setAI(b);
     }
 
     public boolean hasAI() {
-        return player.hasAI();
+        return getPlayer().hasAI();
     }
 
     public void attack(Entity entity) {
-        player.attack(entity);
+        getPlayer().attack(entity);
     }
 
     public void swingMainHand() {
-        player.swingMainHand();
+        getPlayer().swingMainHand();
     }
 
     public void swingOffHand() {
-        player.swingOffHand();
+        getPlayer().swingOffHand();
     }
 
     public void setCollidable(boolean b) {
-        player.setCollidable(b);
+        getPlayer().setCollidable(b);
     }
 
     public boolean isCollidable() {
-        return player.isCollidable();
+        return getPlayer().isCollidable();
     }
 
     public <T> T getMemory(MemoryKey<T> memoryKey) {
-        return player.getMemory(memoryKey);
+        return getPlayer().getMemory(memoryKey);
     }
 
     public <T> void setMemory(MemoryKey<T> memoryKey, T t) {
-        player.setMemory(memoryKey, t);
+        getPlayer().setMemory(memoryKey, t);
     }
 
     public AttributeInstance getAttribute(Attribute attribute) {
-        return player.getAttribute(attribute);
+        return getPlayer().getAttribute(attribute);
     }
 
     public void damage(double v) {
-        player.damage(v);
+        getPlayer().damage(v);
     }
 
     public void damage(double v, Entity entity) {
-        player.damage(v, entity);
+        getPlayer().damage(v, entity);
     }
 
     public double getHealth() {
-        return player.getHealth();
+        return getPlayer().getHealth();
     }
 
     public void setHealth(double v) {
-        player.setHealth(v);
+        getPlayer().setHealth(v);
     }
 
     public double getAbsorptionAmount() {
-        return player.getAbsorptionAmount();
+        return getPlayer().getAbsorptionAmount();
     }
 
     public void setAbsorptionAmount(double v) {
-        player.setAbsorptionAmount(v);
+        getPlayer().setAbsorptionAmount(v);
     }
 
     public String getCustomName() {
-        return player.getCustomName();
+        return getPlayer().getCustomName();
     }
 
     public void setCustomName(String s) {
-        player.setCustomName(s);
+        getPlayer().setCustomName(s);
     }
 
     public void setMetadata(String s, MetadataValue metadataValue) {
-        player.setMetadata(s, metadataValue);
+        getPlayer().setMetadata(s, metadataValue);
     }
 
     public List<MetadataValue> getMetadata(String s) {
-        return player.getMetadata(s);
+        return getPlayer().getMetadata(s);
     }
 
     public boolean hasMetadata(String s) {
-        return player.hasMetadata(s);
+        return getPlayer().hasMetadata(s);
     }
 
     public void removeMetadata(String s, Plugin plugin) {
-        player.removeMetadata(s, plugin);
+        getPlayer().removeMetadata(s, plugin);
     }
 
     public boolean isPermissionSet(String s) {
-        return player.isPermissionSet(s);
+        return getPlayer().isPermissionSet(s);
     }
 
     public boolean isPermissionSet(Permission permission) {
-        return player.isPermissionSet(permission);
+        return getPlayer().isPermissionSet(permission);
     }
 
     public boolean hasPermission(String s) {
-        return player.hasPermission(s);
+        return getPlayer().hasPermission(s);
     }
 
     public boolean hasPermission(Permission permission) {
-        return player.hasPermission(permission);
+        return getPlayer().hasPermission(permission);
     }
 
     public PermissionAttachment addAttachment(Plugin plugin, String s, boolean b) {
-        return player.addAttachment(plugin, s, b);
+        return getPlayer().addAttachment(plugin, s, b);
     }
 
     public PermissionAttachment addAttachment(Plugin plugin) {
-        return player.addAttachment(plugin);
+        return getPlayer().addAttachment(plugin);
     }
 
     public PermissionAttachment addAttachment(Plugin plugin, String s, boolean b, int i) {
-        return player.addAttachment(plugin, s, b, i);
+        return getPlayer().addAttachment(plugin, s, b, i);
     }
 
     public PermissionAttachment addAttachment(Plugin plugin, int i) {
-        return player.addAttachment(plugin, i);
+        return getPlayer().addAttachment(plugin, i);
     }
 
     public void removeAttachment(PermissionAttachment permissionAttachment) {
-        player.removeAttachment(permissionAttachment);
+        getPlayer().removeAttachment(permissionAttachment);
     }
 
     public void recalculatePermissions() {
-        player.recalculatePermissions();
+        getPlayer().recalculatePermissions();
     }
 
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        return player.getEffectivePermissions();
+        return getPlayer().getEffectivePermissions();
     }
 
     public boolean isOp() {
-        return player.isOp();
+        return getPlayer().isOp();
     }
 
     public void setOp(boolean b) {
-        player.setOp(b);
+        getPlayer().setOp(b);
     }
 
     public PersistentDataContainer getPersistentDataContainer() {
-        return player.getPersistentDataContainer();
+        return getPlayer().getPersistentDataContainer();
     }
 
     public void sendPluginMessage(Plugin plugin, String s, byte[] bytes) {
-        player.sendPluginMessage(plugin, s, bytes);
+        getPlayer().sendPluginMessage(plugin, s, bytes);
     }
 
     public Set<String> getListeningPluginChannels() {
-        return player.getListeningPluginChannels();
+        return getPlayer().getListeningPluginChannels();
     }
 
     public <T extends Projectile> T launchProjectile(Class<? extends T> aClass) {
-        return player.launchProjectile(aClass);
+        return getPlayer().launchProjectile(aClass);
     }
 
     public <T extends Projectile> T launchProjectile(Class<? extends T> aClass, Vector vector) {
-        return player.launchProjectile(aClass, vector);
+        return getPlayer().launchProjectile(aClass, vector);
+    }
+
+    @Override
+    public String toString() {
+        return "TNLPlayer{" +
+                "player=" + player +
+                ", tnlOptionPacketScoreboard=" + tnlOptionPacketScoreboard +
+                ", tnlOptionPacketTeam=" + tnlOptionPacketTeam +
+                ", virtualStorage=" + virtualStorage +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TNLPlayer player = (TNLPlayer) o;
+        return getUniqueId().equals(player.getUniqueId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUniqueId());
     }
 }
