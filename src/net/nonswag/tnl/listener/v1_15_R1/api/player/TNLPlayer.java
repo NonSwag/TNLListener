@@ -79,10 +79,10 @@ public final class TNLPlayer {
 
     @Nonnull
     public static TNLPlayer cast(@Nonnull Player player) {
-        if (!TNLListener.getPlayerHashMap().containsKey(player)) {
-            TNLListener.getPlayerHashMap().put(player, new TNLPlayer(player));
+        if (!TNLListener.getPlayerHashMap().containsKey(player.getUniqueId())) {
+            TNLListener.getPlayerHashMap().put(player.getUniqueId(), new TNLPlayer(player));
         }
-        return TNLListener.getPlayerHashMap().get(player);
+        return TNLListener.getPlayerHashMap().get(player.getUniqueId());
     }
 
     @Nonnull
