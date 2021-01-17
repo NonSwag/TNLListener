@@ -25,7 +25,7 @@ public class QuitListener implements Listener {
                 }
             }
             LabyMod.getLabyModPlayers().remove(event.getPlayer());
-            TNLListener.getPlayerHashMap().remove(event.getPlayer());
+            TNLListener.getPlayerHashMap().values().removeIf(all -> !all.isOnline());
         } catch (Throwable t) {
             NMSMain.stacktrace(t);
         }

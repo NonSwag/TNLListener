@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.tabCompleter;
+package net.nonswag.tnl.listener.tabcompleter;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

@@ -5,7 +5,7 @@ import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.commands.BridgeCommand;
 import net.nonswag.tnl.listener.enumerations.InternetProtocolAddress;
 import net.nonswag.tnl.listener.listeners.CommandListener;
-import net.nonswag.tnl.listener.tabCompleter.BridgeCommandTabCompleter;
+import net.nonswag.tnl.listener.tabcompleter.BridgeCommandTabCompleter;
 import net.nonswag.tnl.listener.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
