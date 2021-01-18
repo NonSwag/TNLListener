@@ -4,16 +4,6 @@ import net.nonswag.tnl.listener.api.reflection.Reflection;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-/*******************************************************
- * Copyright (C) 2019-2023 NonSwag kirschnerdavid2466@gmail.com
- *
- * This file is part of TNLListener and was created at the 11/12/20
- *
- * TNLListener can not be copied and/or distributed without the express
- * permission of the owner.
- *
- *******************************************************/
-
 public class PacketUtil {
 
     public static Packet<?> decode(String string) {
