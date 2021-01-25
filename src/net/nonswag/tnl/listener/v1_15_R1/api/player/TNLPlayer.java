@@ -1027,6 +1027,10 @@ public final class TNLPlayer {
         getPlayer().setAllowFlight(b);
     }
 
+    public void setArrowCount(int arrows) {
+        getEntityPlayer().setArrowCount(arrows);
+    }
+
     public void hidePlayer(@Nonnull TNLPlayer player) {
         hidePlayer(NMSMain.getPlugin(), player);
     }
