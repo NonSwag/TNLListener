@@ -302,6 +302,10 @@ public final class TNLPlayer {
         }
     }
 
+    public double getMaxHealth() {
+        return getEntityPlayer().getMaxHealth();
+    }
+
     public void sendMessage(String s) {
         getPlayer().sendMessage(s);
     }
@@ -542,13 +546,13 @@ public final class TNLPlayer {
         }
     }
 
-    public void disguise(net.minecraft.server.v1_15_R1.EntityLiving entity, List<TNLPlayer> receivers) {
+    public void disguise(@Nonnull net.minecraft.server.v1_15_R1.EntityLiving entity, List<TNLPlayer> receivers) {
         for (TNLPlayer receiver : receivers) {
             disguise(entity, receiver);
         }
     }
 
-    public void disguise(net.minecraft.server.v1_15_R1.EntityLiving entity, TNLPlayer receiver) {
+    public void disguise(@Nonnull net.minecraft.server.v1_15_R1.EntityLiving entity, TNLPlayer receiver) {
         if (!this.equals(receiver)) {
             receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
             entity.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
@@ -558,7 +562,7 @@ public final class TNLPlayer {
         }
     }
 
-    public void disguise(net.minecraft.server.v1_15_R1.EntityLiving entity) {
+    public void disguise(@Nonnull net.minecraft.server.v1_15_R1.EntityLiving entity) {
         disguise(entity, TNLListener.getOnlinePlayers());
     }
 
@@ -577,7 +581,7 @@ public final class TNLPlayer {
         return bossBars.getOrDefault(uniqueId, new ArrayList<>());
     }
 
-    public void sendBossBar(BossBar bossBar) {
+    public void sendBossBar(@Nonnull BossBar bossBar) {
         if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
             List<String> bars = getBossBars(getUniqueId());
             bars.add(bossBar.getId());
@@ -587,7 +591,7 @@ public final class TNLPlayer {
         updateBossBar(bossBar);
     }
 
-    public void updateBossBar(BossBar bossBar) {
+    public void updateBossBar(@Nonnull BossBar bossBar) {
         if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
             List<String> bars = getBossBars(getUniqueId());
             bars.add(bossBar.getId());
@@ -599,7 +603,7 @@ public final class TNLPlayer {
         sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_STYLE, bossBar.getBossBar().getHandle()));
     }
 
-    public void hideBossBar(BossBar bossBar) {
+    public void hideBossBar(@Nonnull BossBar bossBar) {
         sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.REMOVE, bossBar.getBossBar().getHandle()));
         List<String> bars = getBossBars(getUniqueId());
         bars.remove(bossBar.getId());
@@ -607,7 +611,7 @@ public final class TNLPlayer {
         BossBar.removeBossBar(bossBar.getId());
     }
 
-    public void sendBossBar(BossBar bossBar, long millis) {
+    public void sendBossBar(@Nonnull BossBar bossBar, long millis) {
         if (getBossHashMap().get(getPlayer().getUniqueId()) != null) {
             hideBossBar(getBossHashMap().get(getPlayer().getUniqueId()));
         }
@@ -625,17 +629,50 @@ public final class TNLPlayer {
         }).start();
     }
 
-    public void sendTitle(Title title) {
-        NMSMain.runTask(() -> this.getPlayer().sendTitle(title.getTitle(),
+    public void sendTitle(@Nonnull Title title) {
+        sendTitle(title.getTitle(),
                 title.getSubtitle(),
                 title.getTimeIn(),
                 title.getTimeStay(),
-                title.getTimeOut()));
+                title.getTimeOut());
     }
 
-    public void sendActionBar(ActionBar actionBar) {
-        PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + actionBar.getText() + "\"}"), ChatMessageType.a((byte) 2));
-        sendPacket(packet);
+    public void sendTitle(@Nonnull Title.Animation animation) {
+        new Thread(() -> {
+            try {
+                String[] split = animation.getTitle().getTitle().split("");
+                String spaces = "          ";
+                do {
+                    spaces = spaces.replaceFirst(" ", "");
+                    sendTitle((animation.getDesign().getSecondaryColor() +
+                                    "- " +
+                                    animation.getDesign().getPrimaryColor() +
+                                    String.join(spaces, split) +
+                                    animation.getDesign().getSecondaryColor() +
+                                    " -"),
+                            animation.getDesign().getExtraColor() + animation.getTitle().getSubtitle(),
+                            animation.getTitle().getTimeIn(),
+                            animation.getTitle().getTimeStay(),
+                            animation.getTitle().getTimeOut());
+                    Thread.sleep(50);
+                } while (!spaces.isEmpty());
+                System.out.println(String.join(spaces, split));
+            } catch (Throwable t) {
+                NMSMain.stacktrace(t);
+            }
+        }).start();
+    }
+
+    public void sendTitle(@Nullable String title,
+                          @Nonnull String subTitle,
+                          int timeIn,
+                          int timeStay,
+                          int timeOut) {
+        getPlayer().sendTitle(title, subTitle, timeIn, timeStay, timeOut);
+    }
+
+    public void sendActionBar(@Nonnull ActionBar actionBar) {
+        sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + actionBar.getText() + "\"}"), ChatMessageType.a((byte) 2)));
     }
 
     public CraftPlayer getCraftPlayer() {
@@ -646,7 +683,7 @@ public final class TNLPlayer {
         return getCraftPlayer().getHandle();
     }
 
-    public void bungeeConnect(net.nonswag.tnl.listener.api.server.Server server) {
+    public void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server) {
         try {
             if (server.isOnline()) {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -1073,10 +1110,6 @@ public final class TNLPlayer {
 
     public void setSpectatorTarget(Entity entity) {
         getPlayer().setSpectatorTarget(entity);
-    }
-
-    public void sendTitle(String s, String s1, int i, int i1, int i2) {
-        getPlayer().sendTitle(s, s1, i, i1, i2);
     }
 
     public void resetTitle() {

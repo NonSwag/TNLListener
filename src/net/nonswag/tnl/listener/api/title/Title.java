@@ -1,16 +1,23 @@
 package net.nonswag.tnl.listener.api.title;
 
+import org.bukkit.ChatColor;
+
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class Title {
 
-    private String title;
-    private String subtitle;
+    @Nonnull private String title;
+    @Nonnull private String subtitle;
     private int timeStay;
     private int timeIn;
     private int timeOut;
 
-    public Title(Object title, Object subtitle, int timeStay, int timeIn, int timeOut) {
+    public Title(@Nonnull Object title,
+                 @Nonnull Object subtitle,
+                 int timeStay,
+                 int timeIn,
+                 int timeOut) {
         this.title = title.toString();
         this.subtitle = subtitle.toString();
         this.timeStay = timeStay;
@@ -18,26 +25,21 @@ public class Title {
         this.timeOut = timeOut;
     }
 
-    public Title(Object title, Object subtitle) {
-        this.title = title.toString();
-        this.subtitle = subtitle.toString();
-        this.timeStay = 70;
-        this.timeIn = 0;
-        this.timeOut = 10;
+    public Title(@Nonnull Object title,
+                 @Nonnull Object subtitle) {
+        this(title, subtitle, 70, 0, 10);
     }
 
     public Title() {
-        this.title = "§7-§8/§7-";
-        this.subtitle = "§7-§8/§7-";
-        this.timeStay = 70;
-        this.timeIn = 0;
-        this.timeOut = 10;
+        this("§7-§8/§7-", "§7-§8/§7-");
     }
 
+    @Nonnull
     public String getTitle() {
         return title;
     }
 
+    @Nonnull
     public String getSubtitle() {
         return subtitle;
     }
@@ -54,29 +56,39 @@ public class Title {
         return timeOut;
     }
 
-    public Title setTitle(String title) {
+    @Nonnull
+    public Title setTitle(@Nonnull String title) {
         this.title = title;
         return this;
     }
 
-    public Title setSubtitle(String subtitle) {
+    @Nonnull
+    public Title setSubtitle(@Nonnull String subtitle) {
         this.subtitle = subtitle;
         return this;
     }
 
+    @Nonnull
     public Title setTimeStay(int timeStay) {
         this.timeStay = timeStay;
         return this;
     }
 
+    @Nonnull
     public Title setTimeIn(int timeIn) {
         this.timeIn = timeIn;
         return this;
     }
 
+    @Nonnull
     public Title setTimeOut(int timeOut) {
         this.timeOut = timeOut;
         return this;
+    }
+
+    @Nonnull
+    public Animation animate(@Nonnull Design design) {
+        return new Animation(this, design);
     }
 
     @Override
@@ -95,15 +107,97 @@ public class Title {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Title title1 = (Title) o;
-        return timeStay == title1.timeStay &&
-                timeIn == title1.timeIn &&
-                timeOut == title1.timeOut &&
-                Objects.equals(title, title1.title) &&
-                Objects.equals(subtitle, title1.subtitle);
+        return timeStay == title1.timeStay && timeIn == title1.timeIn && timeOut == title1.timeOut && title.equals(title1.title) && subtitle.equals(title1.subtitle);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(title, subtitle, timeStay, timeIn, timeOut);
+    }
+
+    public static class Animation {
+
+        @Nonnull private final Title title;
+        @Nonnull private final Design design;
+
+        public Animation(@Nonnull Title title,
+                         @Nonnull Design design) {
+            this.title = title;
+            this.design = design;
+        }
+
+        @Nonnull
+        public Title getTitle() {
+            return title;
+        }
+
+        @Nonnull
+        public Design getDesign() {
+            return design;
+        }
+
+        @Override
+        public String toString() {
+            return "Animation{" +
+                    "title=" + title +
+                    ", design=" + design +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Animation animation = (Animation) o;
+            return title.equals(animation.title) && design == animation.design;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(title, design);
+        }
+    }
+
+    public enum Design {
+        LIGHT(ChatColor.GREEN, ChatColor.GRAY, ChatColor.GOLD),
+        DARK(ChatColor.DARK_RED, ChatColor.DARK_GRAY, ChatColor.RED),
+        OCEAN(ChatColor.AQUA, ChatColor.GRAY, ChatColor.BLUE),
+        ;
+
+        @Nonnull private final ChatColor primaryColor;
+        @Nonnull private final ChatColor secondaryColor;
+        @Nonnull private final ChatColor extraColor;
+
+        Design(@Nonnull ChatColor primaryColor,
+               @Nonnull ChatColor secondaryColor,
+               @Nonnull ChatColor extraColor) {
+            this.primaryColor = primaryColor;
+            this.secondaryColor = secondaryColor;
+            this.extraColor = extraColor;
+        }
+
+        @Nonnull
+        public ChatColor getPrimaryColor() {
+            return primaryColor;
+        }
+
+        @Nonnull
+        public ChatColor getSecondaryColor() {
+            return secondaryColor;
+        }
+
+        @Nonnull
+        public ChatColor getExtraColor() {
+            return extraColor;
+        }
+
+        @Override
+        public String toString() {
+            return "Design{" +
+                    "primaryColor=" + primaryColor +
+                    ", secondaryColor=" + secondaryColor +
+                    ", extraColor=" + extraColor +
+                    '}';
+        }
     }
 }

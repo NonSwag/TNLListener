@@ -19,9 +19,10 @@ import java.util.List;
 
 public class PlayerPacketEvent extends Event implements Cancellable {
 
-    private static HandlerList handlers = new HandlerList();
+    @Nonnull private static final HandlerList handlers = new HandlerList();
     @Nonnull private final TNLPlayer player;
     @Nonnull private final Packet<?> packet;
+    private boolean cancelled = false;
 
     public PlayerPacketEvent(@Nonnull TNLPlayer player, @Nonnull Object packet) {
         this(player, (Packet<?>) packet);
@@ -32,8 +33,6 @@ public class PlayerPacketEvent extends Event implements Cancellable {
         this.player = player;
         this.packet = packet;
     }
-
-    public static void setHandlers(HandlerList handlers) { PlayerPacketEvent.handlers = handlers; }
 
     @Nonnull
     public TNLPlayer getPlayer() {
@@ -118,14 +117,12 @@ public class PlayerPacketEvent extends Event implements Cancellable {
     @Override
     public HandlerList getHandlers() { return handlers; }
 
+    @Nonnull
     public static HandlerList getHandlerList() { return handlers; }
-
-    private boolean cancelled = false;
 
     @Override
     public boolean isCancelled() { return cancelled; }
 
     @Override
     public void setCancelled(boolean cancel) { cancelled = cancel; }
-
 }

@@ -4,30 +4,39 @@ import net.nonswag.tnl.listener.NMSMain;
 import org.bukkit.plugin.Plugin;
 
 import javax.annotation.Nonnull;
+import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Objects;
 
 public class PluginUpdate {
 
+    public static void main(String[] args) {
+        new PluginUpdate("TNLListener", "1.0");
+    }
+
     @Nonnull private final String plugin;
     @Nonnull private final String currentVersion;
     @Nonnull private String latestVersion = "UNKNOWN";
     private boolean upToDate = false;
 
-    public PluginUpdate(final @Nonnull String plugin, final @Nonnull String currentVersion) {
+    public PluginUpdate(@Nonnull String plugin, @Nonnull String currentVersion) {
         this.plugin = plugin;
         this.currentVersion = currentVersion;
         try {
-            URL url = new URL("http://thenextlvl.net/themes/PluginAPI.html");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            URL url = new URL("https://www.thenextlvl.net/themes/PluginAPI.html");
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            InputStream inputStream = connection.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             StringBuilder sb = new StringBuilder();
             String line, latestVersion = null;
             while ((line = reader.readLine()) != null) {
                 sb.append(line.replace(" ", ""));
             }
+            reader.close();
             String[] strings = sb.toString().split(",");
             for (String string : strings) {
                 String[] strings1 = string.split("\"");
@@ -49,7 +58,7 @@ public class PluginUpdate {
         }
     }
 
-    public PluginUpdate(final @Nonnull Plugin plugin) {
+    public PluginUpdate(@Nonnull Plugin plugin) {
         this(plugin.getName(), plugin.getDescription().getVersion());
     }
 

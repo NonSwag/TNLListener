@@ -116,7 +116,7 @@ public class NMSMain extends JavaPlugin {
             bridgeCommand.setExecutor(new BridgeCommand());
             bridgeCommand.setTabCompleter(new BridgeCommandTabCompleter());
             bridgeCommand.setPermission("tnl.admin");
-            bridgeCommand.setPermissionMessage("§8[§f§lTNL§8] §cYou have no Rights §8(§4tnl.admin§8)");
+            bridgeCommand.setPermissionMessage(getPrefix() + " §cYou have no Rights §8(§4tnl.admin§8)");
         }
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(getPlugin(), "BungeeCord");
