@@ -656,7 +656,6 @@ public final class TNLPlayer {
                             animation.getTitle().getTimeOut());
                     Thread.sleep(50);
                 } while (!spaces.isEmpty());
-                System.out.println(String.join(spaces, split));
             } catch (Throwable t) {
                 NMSMain.stacktrace(t);
             }
