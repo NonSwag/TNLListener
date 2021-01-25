@@ -160,7 +160,7 @@ public class Title {
 
     public enum Design {
         LIGHT(ChatColor.GREEN, ChatColor.GRAY, ChatColor.GOLD),
-        DARK(ChatColor.DARK_RED, ChatColor.DARK_GRAY, ChatColor.RED),
+        DARK(ChatColor.RED, ChatColor.DARK_GRAY, ChatColor.DARK_RED),
         OCEAN(ChatColor.AQUA, ChatColor.GRAY, ChatColor.BLUE),
         ;
 
