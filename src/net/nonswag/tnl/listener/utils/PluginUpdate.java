@@ -27,8 +27,11 @@ public class PluginUpdate {
         this.plugin = plugin;
         this.currentVersion = currentVersion;
         try {
-            URL url = new URL("https://www.thenextlvl.net/themes/PluginAPI.html");
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            HttpsURLConnection connection = (HttpsURLConnection) new URL("https://www.thenextlvl.net/themes/PluginAPI.html").openConnection();
+            connection.setRequestMethod("GET");
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.connect();
             InputStream inputStream = connection.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             StringBuilder sb = new StringBuilder();

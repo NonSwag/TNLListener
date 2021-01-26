@@ -1,16 +1,22 @@
 package net.nonswag.tnl.listener.v1_15_R1.api.fakeplayer;
 
+import com.google.common.annotations.Beta;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.mojang.Mojang;
+import net.nonswag.tnl.listener.api.mojang.PlayerProfile;
 import net.nonswag.tnl.listener.v1_15_R1.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 import javax.annotation.Nonnull;
 import java.io.InputStreamReader;
@@ -82,11 +88,35 @@ public class FakePlayer {
 
     public void setSkinValues(@Nonnull String[] skinValues) {
         this.skinValues = skinValues;
-        this.profile.getProperties().put("textures", new Property("textures", getSkinValues()[0], getSkinValues()[1]));
+        this.profile.getProperties().put("textures", new Property("textures", skinValues[0], skinValues[1]));
     }
 
     public void setSkin(@Nonnull String name) {
         setSkinValues(getSkin(name));
+        NMSMain.warn("Please use the properties '" + Arrays.toString(getSkinValues()) + "' instead of the name '" + name + "'");
+    }
+
+    public void setSkin(@Nonnull String value, @Nonnull String signature) {
+        setSkinValues(new String[]{value, signature});
+    }
+
+    @Beta
+    public void setSkin(@Nonnull String skin,
+                        @Nonnull String cape,
+                        @Nonnull Mojang.SkinType skinType,
+                        @Nonnull String signature) {
+        setSkin(PlayerProfile.TexturesProperty.createBase64Profile(skin, cape, skinType), signature);
+    }
+
+    @Beta
+    public void setSkin(@Nonnull PlayerProfile.TexturesProperty texturesProperty) {
+        setSkin(texturesProperty.toBase64(), texturesProperty.getSignature());
+        if (texturesProperty.getSkin().isPresent()) {
+            NMSMain.warn("Please use the static link '" + texturesProperty.getSkin().get().toString() + "' for the skin");
+        }
+        if (texturesProperty.getCape().isPresent()) {
+            NMSMain.warn("Please use the static link '" + texturesProperty.getCape().get().toString() + "' for the cape");
+        }
     }
 
     public void spawn() {
@@ -96,9 +126,40 @@ public class FakePlayer {
     }
 
     public void spawn(@Nonnull TNLPlayer receiver) {
+        getPlayer().getDataWatcher().set(DataWatcherRegistry.a.a(16), (byte) 127);
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, getPlayer()));
         receiver.sendPacket(new PacketPlayOutNamedEntitySpawn(getPlayer()));
-        receiver.sendPacket(new PacketPlayOutEntityHeadRotation(getPlayer(), ((byte) (getPlayer().yaw * 256 / 360))));
+        receiver.sendPacket(new PacketPlayOutEntityMetadata(getPlayer().getId(), getPlayer().getDataWatcher(), true));
+        receiver.sendPacket(new PacketPlayOutEntityHeadRotation(getPlayer(), (byte) (getPlayer().yaw * 256 / 360)));
+        for (EnumItemSlot slot : EnumItemSlot.values()) {
+            receiver.sendPacket(new PacketPlayOutEntityEquipment(getPlayer().getId(), slot, getPlayer().getEquipment(slot)));
+        }
+    }
+
+    public void playAnimate(@Nonnull TNLPlayer receiver, @Nonnull Animation animation) {
+        receiver.sendPacket(new PacketPlayOutAnimation(getPlayer(), animation.getId()));
+    }
+
+    public void playStatus(@Nonnull TNLPlayer receiver, @Nonnull Status status) {
+        receiver.sendPacket(new PacketPlayOutEntityStatus(getPlayer(), status.getId()));
+    }
+
+    public void addEffect(@Nonnull TNLPlayer receiver, @Nonnull PotionEffect effect) {
+        receiver.sendPacket(new PacketPlayOutEntityEffect(getPlayer().getId(),
+                new MobEffect(MobEffectList.fromId(effect.getType().getId()),
+                        effect.getDuration(),
+                        effect.getAmplifier(),
+                        effect.isAmbient(),
+                        effect.hasParticles(),
+                        effect.hasIcon())));
+    }
+
+    public void removeEffect(@Nonnull TNLPlayer receiver, @Nonnull PotionEffectType effect) {
+        receiver.sendPacket(new PacketPlayOutRemoveEntityEffect(getPlayer().getId(), MobEffectList.fromId(effect.getId())));
+    }
+
+    public void setVelocity(@Nonnull TNLPlayer receiver, @Nonnull Vector vector) {
+        receiver.sendPacket(new PacketPlayOutEntityVelocity(getPlayer().getId(), new Vec3D(vector.getX(), vector.getY(), vector.getZ())));
     }
 
     public void deSpawn() {
@@ -109,14 +170,12 @@ public class FakePlayer {
 
     public void deSpawn(@Nonnull TNLPlayer receiver) {
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, getPlayer()));
-        receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, getPlayer()));
-        receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_GAME_MODE, getPlayer()));
-        receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, getPlayer()));
+        receiver.sendPacket(new PacketPlayOutEntityDestroy(getPlayer().getId()));
     }
 
     @Nonnull
     private String[] getSkin(@Nonnull String player) {
-        String texture = "";
+        String value = "";
         String signature = "";
         try {
             URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + player);
@@ -125,12 +184,11 @@ public class FakePlayer {
             URL url1 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid + "?unsigned=false");
             InputStreamReader reader1 = new InputStreamReader(url1.openStream());
             JsonObject property = new JsonParser().parse(reader1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
-            texture = property.get("value").getAsString();
+            value = property.get("value").getAsString();
             signature = property.get("signature").getAsString();
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (Throwable ignored) {
         }
-        return new String[]{texture, signature};
+        return new String[]{value, signature};
     }
 
     @Override
@@ -161,5 +219,55 @@ public class FakePlayer {
         result = 31 * result + Arrays.hashCode(receivers);
         result = 31 * result + Arrays.hashCode(skinValues);
         return result;
+    }
+
+    public enum Animation {
+        SWING_HAND(0),
+        SWING_OFFHAND(3),
+        NORMAL_DAMAGE(1),
+        CRITICAL_DAMAGE(4),
+        MAGICAL_DAMAGE(5),
+        ;
+
+        private final int id;
+
+        Animation(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        @Override
+        public String toString() {
+            return "Animation{" +
+                    "id=" + id +
+                    '}';
+        }
+    }
+
+    public enum Status {
+        BURNING(1),
+        CROUCHING(2),
+        HIDDEN(32),
+        ;
+
+        private final byte id;
+
+        Status(int id) {
+            this.id = ((byte) id);
+        }
+
+        public byte getId() {
+            return id;
+        }
+
+        @Override
+        public String toString() {
+            return "Status{" +
+                    "id=" + id +
+                    '}';
+        }
     }
 }

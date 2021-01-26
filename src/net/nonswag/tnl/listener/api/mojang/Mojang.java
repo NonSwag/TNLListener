@@ -17,7 +17,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Mojang {
+public abstract class Mojang {
 
     public static ServiceStatus getStatus(ServiceType serviceType) {
         try {
@@ -27,26 +27,29 @@ public class Mojang {
         }
     }
 
-    public String getUuidOfName(String name) {
+    public static String getUuidOfName(String name) {
         return (String) getJSONObject("https://api.mojang.com/users/profiles/minecraft/" + name).get("id");
     }
 
-    public String getUuidOfName(String name, String timestamp) {
+    public static String getUuidOfName(String name, String timestamp) {
         return (String) getJSONObject("https://api.mojang.com/users/profiles/minecraft/" + name + "?at=" + timestamp).get("id");
     }
 
-    public Map<String, Long> getNameHistoryOfPlayer(UUID uuid) {
+    public static Map<String, Long> getNameHistoryOfPlayer(String uuid) {
         JSONArray arr = getJSONArray("https://api.mojang.com/user/profiles/" + uuid + "/names");
         Map<String, Long> history = new HashMap<>();
-        arr.forEach(o ->
-        {
+        arr.forEach(o -> {
             JSONObject obj = (JSONObject) o;
             history.put((String) obj.get("name"), obj.get("changedToAt") == null ? 0 : Long.parseLong(obj.get("changedToAt").toString()));
         });
         return history;
     }
 
-    public PlayerProfile getPlayerProfile(UUID uuid) {
+    public static void main(String[] args) {
+        System.out.println(getPlayerProfile(getUuidOfName("Supshy")).getTextures().get().toBase64());
+    }
+
+    public static PlayerProfile getPlayerProfile(String uuid) {
         JSONObject obj = getJSONObject("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
         String name = (String) obj.get("name");
         Set<PlayerProfile.Property> properties = (Set<PlayerProfile.Property>) ((JSONArray) obj.get("properties")).stream().map(o -> {
@@ -76,8 +79,9 @@ public class Mojang {
                             }
                         }));
                 p = q;
-            } else
+            } else {
                 p = new PlayerProfile.Property();
+            }
             p.name = propName;
             p.signature = (String) prop.get("signature");
             p.value = propValue;
@@ -86,7 +90,7 @@ public class Mojang {
         return new PlayerProfile(uuid, name, properties);
     }
 
-    public void updateSkin(UUID uuid, String token, SkinType skinType, String skinUrl) {
+    public static void updateSkin(UUID uuid, String token, SkinType skinType, String skinUrl) {
         try {
             Unirest.post("https://api.mojang.com/user/profile/" + uuid + "/skin").header("Authorization", "Bearer " + token).field("model", skinType.toString()).field("url", skinUrl).asString();
         } catch (UnirestException e) {
@@ -95,7 +99,7 @@ public class Mojang {
     }
 
     @Beta
-    public void updateAndUpload(UUID uuid, String token, SkinType skinType, String file) {
+    public static void updateAndUpload(UUID uuid, String token, SkinType skinType, String file) {
         try {
             Unirest.put("https://api.mojang.com/user/profile/" + uuid + "/skin").header("Authorization", "Bearer " + token).field("model", skinType.equals(SkinType.DEFAULT) ? "alex" : skinType.toString()).field("file", file).asString();
         } catch (UnirestException e) {
@@ -103,7 +107,7 @@ public class Mojang {
         }
     }
 
-    public void resetSkin(UUID uuid, String token) {
+    public static void resetSkin(UUID uuid, String token) {
         try {
             Unirest.delete("https://api.mojang.com/user/profile/" + uuid + "/skin").header("Authorization", "Bearer " + token).asString();
         } catch (UnirestException e) {
