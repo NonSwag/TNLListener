@@ -1,10 +1,8 @@
 package net.nonswag.tnl.listener.api.file;
 
-import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 import net.nonswag.tnl.listener.NMSMain;
 
-import javax.annotation.Nonnull;
 import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,13 +10,13 @@ import java.util.List;
 
 public class Configuration {
 
-    @Nonnull private final File file;
+    private final File file;
 
-    public Configuration(@Nonnull String file) {
+    public Configuration(String file) {
         this(new File(file));
     }
 
-    public Configuration(@Nonnull String path, @Nonnull String file) {
+    public Configuration(String path, String file) {
         File configPath = new File(path);
         File configFile = new File((path + "/" + file));
         try {
@@ -43,7 +41,7 @@ public class Configuration {
         }
     }
 
-    public Configuration(@Nonnull File file) {
+    public Configuration(File file) {
         this.file = file;
         if (!file.exists()) {
             try {
@@ -65,7 +63,6 @@ public class Configuration {
         }
     }
 
-    @Nonnull
     public File getFile() {
         return file;
     }
@@ -291,7 +288,6 @@ public class Configuration {
         }
     }
 
-    @NotNull
     public HashMap<Object, Object> getValues() {
         HashMap<Object, Object> values = new HashMap<>();
         try {

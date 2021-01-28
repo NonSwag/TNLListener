@@ -5,8 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import javax.annotation.Nonnull;
-
 public class MessageReceiveEvent extends Event {
 
     private final static HandlerList handlerList = new HandlerList();
@@ -21,7 +19,6 @@ public class MessageReceiveEvent extends Event {
         this.jsonElement = jsonElement;
     }
 
-    @Nonnull
     @Override
     public HandlerList getHandlers() {
         return handlerList;

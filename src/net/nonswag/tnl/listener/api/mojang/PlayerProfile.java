@@ -4,7 +4,6 @@ import net.nonswag.tnl.listener.NMSMain;
 import org.apache.commons.codec.binary.Base64;
 import org.json.simple.JSONObject;
 
-import javax.annotation.Nonnull;
 import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
@@ -110,9 +109,9 @@ public class PlayerProfile {
             return Base64.encodeBase64String(profile.toJSONString().replace("\\/", "/").getBytes());
         }
 
-        public static String createBase64Profile(@Nonnull String skin,
-                                                 @Nonnull String cape,
-                                                 @Nonnull Mojang.SkinType skinType) {
+        public static String createBase64Profile(String skin,
+                                                 String cape,
+                                                 Mojang.SkinType skinType) {
             JSONObject profile = new JSONObject();
             JSONObject textures = new JSONObject();
             JSONObject skinObject = new JSONObject();

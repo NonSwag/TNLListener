@@ -2,19 +2,18 @@ package net.nonswag.tnl.listener.api.title;
 
 import org.bukkit.ChatColor;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class Title {
 
-    @Nonnull private String title;
-    @Nonnull private String subtitle;
+    private String title;
+    private String subtitle;
     private int timeStay;
     private int timeIn;
     private int timeOut;
 
-    public Title(@Nonnull Object title,
-                 @Nonnull Object subtitle,
+    public Title(Object title,
+                 Object subtitle,
                  int timeStay,
                  int timeIn,
                  int timeOut) {
@@ -25,8 +24,8 @@ public class Title {
         this.timeOut = timeOut;
     }
 
-    public Title(@Nonnull Object title,
-                 @Nonnull Object subtitle) {
+    public Title(Object title,
+                 Object subtitle) {
         this(title, subtitle, 70, 0, 10);
     }
 
@@ -34,12 +33,10 @@ public class Title {
         this("§7-§8/§7-", "§7-§8/§7-");
     }
 
-    @Nonnull
     public String getTitle() {
         return title;
     }
 
-    @Nonnull
     public String getSubtitle() {
         return subtitle;
     }
@@ -56,38 +53,32 @@ public class Title {
         return timeOut;
     }
 
-    @Nonnull
-    public Title setTitle(@Nonnull String title) {
+    public Title setTitle(String title) {
         this.title = title;
         return this;
     }
 
-    @Nonnull
-    public Title setSubtitle(@Nonnull String subtitle) {
+    public Title setSubtitle(String subtitle) {
         this.subtitle = subtitle;
         return this;
     }
 
-    @Nonnull
     public Title setTimeStay(int timeStay) {
         this.timeStay = timeStay;
         return this;
     }
 
-    @Nonnull
     public Title setTimeIn(int timeIn) {
         this.timeIn = timeIn;
         return this;
     }
 
-    @Nonnull
     public Title setTimeOut(int timeOut) {
         this.timeOut = timeOut;
         return this;
     }
 
-    @Nonnull
-    public Animation animate(@Nonnull Design design) {
+    public Animation animate(Design design) {
         return new Animation(this, design);
     }
 
@@ -117,21 +108,19 @@ public class Title {
 
     public static class Animation {
 
-        @Nonnull private final Title title;
-        @Nonnull private final Design design;
+        private final Title title;
+        private final Design design;
 
-        public Animation(@Nonnull Title title,
-                         @Nonnull Design design) {
+        public Animation(Title title,
+                         Design design) {
             this.title = title;
             this.design = design;
         }
 
-        @Nonnull
         public Title getTitle() {
             return title;
         }
 
-        @Nonnull
         public Design getDesign() {
             return design;
         }
@@ -164,29 +153,26 @@ public class Title {
         OCEAN(ChatColor.AQUA, ChatColor.GRAY, ChatColor.BLUE),
         ;
 
-        @Nonnull private final ChatColor primaryColor;
-        @Nonnull private final ChatColor secondaryColor;
-        @Nonnull private final ChatColor extraColor;
+        private final ChatColor primaryColor;
+        private final ChatColor secondaryColor;
+        private final ChatColor extraColor;
 
-        Design(@Nonnull ChatColor primaryColor,
-               @Nonnull ChatColor secondaryColor,
-               @Nonnull ChatColor extraColor) {
+        Design(ChatColor primaryColor,
+               ChatColor secondaryColor,
+               ChatColor extraColor) {
             this.primaryColor = primaryColor;
             this.secondaryColor = secondaryColor;
             this.extraColor = extraColor;
         }
 
-        @Nonnull
         public ChatColor getPrimaryColor() {
             return primaryColor;
         }
 
-        @Nonnull
         public ChatColor getSecondaryColor() {
             return secondaryColor;
         }
 
-        @Nonnull
         public ChatColor getExtraColor() {
             return extraColor;
         }

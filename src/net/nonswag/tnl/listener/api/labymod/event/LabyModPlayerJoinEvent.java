@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public class LabyModPlayerJoinEvent extends Event {
@@ -26,7 +25,6 @@ public class LabyModPlayerJoinEvent extends Event {
         this.addons = addons;
     }
 
-    @Nonnull
     @Override
     public HandlerList getHandlers() {
         return handlerList;

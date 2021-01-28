@@ -6,8 +6,6 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import javax.annotation.Nonnull;
-
 public class MessageSendEvent extends Event implements Cancellable {
 
     private final static HandlerList handlerList = new HandlerList();
@@ -62,7 +60,6 @@ public class MessageSendEvent extends Event implements Cancellable {
         return cancelled;
     }
 
-    @Nonnull
     @Override
     public HandlerList getHandlers() {
         return handlerList;

@@ -8,7 +8,7 @@ import net.minecraft.server.v1_15_R1.MinecraftKey;
 import net.minecraft.server.v1_15_R1.PacketDataSerializer;
 import net.minecraft.server.v1_15_R1.PacketPlayOutCustomPayload;
 import net.nonswag.tnl.listener.NMSMain;
-import net.nonswag.tnl.listener.v1_15_R1.api.player.TNLPlayer;
+import net.nonswag.tnl.listener.api.player.TNLPlayer;
 
 import java.nio.charset.StandardCharsets;
 

@@ -4,6 +4,7 @@ import net.nonswag.tnl.listener.NMSMain;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class ConfigUtil {
@@ -23,6 +24,11 @@ public class ConfigUtil {
     public static FileConfiguration getConfig() { return config; }
 
     public static boolean isSet(String path) { return config.isSet(path); }
+
+    @Nonnull
+    public static String getString(String path) {
+        return new net.nonswag.tnl.listener.api.object.Object<>(getConfig().getString(path)).getOrDefault("");
+    }
 
     public static Object get(String path) {
         return config.get(path);

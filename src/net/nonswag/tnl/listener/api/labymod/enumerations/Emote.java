@@ -1,7 +1,5 @@
 package net.nonswag.tnl.listener.api.labymod.enumerations;
 
-import javax.annotation.Nullable;
-
 public enum Emote {
     STOP(-1, null),
     BACKFLIP(2, "Backflip"),
@@ -129,15 +127,14 @@ public enum Emote {
     CLEANING_THE_FLOOR(204, "Cleaning the floor"),
     ;
 
-    @Nullable private final String name;
+    private final String name;
     private final int id;
 
-    Emote(int id, @Nullable String name) {
+    Emote(int id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    @Nullable
     public String getName() {
         return name;
     }

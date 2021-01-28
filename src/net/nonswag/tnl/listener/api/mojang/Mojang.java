@@ -9,7 +9,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import javax.annotation.Nonnull;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -159,13 +158,12 @@ public abstract class Mojang {
         MOJANG_COM("mojang.com"),
         ;
 
-        @Nonnull private final String name;
+        private final String name;
 
-        ServiceType(@Nonnull String name) {
+        ServiceType(String name) {
             this.name = name;
         }
 
-        @Nonnull
         public String getName() {
             return name;
         }

@@ -3,7 +3,6 @@ package net.nonswag.tnl.listener.utils;
 import net.nonswag.tnl.listener.NMSMain;
 import org.bukkit.plugin.Plugin;
 
-import javax.annotation.Nonnull;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,12 +17,12 @@ public class PluginUpdate {
         new PluginUpdate("TNLListener", "1.0");
     }
 
-    @Nonnull private final String plugin;
-    @Nonnull private final String currentVersion;
-    @Nonnull private String latestVersion = "UNKNOWN";
+    private final String plugin;
+    private final String currentVersion;
+    private String latestVersion = "UNKNOWN";
     private boolean upToDate = false;
 
-    public PluginUpdate(@Nonnull String plugin, @Nonnull String currentVersion) {
+    public PluginUpdate(String plugin, String currentVersion) {
         this.plugin = plugin;
         this.currentVersion = currentVersion;
         try {
@@ -57,11 +56,11 @@ public class PluginUpdate {
                 this.upToDate = (getCurrentVersion().equals(getLatestVersion()));
             }
         } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+            NMSMain.stacktrace(t, false);
         }
     }
 
-    public PluginUpdate(@Nonnull Plugin plugin) {
+    public PluginUpdate(Plugin plugin) {
         this(plugin.getName(), plugin.getDescription().getVersion());
     }
 
@@ -71,14 +70,14 @@ public class PluginUpdate {
                 FileDownloader.downloadFile("http://thenextlvl.net/plugins/" + getPlugin() + ".jar",
                         new File("").getAbsolutePath());
             } catch (Throwable t) {
-                NMSMain.stacktrace(t);
+                NMSMain.stacktrace(t, false);
             }
         } else {
             NMSMain.print("The plugin '" + getPlugin() + "' is up to date");
         }
     }
 
-    public void setLatestVersion(@Nonnull String latestVersion) {
+    public void setLatestVersion(String latestVersion) {
         this.latestVersion = latestVersion;
     }
 
@@ -86,17 +85,14 @@ public class PluginUpdate {
         this.upToDate = upToDate;
     }
 
-    @Nonnull
     public String getPlugin() {
         return plugin;
     }
 
-    @Nonnull
     public String getCurrentVersion() {
         return currentVersion;
     }
 
-    @Nonnull
     public String getLatestVersion() {
         return latestVersion;
     }

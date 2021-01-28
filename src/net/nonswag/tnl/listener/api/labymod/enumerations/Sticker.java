@@ -1,7 +1,5 @@
 package net.nonswag.tnl.listener.api.labymod.enumerations;
 
-import javax.annotation.Nonnull;
-
 public enum Sticker {
     PUMPKIN(1, "Pumpkin"),
     HAPPY_HALLOWEEN(2, "Happy Halloween"),
@@ -61,9 +59,9 @@ public enum Sticker {
     ;
 
     private final int id;
-    @Nonnull private final String name;
+    private final String name;
 
-    Sticker(int id, @Nonnull String name) {
+    Sticker(int id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -72,7 +70,6 @@ public enum Sticker {
         return id;
     }
 
-    @Nonnull
     public String getName() {
         return name;
     }

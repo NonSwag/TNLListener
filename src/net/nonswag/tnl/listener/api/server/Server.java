@@ -4,8 +4,6 @@ import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.api.serializer.PacketSerializer;
 import org.json.JSONObject;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -17,28 +15,26 @@ import java.util.Objects;
 
 public class Server {
 
-    @Nonnull private static final HashMap<String, Server> servers = new HashMap<>();
+    private static final HashMap<String, Server> servers = new HashMap<>();
 
-    @Nonnull private final String name;
-    @Nonnull private final InetSocketAddress inetSocketAddress;
+    private final String name;
+    private final InetSocketAddress inetSocketAddress;
 
     private boolean online = false;
     private int playerCount = 0;
     private int maxPlayerCount = 0;
 
-    public Server(@Nonnull String name, @Nonnull InetSocketAddress inetSocketAddress) {
+    public Server(String name, InetSocketAddress inetSocketAddress) {
         this.name = name;
         this.inetSocketAddress = inetSocketAddress;
         servers.put(this.getName(), this);
         this.update();
     }
 
-    @Nonnull
     public String getName() {
         return name;
     }
 
-    @Nonnull
     public InetSocketAddress getInetSocketAddress() {
         return inetSocketAddress;
     }
@@ -102,7 +98,6 @@ public class Server {
         }
     }
 
-    @Nullable
     public static Server wrap(String name) {
         return servers.get(name);
     }
@@ -131,7 +126,6 @@ public class Server {
         return Objects.hash(name, inetSocketAddress, online, playerCount, maxPlayerCount);
     }
 
-    @Nonnull
     public static Collection<Server> getServers() {
         return servers.values();
     }

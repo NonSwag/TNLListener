@@ -1,7 +1,5 @@
 package net.nonswag.tnl.listener.api.labymod.enumerations;
 
-import javax.annotation.Nonnull;
-
 public enum Permission {
     IMPROVED_LAVA("Improved Lava", false),
     CROSSHAIR_SYNC("Crosshair sync", false),
@@ -17,15 +15,14 @@ public enum Permission {
     SATURATION_BAR("Saturation bar", true),
     ;
 
-    @Nonnull private final String displayName;
+    private final String displayName;
     private final boolean defaultEnabled;
 
-    Permission(@Nonnull String displayName, boolean defaultEnabled) {
+    Permission(String displayName, boolean defaultEnabled) {
         this.displayName = displayName;
         this.defaultEnabled = defaultEnabled;
     }
 
-    @Nonnull
     public String getDisplayName() {
         return displayName;
     }
