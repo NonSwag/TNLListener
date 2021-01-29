@@ -23,12 +23,13 @@ public class Server {
     private boolean online = false;
     private int playerCount = 0;
     private int maxPlayerCount = 0;
+    private long lastUpdateTime = 0;
 
     public Server(String name, InetSocketAddress inetSocketAddress) {
         this.name = name;
         this.inetSocketAddress = inetSocketAddress;
         servers.put(this.getName(), this);
-        this.update();
+        this.update(System.currentTimeMillis());
     }
 
     public String getName() {
@@ -40,11 +41,17 @@ public class Server {
     }
 
     public int getPlayerCount() {
+        this.update(System.currentTimeMillis());
         return playerCount;
     }
 
     public int getMaxPlayerCount() {
+        this.update(System.currentTimeMillis());
         return maxPlayerCount;
+    }
+
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
     }
 
     private void setOnline(boolean online) {
@@ -59,43 +66,54 @@ public class Server {
         this.maxPlayerCount = maxPlayerCount;
     }
 
+    public void setLastUpdateTime(long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
     public boolean isOnline() {
+        this.update(System.currentTimeMillis());
         return online;
     }
 
-    public void update() {
-        Socket socket;
-        try {
-            socket = new Socket();
-            socket.connect(getInetSocketAddress(), 1500);
-            setOnline(true);
-            try {
-                DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-                DataInputStream input = new DataInputStream(socket.getInputStream());
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                DataOutputStream handshake = new DataOutputStream(buffer);
-                handshake.writeByte(0x00);
-                PacketSerializer.writeVarInt(handshake, 754);
-                PacketSerializer.writeString(handshake, getInetSocketAddress().getHostName());
-                handshake.writeShort(getInetSocketAddress().getPort());
-                PacketSerializer.writeVarInt(handshake, 1);
-                byte[] handshakeMessage = buffer.toByteArray();
-                PacketSerializer.writeVarInt(output, handshakeMessage.length);
-                output.write(handshakeMessage);
-                output.writeByte(0x01);
-                output.writeByte(0x00);
-                byte[] in = new byte[PacketSerializer.readVarInt(input)];
-                input.readFully(in);
-                JSONObject object = new JSONObject(new String(in).substring(3));
-                JSONObject players = object.getJSONObject("players");
-                setMaxPlayerCount(players.getInt("max"));
-                setPlayerCount(players.getInt("online"));
-            } catch (Throwable t) {
-                NMSMain.stacktrace(t);
-            }
-        } catch (Throwable ignored) {
-            setOnline(false);
+    public void update(long time) {
+        if (time <= getLastUpdateTime()) {
+            return;
         }
+        setLastUpdateTime(time);
+        new Thread(() -> {
+            Socket socket;
+            try {
+                socket = new Socket();
+                socket.connect(getInetSocketAddress(), 1500);
+                setOnline(true);
+                try {
+                    DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+                    DataInputStream input = new DataInputStream(socket.getInputStream());
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    DataOutputStream handshake = new DataOutputStream(buffer);
+                    handshake.writeByte(0x00);
+                    PacketSerializer.writeVarInt(handshake, 754);
+                    PacketSerializer.writeString(handshake, getInetSocketAddress().getHostName());
+                    handshake.writeShort(getInetSocketAddress().getPort());
+                    PacketSerializer.writeVarInt(handshake, 1);
+                    byte[] handshakeMessage = buffer.toByteArray();
+                    PacketSerializer.writeVarInt(output, handshakeMessage.length);
+                    output.write(handshakeMessage);
+                    output.writeByte(0x01);
+                    output.writeByte(0x00);
+                    byte[] in = new byte[PacketSerializer.readVarInt(input)];
+                    input.readFully(in);
+                    JSONObject object = new JSONObject(new String(in).substring(3));
+                    JSONObject players = object.getJSONObject("players");
+                    setMaxPlayerCount(players.getInt("max"));
+                    setPlayerCount(players.getInt("online"));
+                } catch (Throwable t) {
+                    NMSMain.stacktrace(t);
+                }
+            } catch (Throwable ignored) {
+                setOnline(false);
+            }
+        }).start();
     }
 
     public static Server wrap(String name) {
