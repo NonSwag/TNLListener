@@ -72,7 +72,7 @@ public class PluginUpdate {
     public void downloadUpdate() {
         if (!isUpToDate()) {
             try {
-                FileDownloader.downloadFile("https://www.thenextlvl.net/plugins/" + getPlugin() + ".jar", new File("").getAbsolutePath());
+                FileDownloader.downloadFile("https://www.thenextlvl.net/plugins/" + getPlugin() + ".jar", new File("plugins/").getAbsolutePath());
             } catch (Throwable t) {
                 NMSMain.stacktrace(t, true);
             }
