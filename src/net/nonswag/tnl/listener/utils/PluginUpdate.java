@@ -2,7 +2,10 @@ package net.nonswag.tnl.listener.utils;
 
 import net.nonswag.tnl.listener.NMSMain;
 import org.bukkit.plugin.Plugin;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
+import javax.annotation.Nonnull;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,22 +17,20 @@ import java.util.Objects;
 public class PluginUpdate {
 
     public static void main(String[] args) {
-        new PluginUpdate("TNLListener", "1.0");
+        new PluginUpdate("TNLListener", "1.0").downloadUpdate();
     }
 
-    private final String plugin;
-    private final String currentVersion;
-    private String latestVersion = "UNKNOWN";
+    @Nonnull private final String plugin;
+    @Nonnull private final String currentVersion;
+    @Nonnull private String latestVersion = "UNKNOWN";
     private boolean upToDate = false;
 
-    public PluginUpdate(String plugin, String currentVersion) {
+    public PluginUpdate(@Nonnull String plugin, @Nonnull String currentVersion) {
         this.plugin = plugin;
         this.currentVersion = currentVersion;
         try {
             HttpsURLConnection connection = (HttpsURLConnection) new URL("https://www.thenextlvl.net/themes/PluginAPI.html").openConnection();
             connection.setRequestMethod("GET");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
             connection.connect();
             InputStream inputStream = connection.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -39,45 +40,48 @@ public class PluginUpdate {
                 sb.append(line.replace(" ", ""));
             }
             reader.close();
-            String[] strings = sb.toString().split(",");
-            for (String string : strings) {
-                String[] strings1 = string.split("\"");
-                for (int i1 = 0; i1 < strings1.length; i1++) {
-                    if (strings1[i1].equals(plugin)) {
-                        latestVersion = strings1[i1 + 2];
+
+            Object parse = new JSONParser().parse(sb.toString());
+            if (parse instanceof JSONObject) {
+                JSONObject object = ((JSONObject) parse);
+                for (Object key : object.keySet()) {
+                    if (key != null && key.toString().equalsIgnoreCase(plugin)) {
+                        latestVersion = object.get(key).toString();
                         break;
                     }
                 }
+            } else {
+                return;
             }
             if (latestVersion == null) {
                 NMSMain.stacktrace("The Plugin '" + plugin + "' is not a (public) plugin by TheNextLvl.net");
             } else {
-                this.latestVersion = latestVersion;
-                this.upToDate = (getCurrentVersion().equals(getLatestVersion()));
+                setLatestVersion(latestVersion);
+                setUpToDate(getCurrentVersion().equals(getLatestVersion()));
             }
+            connection.disconnect();
         } catch (Throwable t) {
             NMSMain.stacktrace(t, false);
         }
     }
 
-    public PluginUpdate(Plugin plugin) {
+    public PluginUpdate(@Nonnull Plugin plugin) {
         this(plugin.getName(), plugin.getDescription().getVersion());
     }
 
     public void downloadUpdate() {
         if (!isUpToDate()) {
             try {
-                FileDownloader.downloadFile("http://thenextlvl.net/plugins/" + getPlugin() + ".jar",
-                        new File("").getAbsolutePath());
+                FileDownloader.downloadFile("https://www.thenextlvl.net/plugins/" + getPlugin() + ".jar", new File("").getAbsolutePath());
             } catch (Throwable t) {
-                NMSMain.stacktrace(t, false);
+                NMSMain.stacktrace(t, true);
             }
         } else {
             NMSMain.print("The plugin '" + getPlugin() + "' is up to date");
         }
     }
 
-    public void setLatestVersion(String latestVersion) {
+    public void setLatestVersion(@Nonnull String latestVersion) {
         this.latestVersion = latestVersion;
     }
 
@@ -85,14 +89,17 @@ public class PluginUpdate {
         this.upToDate = upToDate;
     }
 
+    @Nonnull
     public String getPlugin() {
         return plugin;
     }
 
+    @Nonnull
     public String getCurrentVersion() {
         return currentVersion;
     }
 
+    @Nonnull
     public String getLatestVersion() {
         return latestVersion;
     }
