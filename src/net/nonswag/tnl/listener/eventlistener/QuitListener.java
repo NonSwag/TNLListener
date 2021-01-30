@@ -1,7 +1,6 @@
 package net.nonswag.tnl.listener.eventlistener;
 
 import net.nonswag.tnl.listener.NMSMain;
-import net.nonswag.tnl.listener.TNLListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,7 +22,6 @@ public class QuitListener implements Listener {
                     }
                 }
             }
-            NMSMain.runTaskAsynchronously(() -> TNLListener.getPlayerHashMap().keySet().removeIf(all -> !all.isOnline()));
         } catch (Throwable t) {
             NMSMain.stacktrace(t);
         }

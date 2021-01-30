@@ -1,7 +1,6 @@
 package net.nonswag.tnl.listener.eventlistener;
 
 import net.nonswag.tnl.listener.NMSMain;
-import net.nonswag.tnl.listener.TNLListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,7 +33,6 @@ public class KickListener implements Listener {
             if (!reason.startsWith(NMSMain.getPrefix() + "")) {
                 event.setReason(NMSMain.getPrefix() + "\n§c" + event.getReason());
             }
-            NMSMain.runTaskAsynchronously(() -> TNLListener.getPlayerHashMap().keySet().removeIf(all -> !all.isOnline()));
         } catch (Throwable t) {
             NMSMain.stacktrace(t);
         }

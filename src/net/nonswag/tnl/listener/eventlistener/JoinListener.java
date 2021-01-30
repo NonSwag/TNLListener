@@ -1,7 +1,6 @@
 package net.nonswag.tnl.listener.eventlistener;
 
 import net.nonswag.tnl.listener.NMSMain;
-import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.adapter.PacketAdapter;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
@@ -41,7 +40,6 @@ public class JoinListener implements Listener {
                     }
                 }
             }
-            NMSMain.runTaskAsynchronously(() -> TNLListener.getPlayerHashMap().keySet().removeIf(all -> !all.isOnline()));
         } catch (Throwable t) {
             NMSMain.stacktrace(t);
         }
