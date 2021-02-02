@@ -1179,7 +1179,7 @@ public class TNLPlayer {
     }
 
     public Location getTargetLocation(int i) {
-        return getLocation().clone().add(getPlayer().getLocation().getDirection().multiply(3));
+        return getLocation().clone().add(getPlayer().getLocation().getDirection().multiply(i));
     }
 
     public void setVelocity(Vector vector) {

@@ -1,6 +1,7 @@
-package net.nonswag.tnl.listener.eventlistener;
+package net.nonswag.tnl.listener.listeners;
 
 import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.adapter.PacketAdapter;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
@@ -43,5 +44,6 @@ public class JoinListener implements Listener {
         } catch (Throwable t) {
             NMSMain.stacktrace(t);
         }
+        NMSMain.runTaskAsynchronously(TNLListener::updatePlayers);
     }
 }

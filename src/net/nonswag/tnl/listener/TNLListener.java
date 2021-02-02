@@ -2,13 +2,14 @@ package net.nonswag.tnl.listener;
 
 import net.nonswag.tnl.listener.adapter.PacketAdapter;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
-import net.nonswag.tnl.listener.eventlistener.*;
+import net.nonswag.tnl.listener.listeners.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class TNLListener {
@@ -29,6 +30,16 @@ public abstract class TNLListener {
             }
         } catch (Throwable t) {
             NMSMain.stacktrace(t);
+        }
+    }
+
+    public static void updatePlayers() {
+        Iterator<Player> iterator = getPlayerHashMap().keySet().iterator();
+        while (iterator.hasNext()) {
+            Player player = iterator.next();
+            if (!player.isOnline()) {
+                getPlayerHashMap().remove(player);
+            }
         }
     }
 

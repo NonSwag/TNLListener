@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.eventlistener;
+package net.nonswag.tnl.listener.listeners;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_15_R1.*;

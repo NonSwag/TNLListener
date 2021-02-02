@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.eventlistener;
+package net.nonswag.tnl.listener.listeners;
 
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.eventhandler.PlayerBottleFillEvent;
