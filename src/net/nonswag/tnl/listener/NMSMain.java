@@ -3,6 +3,7 @@ package net.nonswag.tnl.listener;
 import net.nonswag.tnl.listener.api.annotations.Soon;
 import net.nonswag.tnl.listener.api.annotations.UndefinedNullability;
 import net.nonswag.tnl.listener.api.bridge.ProxyServer;
+import net.nonswag.tnl.listener.api.command.CommandManager;
 import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.commands.BridgeCommand;
 import net.nonswag.tnl.listener.enumerations.InternetProtocolAddress;
@@ -12,7 +13,6 @@ import net.nonswag.tnl.listener.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -49,6 +49,7 @@ public class NMSMain extends JavaPlugin {
 
     @UndefinedNullability private static Plugin plugin;
     @UndefinedNullability private static JavaPlugin javaPlugin;
+    @UndefinedNullability private static CommandManager commandManager;
 
     private static boolean betterTNT = true;
     private static boolean betterFallingBlocks = true;
@@ -81,6 +82,7 @@ public class NMSMain extends JavaPlugin {
     public void onEnable() {
         setPlugin(this);
         setJavaPlugin(this);
+        setCommandManager(new CommandManager(getJavaPlugin()));
         NMSMain.print(Bukkit.getVersion(), Bukkit.getBukkitVersion());
         /*
         if (!Bukkit.getVersion().contains("1.15.2")) {
@@ -95,13 +97,7 @@ public class NMSMain extends JavaPlugin {
         new ConfigUtil.ConfigurationSection("debug", isDebug()).createIfAbsent();
         setServerName(FileUtil.getServerFolder().getName());
         setDebug(ConfigUtil.getConfig().getBoolean("debug", isDebug()));
-        PluginCommand bridgeCommand = getCommand("bridge");
-        if (bridgeCommand != null) {
-            bridgeCommand.setExecutor(new BridgeCommand());
-            bridgeCommand.setTabCompleter(new BridgeCommandTabCompleter());
-            bridgeCommand.setPermission("tnl.admin");
-            bridgeCommand.setPermissionMessage(getPrefix() + " §cYou have no Rights §8(§4tnl.admin§8)");
-        }
+        getCommandManager().registerCommand("bridge", "tnl.admin", new BridgeCommand(), new BridgeCommandTabCompleter());
         Bukkit.getMessenger().registerOutgoingPluginChannel(getPlugin(), "BungeeCord");
         new ConfigUtil.ConfigurationSection("commands.use-better-permissions", isBetterPermissions()).createIfAbsent();
         new ConfigUtil.ConfigurationSection("commands.use-better-commands", isBetterCommands()).createIfAbsent();
@@ -401,6 +397,10 @@ public class NMSMain extends JavaPlugin {
         NMSMain.plugin = plugin;
     }
 
+    public static void setCommandManager(CommandManager commandManager) {
+        NMSMain.commandManager = commandManager;
+    }
+
     public static void setAutoUpdater(boolean autoUpdater) {
         NMSMain.autoUpdater = autoUpdater;
     }
@@ -542,6 +542,10 @@ public class NMSMain extends JavaPlugin {
 
     public static JavaPlugin getJavaPlugin() {
         return javaPlugin;
+    }
+
+    public static CommandManager getCommandManager() {
+        return commandManager;
     }
 
     public static InternetProtocolAddress getProxyProtocolAddress() {

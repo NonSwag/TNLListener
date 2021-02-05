@@ -3,6 +3,8 @@ package net.nonswag.tnl.listener.utils;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import net.nonswag.tnl.listener.NMSMain;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -183,6 +185,20 @@ public class ItemBuilder {
                 ItemFlag.HIDE_UNBREAKABLE,
                 ItemFlag.HIDE_PLACED_ON,
                 ItemFlag.HIDE_POTION_EFFECTS);
+        return this;
+    }
+
+    @Nonnull
+    public ItemBuilder addAttribute(Attribute attribute, AttributeModifier modifier) {
+        getItemMeta().addAttributeModifier(attribute, modifier);
+        return this;
+    }
+
+    @Nonnull
+    public ItemBuilder removeAttributes(Attribute... attributes) {
+        for (Attribute attribute : attributes) {
+            getItemMeta().removeAttributeModifier(attribute);
+        }
         return this;
     }
 
