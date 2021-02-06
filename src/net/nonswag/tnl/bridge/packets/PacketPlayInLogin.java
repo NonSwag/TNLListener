@@ -1,31 +1,34 @@
-package net.nonswag.tnl.listener.api.bridge.packet.packets;
+package net.nonswag.tnl.bridge.packets;
 
-import net.nonswag.tnl.listener.api.bridge.packet.Packet;
-import net.nonswag.tnl.listener.api.bridge.packet.PacketListenerPlayOut;
+import net.nonswag.tnl.bridge.Packet;
+import net.nonswag.tnl.bridge.PacketListenerPlayIn;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class PacketPlayOutLogin implements Packet<PacketListenerPlayOut> {
+public class PacketPlayInLogin implements Packet<PacketListenerPlayIn> {
 
-    private final String serverName;
-    private final String forwardingSecret;
+    @Nonnull private final String serverName;
+    @Nonnull private final String forwardingSecret;
 
-    public PacketPlayOutLogin(String serverName, String forwardingSecret) {
+    public PacketPlayInLogin(@Nonnull String serverName, @Nonnull String forwardingSecret) {
         this.serverName = serverName;
         this.forwardingSecret = forwardingSecret;
     }
 
+    @Nonnull
     public String getServerName() {
         return serverName;
     }
 
+    @Nonnull
     public String getForwardingSecret() {
         return forwardingSecret;
     }
 
     @Override
     public String toString() {
-        return "PacketPlayOutLogin{" +
+        return "PacketPlayInLogin{" +
                 "serverName='" + serverName + '\'' +
                 ", forwardingSecret='" + forwardingSecret + '\'' +
                 '}';
@@ -35,9 +38,8 @@ public class PacketPlayOutLogin implements Packet<PacketListenerPlayOut> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PacketPlayOutLogin that = (PacketPlayOutLogin) o;
-        return Objects.equals(serverName, that.serverName) &&
-                Objects.equals(forwardingSecret, that.forwardingSecret);
+        PacketPlayInLogin that = (PacketPlayInLogin) o;
+        return serverName.equals(that.serverName) && forwardingSecret.equals(that.forwardingSecret);
     }
 
     @Override

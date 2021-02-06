@@ -1,9 +1,11 @@
-package net.nonswag.tnl.listener.api.bridge;
+package net.nonswag.tnl.bridge.receiver;
 
-import net.nonswag.tnl.bridge.Bridge;
+import net.nonswag.tnl.bridge.Packet;
+import net.nonswag.tnl.bridge.PacketListener;
+import net.nonswag.tnl.bridge.PacketUtil;
+import net.nonswag.tnl.bridge.packets.PacketPlayOutLogin;
+import net.nonswag.tnl.bridge.proxy.Bridge;
 import net.nonswag.tnl.listener.NMSMain;
-import net.nonswag.tnl.listener.api.bridge.packet.PacketUtil;
-import net.nonswag.tnl.listener.api.bridge.packet.packets.PacketPlayOutLogin;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -26,9 +28,12 @@ class PacketAdapter {
                             while (NMSMain.getPlugin().isEnabled() && proxyServer.isConnected()) {
                                 packet = reader.readLine();
                                 if (packet != null) {
-                                    proxyServer.readPacket(PacketUtil.decode(packet));
+                                    Packet<? extends PacketListener> decode = PacketUtil.decode(packet);
+                                    if (decode != null) {
+                                        proxyServer.readPacket(decode);
+                                    }
                                 } else {
-                                    throw new UnexpectedException("The packet can't be cull");
+                                    throw new UnexpectedException("The packet can't be null");
                                 }
                             }
                         } catch (Throwable ignored) {

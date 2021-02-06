@@ -16,6 +16,7 @@
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/json/json/20160212/json-20160212.jar" path-in-jar="/" />
       <element id="file-copy" path="$PROJECT_DIR$/plugin.yml" />
       <element id="file-copy" path="$PROJECT_DIR$/velocity-plugin.json" />
+      <element id="extracted-dir" path="$USER_HOME$/Desktop/Coding/APIs/TNLEventAPI.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

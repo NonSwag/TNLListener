@@ -1,28 +1,27 @@
-package net.nonswag.tnl.bridge.packet.packets;
+package net.nonswag.tnl.bridge.packets;
 
-import net.nonswag.tnl.bridge.packet.Packet;
-import net.nonswag.tnl.bridge.packet.PacketListenerPlayOut;
+import net.nonswag.tnl.bridge.Packet;
+import net.nonswag.tnl.bridge.PacketListenerPlayOut;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class PacketPlayInLogin implements Packet<PacketListenerPlayOut> {
+public class PacketPlayOutLogin implements Packet<PacketListenerPlayOut> {
 
-    private final String serverName;
-    private final String forwardingSecret;
+    @Nonnull private final String serverName;
+    @Nonnull private final String forwardingSecret;
 
-    public PacketPlayInLogin(String serverName, String forwardingSecret) {
+    public PacketPlayOutLogin(@Nonnull String serverName, @Nonnull String forwardingSecret) {
         this.serverName = serverName;
         this.forwardingSecret = forwardingSecret;
     }
 
-    public PacketPlayInLogin() {
-        this(null, null);
-    }
-
+    @Nonnull
     public String getServerName() {
         return serverName;
     }
 
+    @Nonnull
     public String getForwardingSecret() {
         return forwardingSecret;
     }
@@ -39,9 +38,8 @@ public class PacketPlayInLogin implements Packet<PacketListenerPlayOut> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PacketPlayInLogin that = (PacketPlayInLogin) o;
-        return Objects.equals(serverName, that.serverName) &&
-                Objects.equals(forwardingSecret, that.forwardingSecret);
+        PacketPlayOutLogin that = (PacketPlayOutLogin) o;
+        return serverName.equals(that.serverName) && forwardingSecret.equals(that.forwardingSecret);
     }
 
     @Override

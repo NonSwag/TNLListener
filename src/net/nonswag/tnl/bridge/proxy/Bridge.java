@@ -1,12 +1,12 @@
-package net.nonswag.tnl.bridge;
+package net.nonswag.tnl.bridge.proxy;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.proxy.VelocityServer;
-import net.nonswag.tnl.bridge.handler.ConnectedServer;
-import net.nonswag.tnl.bridge.handler.ConnectionHandler;
+import net.nonswag.tnl.bridge.proxy.handler.ConnectedServer;
+import net.nonswag.tnl.bridge.proxy.handler.ConnectionHandler;
 import net.nonswag.tnl.cloud.api.file.Configuration;
 import net.nonswag.tnl.cloud.api.system.Console;
 import net.nonswag.tnl.cloud.utils.MathUtil;

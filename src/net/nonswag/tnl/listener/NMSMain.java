@@ -2,7 +2,7 @@ package net.nonswag.tnl.listener;
 
 import net.nonswag.tnl.listener.api.annotations.Soon;
 import net.nonswag.tnl.listener.api.annotations.UndefinedNullability;
-import net.nonswag.tnl.listener.api.bridge.ProxyServer;
+import net.nonswag.tnl.bridge.receiver.ProxyServer;
 import net.nonswag.tnl.listener.api.command.CommandManager;
 import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.commands.BridgeCommand;

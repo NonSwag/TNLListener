@@ -4,6 +4,7 @@ import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.api.serializer.PacketSerializer;
 import org.json.JSONObject;
 
+import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -15,27 +16,29 @@ import java.util.Objects;
 
 public class Server {
 
-    private static final HashMap<String, Server> servers = new HashMap<>();
+    @Nonnull private static final HashMap<String, Server> servers = new HashMap<>();
 
-    private final String name;
-    private final InetSocketAddress inetSocketAddress;
+    @Nonnull private final String name;
+    @Nonnull private final InetSocketAddress inetSocketAddress;
 
     private boolean online = false;
     private int playerCount = 0;
     private int maxPlayerCount = 0;
     private long lastUpdateTime = 0;
 
-    public Server(String name, InetSocketAddress inetSocketAddress) {
+    public Server(@Nonnull String name, @Nonnull InetSocketAddress inetSocketAddress) {
         this.name = name;
         this.inetSocketAddress = inetSocketAddress;
         servers.put(this.getName(), this);
         this.update(System.currentTimeMillis());
     }
 
+    @Nonnull
     public String getName() {
         return name;
     }
 
+    @Nonnull
     public InetSocketAddress getInetSocketAddress() {
         return inetSocketAddress;
     }
@@ -112,6 +115,8 @@ public class Server {
                 }
             } catch (Throwable ignored) {
                 setOnline(false);
+                setPlayerCount(0);
+                setMaxPlayerCount(0);
             }
         }).start();
     }

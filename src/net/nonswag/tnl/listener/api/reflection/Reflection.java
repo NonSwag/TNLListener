@@ -2,13 +2,16 @@ package net.nonswag.tnl.listener.api.reflection;
 
 import org.json.simple.JSONObject;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Reflection {
 
-    public static Class<?> getClass(String link) {
+    @Nullable
+    public static Class<?> getClass(@Nonnull String link) {
         try {
             return Class.forName(link);
         } catch (Throwable t) {
@@ -16,7 +19,9 @@ public class Reflection {
         }
     }
 
-    public static void setField(Object clazz, String name, Object value) {
+    public static void setField(@Nonnull Object clazz,
+                                @Nonnull String name,
+                                @Nullable Object value) {
         try {
             Field field = clazz.getClass().getDeclaredField(name);
             field.setAccessible(true);
@@ -27,7 +32,10 @@ public class Reflection {
         }
     }
 
-    public static void setField(Object clazz, Class<?> superclass, String name, Object value) {
+    public static void setField(@Nonnull Object clazz,
+                                @Nonnull Class<?> superclass,
+                                @Nonnull String name,
+                                @Nullable Object value) {
         try {
             Field field = superclass.getDeclaredField(name);
             field.setAccessible(true);
@@ -38,7 +46,9 @@ public class Reflection {
         }
     }
 
-    public static void setStaticFinalField(Class<?> clazz, String name, Object value) {
+    public static void setStaticFinalField(@Nonnull Class<?> clazz,
+                                           @Nonnull String name,
+                                           @Nullable Object value) {
         try {
             Field field = clazz.getDeclaredField(name);
             Field modifiers = Field.class.getDeclaredField("modifiers");
@@ -53,7 +63,9 @@ public class Reflection {
         }
     }
 
-    public static Object getField(Object clazz, String field) {
+    @Nullable
+    public static Object getField(@Nonnull Object clazz,
+                                  @Nonnull String field) {
         try {
             Field declaredField = clazz.getClass().getDeclaredField(field);
             declaredField.setAccessible(true);
@@ -63,15 +75,19 @@ public class Reflection {
         }
     }
 
-    public static JSONObject toJsonObject(Object clazz) {
-        JSONObject jsonObject = new JSONObject();
+    @Nonnull
+    public static JSONObject toJsonObject(@Nonnull Object clazz) {
+        JSONObject object = new JSONObject();
+        JSONObject fields = new JSONObject();
         for (String field : getFields(clazz.getClass())) {
-            jsonObject.put(field, getField(clazz, field));
+            fields.put(field, getField(clazz, field));
         }
-        return jsonObject;
+        object.put(clazz.getClass().getSimpleName(), fields);
+        return object;
     }
 
-    public static List<String> getFields(Class<?> clazz) {
+    @Nonnull
+    public static List<String> getFields(@Nonnull Class<?> clazz) {
         List<String> fields = new ArrayList<>();
         try {
             for (Field field : clazz.getDeclaredFields()) {

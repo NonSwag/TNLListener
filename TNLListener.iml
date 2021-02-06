@@ -40,5 +40,6 @@
     <orderEntry type="library" name="com.mashape.unirest:unirest-java:1.4.9" level="project" />
     <orderEntry type="library" name="org.apache.clerezza.ext:org.json.simple:0.4" level="project" />
     <orderEntry type="library" name="Tuinity 1.15.2" level="project" />
+    <orderEntry type="library" name="TNLEventAPI" level="project" />
   </component>
 </module>
