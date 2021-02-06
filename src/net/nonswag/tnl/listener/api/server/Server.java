@@ -5,6 +5,7 @@ import net.nonswag.tnl.listener.api.serializer.PacketSerializer;
 import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -25,6 +26,10 @@ public class Server {
     private int playerCount = 0;
     private int maxPlayerCount = 0;
     private long lastUpdateTime = 0;
+
+    public Server(@Nonnull String name, int port) {
+        this(name, new InetSocketAddress(port));
+    }
 
     public Server(@Nonnull String name, @Nonnull InetSocketAddress inetSocketAddress) {
         this.name = name;
@@ -121,8 +126,15 @@ public class Server {
         }).start();
     }
 
-    public static Server wrap(String name) {
+    @Nullable
+    public static Server wrap(@Nonnull String name) {
         return servers.get(name);
+    }
+
+    @Nonnull
+    public static Server getOrDefault(@Nonnull String name, @Nonnull Server server) {
+        Server wrap = wrap(name);
+        return wrap != null ? wrap : server;
     }
 
     @Override

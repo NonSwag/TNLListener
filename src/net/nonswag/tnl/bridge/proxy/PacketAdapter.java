@@ -1,12 +1,9 @@
-package net.nonswag.tnl.bridge.proxy.handler;
+package net.nonswag.tnl.bridge.proxy;
 
 import net.nonswag.tnl.api.event.EventManager;
-import net.nonswag.tnl.bridge.ChannelDirection;
+import net.nonswag.tnl.bridge.*;
 import net.nonswag.tnl.bridge.events.PacketEvent;
 import net.nonswag.tnl.bridge.events.ServerConnectEvent;
-import net.nonswag.tnl.bridge.Packet;
-import net.nonswag.tnl.bridge.PacketListener;
-import net.nonswag.tnl.bridge.PacketUtil;
 import net.nonswag.tnl.cloud.api.system.Console;
 import net.nonswag.tnl.listener.enumerations.InternetProtocolAddress;
 
@@ -29,13 +26,13 @@ class PacketAdapter {
                         continue;
                     }
                     InternetProtocolAddress address = new InternetProtocolAddress(socket.getInetAddress().getHostAddress(), socket.getPort());
-                    Console.print("§8[§fserver-connection§8] §aIncoming bridge connection from §8'§6" + address.getAsString() + "§8'");
+                    Console.print("§8[§fremote-connection§8] §aIncoming bridge connection from §8'§6" + address.getAsString() + "§8'");
                     InputStream inputStream = socket.getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                     Object packet;
                     while (!socket.isClosed() && socket.isConnected() && (packet = reader.readLine()) != null) {
                         try {
-                            Packet<? extends PacketListener> decode = PacketUtil.decode(packet.toString(), socket);
+                            Packet<? extends PacketListenerPlayIn> decode = PacketUtil.decode(packet.toString(), socket);
                             if (decode != null) {
                                 PacketEvent packetEvent = new PacketEvent(socket, decode, ChannelDirection.IN);
                                 EventManager.callEvent(packetEvent);

@@ -177,6 +177,8 @@ public class NMSMain extends JavaPlugin {
         setProxyProtocolAddress(new InternetProtocolAddress(Objects.requireNonNull(ConfigUtil.getConfig().getString("cloud.bridge.address"))));
         setForwardingSecret(ConfigUtil.getConfig().getString("cloud.bridge.forwarding-secret"));
 
+        print("§aForwarding secret is §8'§6" + getForwardingSecret() + "§8'");
+
         Bukkit.getPluginManager().registerEvents(new CommandListener(), getPlugin());
 
         try {

@@ -6,12 +6,12 @@ import net.nonswag.tnl.bridge.PacketListenerPlayIn;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class PacketPlayInLogin implements Packet<PacketListenerPlayIn> {
+public class LoginPacket implements Packet<PacketListenerPlayIn> {
 
     @Nonnull private final String serverName;
     @Nonnull private final String forwardingSecret;
 
-    public PacketPlayInLogin(@Nonnull String serverName, @Nonnull String forwardingSecret) {
+    public LoginPacket(@Nonnull String serverName, @Nonnull String forwardingSecret) {
         this.serverName = serverName;
         this.forwardingSecret = forwardingSecret;
     }
@@ -38,7 +38,7 @@ public class PacketPlayInLogin implements Packet<PacketListenerPlayIn> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PacketPlayInLogin that = (PacketPlayInLogin) o;
+        LoginPacket that = (LoginPacket) o;
         return serverName.equals(that.serverName) && forwardingSecret.equals(that.forwardingSecret);
     }
 

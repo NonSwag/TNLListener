@@ -1,8 +1,8 @@
 {
   "id": "tnllistener",
   "name": "TNLListener",
-  "version": "1.0",
+  "version": "2.2",
   "authors": ["NonSwag"],
   "dependencies": [],
-  "main": "net.nonswag.tnl.bridge.Bridge"
+  "main": "net.nonswag.tnl.bridge.proxy.Bridge"
 }

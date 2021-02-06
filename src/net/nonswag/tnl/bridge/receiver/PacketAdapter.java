@@ -1,47 +1,54 @@
 package net.nonswag.tnl.bridge.receiver;
 
+import net.nonswag.tnl.api.event.EventManager;
+import net.nonswag.tnl.bridge.ChannelDirection;
 import net.nonswag.tnl.bridge.Packet;
 import net.nonswag.tnl.bridge.PacketListener;
 import net.nonswag.tnl.bridge.PacketUtil;
-import net.nonswag.tnl.bridge.packets.PacketPlayOutLogin;
-import net.nonswag.tnl.bridge.proxy.Bridge;
+import net.nonswag.tnl.bridge.events.PacketEvent;
+import net.nonswag.tnl.bridge.packets.LoginPacket;
 import net.nonswag.tnl.listener.NMSMain;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.rmi.UnexpectedException;
 
 class PacketAdapter {
 
-    PacketAdapter(ProxyServer proxyServer) {
-        if (proxyServer != null && proxyServer.getSocket() != null) {
+    PacketAdapter(@Nonnull ProxyServer proxyServer) {
+        if (proxyServer.getSocket() != null) {
             NMSMain.print("Started bridge on '" + proxyServer.getAddress().getAsString() + "'");
-            proxyServer.sendPacket(new PacketPlayOutLogin(NMSMain.getServerName(), Bridge.getForwardingSecret()));
+            proxyServer.sendPacket(new LoginPacket(NMSMain.getServerName(), NMSMain.getForwardingSecret()));
             new Thread(() -> {
                 try {
                     InputStream inputStream = proxyServer.getSocket().getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                    while (proxyServer.isConnected() && NMSMain.getPlugin().isEnabled()) {
+                    String packet;
+                    while (NMSMain.getPlugin().isEnabled() && proxyServer.isConnected()) {
                         try {
-                            String packet;
-                            while (NMSMain.getPlugin().isEnabled() && proxyServer.isConnected()) {
-                                packet = reader.readLine();
+                            packet = reader.readLine();
+                            try {
                                 if (packet != null) {
-                                    Packet<? extends PacketListener> decode = PacketUtil.decode(packet);
+                                    Packet<? extends PacketListener> decode = PacketUtil.decode(packet, proxyServer.getSocket());
                                     if (decode != null) {
-                                        proxyServer.readPacket(decode);
+                                        PacketEvent event = new PacketEvent(proxyServer.getSocket(), decode, ChannelDirection.IN);
+                                        EventManager.callEvent(event);
+                                        if (!event.isCancelled()) {
+                                            proxyServer.readPacket(decode);
+                                        }
                                     }
-                                } else {
-                                    throw new UnexpectedException("The packet can't be null");
                                 }
+                            } catch (Throwable t) {
+                                NMSMain.stacktrace(t);
                             }
                         } catch (Throwable ignored) {
                             return;
                         }
                     }
-                } catch (Throwable ignored) {
+                } catch (Throwable t) {
                     proxyServer.disconnect();
+                    NMSMain.stacktrace(t);
                 }
             }).start();
         } else {

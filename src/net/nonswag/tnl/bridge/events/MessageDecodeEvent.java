@@ -7,35 +7,53 @@ import org.json.simple.JSONObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.Socket;
+import java.util.Collections;
 import java.util.Objects;
 
 public class MessageDecodeEvent extends Event {
 
-    @Nonnull private final JSONObject message;
-    @Nullable private Packet<PacketListenerPlayIn> packet = null;
+    @Nonnull private final String key;
+    @Nonnull private final JSONObject value;
+    @Nonnull private final Socket socket;
+    @Nullable private Packet<? extends PacketListenerPlayIn> packet = null;
 
-    public MessageDecodeEvent(@Nonnull JSONObject message) {
-        this.message = message;
+    public MessageDecodeEvent(@Nonnull JSONObject message, @Nonnull Socket socket) {
+        this.key = String.join("", Collections.singletonList(message.keySet()).get(0));
+        this.value = ((JSONObject) message.get(key));
+        this.socket = socket;
     }
 
     @Nonnull
-    public JSONObject getMessage() {
-        return message;
+    public String getKey() {
+        return key;
+    }
+
+    @Nonnull
+    public JSONObject getValue() {
+        return value;
+    }
+
+    @Nonnull
+    public Socket getSocket() {
+        return socket;
     }
 
     @Nullable
-    public Packet<PacketListenerPlayIn> getPacket() {
+    public Packet<? extends PacketListenerPlayIn> getPacket() {
         return packet;
     }
 
-    public void setPacket(@Nonnull Packet<PacketListenerPlayIn> packet) {
+    public void setPacket(@Nonnull Packet<? extends PacketListenerPlayIn> packet) {
         this.packet = packet;
     }
 
     @Override
     public String toString() {
         return "MessageDecodeEvent{" +
-                "message=" + message +
+                "key='" + key + '\'' +
+                ", value=" + value +
+                ", socket=" + socket +
                 ", packet=" + packet +
                 '}';
     }
@@ -45,11 +63,11 @@ public class MessageDecodeEvent extends Event {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MessageDecodeEvent that = (MessageDecodeEvent) o;
-        return message.equals(that.message) && Objects.equals(packet, that.packet);
+        return key.equals(that.key) && value.equals(that.value) && socket.equals(that.socket) && Objects.equals(packet, that.packet);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(message, packet);
+        return Objects.hash(key, value, socket, packet);
     }
 }

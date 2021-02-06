@@ -5,8 +5,10 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.proxy.VelocityServer;
+import net.nonswag.tnl.api.event.EventManager;
 import net.nonswag.tnl.bridge.proxy.handler.ConnectedServer;
 import net.nonswag.tnl.bridge.proxy.handler.ConnectionHandler;
+import net.nonswag.tnl.bridge.proxy.listeners.MessageDecodeListener;
 import net.nonswag.tnl.cloud.api.file.Configuration;
 import net.nonswag.tnl.cloud.api.system.Console;
 import net.nonswag.tnl.cloud.utils.MathUtil;
@@ -18,7 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-@Plugin(authors = "NonSwag", id = "tnllistener", name = "TNLListener", version = "1.0", url = "https://www.thenextlvl.net/")
+@Plugin(authors = "NonSwag", id = "tnllistener", name = "TNLListener", version = "2.2", url = "https://www.thenextlvl.net/")
 public class Bridge {
 
     private static ProxyServer server;
@@ -28,7 +30,7 @@ public class Bridge {
     private static Configuration config;
 
     private static int port;
-    private static String forwardingSecret = StringUtil.random(7);
+    private static String forwardingSecret = StringUtil.random(16);
 
     private static final List<ConnectedServer> connectedServer = new ArrayList<>();
 
@@ -37,6 +39,9 @@ public class Bridge {
         setServer(server);
         setVelocityServer(((VelocityServer) server));
         setLogger(logger);
+
+        EventManager.registerEvent(new MessageDecodeListener());
+
         File configFile = new File("/home/Minecraft/Velocity/plugins/TNLListener/");
         if (!configFile.exists()) {
             if (!configFile.mkdir()) {
@@ -64,12 +69,17 @@ public class Bridge {
                     getConfig().setValue("port", port);
                 }
                 setPort(port);
+            } catch (Throwable t) {
+                stacktrace(t);
+            }
+            try {
                 String forwardingSecret = getConfig().getString("forwarding-secret");
                 if (forwardingSecret == null) {
-                    forwardingSecret = StringUtil.random(16);
-                    getConfig().setValue("forwarding-secret", forwardingSecret);
+                    getConfig().setValue("forwarding-secret", Bridge.forwardingSecret);
+                } else {
+                    setForwardingSecret(forwardingSecret);
                 }
-                setForwardingSecret(forwardingSecret);
+                print("§aForwarding secret is §8'§6" + getForwardingSecret() + "§8'");
                 ConnectionHandler.start();
             } catch (Throwable t) {
                 stacktrace(t);
@@ -154,7 +164,6 @@ public class Bridge {
 
     public static void stacktrace(String... strings) {
         if (strings != null && strings.length > 0) {
-            Console.stacktrace("§8[§fTNLListener§8-§fBridge§8] §cAn error has occurred");
             for (String string : strings) {
                 Console.stacktrace("§8[§fTNLListener§8-§fBridge§8] §c" + string);
             }
