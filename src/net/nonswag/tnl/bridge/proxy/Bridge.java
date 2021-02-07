@@ -10,6 +10,7 @@ import com.velocitypowered.proxy.VelocityServer;
 import net.nonswag.tnl.api.event.EventManager;
 import net.nonswag.tnl.bridge.proxy.listeners.JoinListener;
 import net.nonswag.tnl.bridge.proxy.listeners.MessageDecodeListener;
+import net.nonswag.tnl.bridge.proxy.listeners.PacketListener;
 import net.nonswag.tnl.cloud.api.file.Configuration;
 import net.nonswag.tnl.cloud.api.system.Console;
 import net.nonswag.tnl.cloud.utils.MathUtil;
@@ -45,6 +46,7 @@ public class Bridge {
             setLogger(logger);
 
             EventManager.registerEvent(new MessageDecodeListener());
+            EventManager.registerEvent(new PacketListener());
 
             File configFile = new File("/home/Minecraft/Velocity/plugins/TNLListener/");
             if (!configFile.exists()) {

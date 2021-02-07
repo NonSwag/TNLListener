@@ -1,6 +1,5 @@
 package net.nonswag.tnl.bridge.receiver;
 
-import net.nonswag.tnl.bridge.Packet;
 import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.enumerations.InternetProtocolAddress;
 
@@ -93,19 +92,6 @@ public class ProxyServer {
         } else {
             NMSMain.stacktrace("Error while starting the bridge (already started)");
         }
-    }
-
-    public void sendPacket(Packet<?> packet) {
-        assert getWriter() != null;
-        try {
-            getWriter().write(packet.encode(packet) + "\n");
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t, "Error while writing packet '" + packet.getName() + "'");
-        }
-    }
-
-    public void readPacket(@Nonnull Packet<?> packet) {
-        PacketReader.read(packet);
     }
 
     public static ProxyServer getInstance() {

@@ -19,8 +19,8 @@ class PacketAdapter {
     PacketAdapter(@Nonnull ProxyServer proxyServer) {
         if (proxyServer.getSocket() != null) {
             NMSMain.print("Started bridge on '" + proxyServer.getAddress().getAsString() + "'");
-            proxyServer.sendPacket(new LoginPacket(NMSMain.getServerName(), NMSMain.getForwardingSecret()));
             new Thread(() -> {
+                PacketHandler.sendPacket(new LoginPacket(NMSMain.getServerName(), NMSMain.getForwardingSecret()));
                 try {
                     InputStream inputStream = proxyServer.getSocket().getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -30,12 +30,12 @@ class PacketAdapter {
                             packet = reader.readLine();
                             try {
                                 if (packet != null) {
-                                    Packet<? extends PacketListener> decode = PacketUtil.decode(packet, proxyServer.getSocket());
+                                    Packet<PacketListener> decode = PacketUtil.decode(packet, proxyServer.getSocket());
                                     if (decode != null) {
-                                        PacketEvent event = new PacketEvent(proxyServer.getSocket(), decode, ChannelDirection.IN);
+                                        PacketEvent event = new PacketEvent(proxyServer.getSocket(), decode, ChannelDirection.BRIDGE_IN);
                                         EventManager.callEvent(event);
                                         if (!event.isCancelled()) {
-                                            proxyServer.readPacket(decode);
+                                            PacketHandler.readPacket(decode);
                                         }
                                     }
                                 }

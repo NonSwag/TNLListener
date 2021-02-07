@@ -2,7 +2,7 @@ package net.nonswag.tnl.bridge.events;
 
 import net.nonswag.tnl.api.event.Event;
 import net.nonswag.tnl.bridge.Packet;
-import net.nonswag.tnl.bridge.PacketListenerPlayIn;
+import net.nonswag.tnl.bridge.PacketListener;
 import org.json.simple.JSONObject;
 
 import javax.annotation.Nonnull;
@@ -16,7 +16,7 @@ public class MessageDecodeEvent extends Event {
     @Nonnull private final String key;
     @Nonnull private final JSONObject value;
     @Nonnull private final Socket socket;
-    @Nullable private Packet<? extends PacketListenerPlayIn> packet = null;
+    @Nullable private Packet<PacketListener> packet = null;
 
     public MessageDecodeEvent(@Nonnull JSONObject message, @Nonnull Socket socket) {
         this.key = String.join("", Collections.singletonList(message.keySet()).get(0));
@@ -40,11 +40,11 @@ public class MessageDecodeEvent extends Event {
     }
 
     @Nullable
-    public Packet<? extends PacketListenerPlayIn> getPacket() {
+    public Packet<PacketListener> getPacket() {
         return packet;
     }
 
-    public void setPacket(@Nonnull Packet<? extends PacketListenerPlayIn> packet) {
+    public void setPacket(@Nonnull Packet<PacketListener> packet) {
         this.packet = packet;
     }
 

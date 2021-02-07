@@ -28,7 +28,7 @@ public class LoginPacket implements Packet<PacketListener> {
 
     @Override
     public String toString() {
-        return "PacketPlayInLogin{" +
+        return "LoginPacket{" +
                 "serverName='" + serverName + '\'' +
                 ", forwardingSecret='" + forwardingSecret + '\'' +
                 '}';
