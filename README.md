@@ -12,7 +12,7 @@ Features:
     - Bukkit <-> Velocity Bridge
     - Reflection API
     - Packet API (Netty)
-    - Mojang-/LabyMod-API
+    - Mojang API
     - Translation API
     - Math API
     - File-/Config-API

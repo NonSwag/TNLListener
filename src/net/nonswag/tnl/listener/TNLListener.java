@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 public abstract class TNLListener {
@@ -34,9 +33,7 @@ public abstract class TNLListener {
     }
 
     public static void updatePlayers() {
-        Iterator<Player> iterator = getPlayerHashMap().keySet().iterator();
-        while (iterator.hasNext()) {
-            Player player = iterator.next();
+        for (Player player : new ArrayList<>(getPlayerHashMap().keySet())) {
             if (!player.isOnline()) {
                 getPlayerHashMap().remove(player);
             }
