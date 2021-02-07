@@ -8,7 +8,7 @@ import net.nonswag.tnl.bridge.packets.LoginPacket;
 import net.nonswag.tnl.bridge.packets.LogoutPacket;
 import net.nonswag.tnl.bridge.proxy.Bridge;
 import net.nonswag.tnl.bridge.proxy.ConnectedServer;
-import net.nonswag.tnl.listener.api.server.Server;
+import net.nonswag.tnl.cloud.utils.ServerUtil;
 
 public class PacketListener implements Listener {
 
@@ -19,12 +19,17 @@ public class PacketListener implements Listener {
                 try {
                     if (event.getPacket() instanceof LoginPacket) {
                         LoginPacket packet = (LoginPacket) event.getPacket();
-                        if (packet.getForwardingSecret().equals(Bridge.getForwardingSecret())) {
-                            new ConnectedServer(event.getSocket(), Server.getOrDefault(packet.getServerName(), new Server(packet.getServerName(), event.getSocket().getPort())));
-                            Bridge.print("§8[§fconnected-remote§8] §aServer §8'§6" + packet.getServerName() + "§8'§a has connected");
+                        if (ServerUtil.getServer(packet.getServerName()) != null) {
+                            if (packet.getForwardingSecret().equals(Bridge.getForwardingSecret())) {
+                                new ConnectedServer(event.getSocket(), ServerUtil.getServer(packet.getServerName()));
+                                Bridge.print("§8[§fconnected-remote§8] §aServer §8'§6" + packet.getServerName() + "§8'§a has connected");
+                            } else {
+                                event.getSocket().close();
+                                Bridge.stacktrace("§8[§fremote-connection§8] §cServer §8'§4" + packet.getServerName() + "§8'§c sent an invalid forwarding secret");
+                            }
                         } else {
                             event.getSocket().close();
-                            Bridge.stacktrace("§8[§fremote-connection§8] §cServer §8'§4" + packet.getServerName() + "§8'§c sent an invalid forwarding secret");
+                            Bridge.stacktrace("§8[§fremote-connection§8] §cServer §8'§4" + packet.getServerName() + "§8'§c is not Registered");
                         }
                     } else if (event.getPacket() instanceof LogoutPacket) {
                         event.getSocket().close();

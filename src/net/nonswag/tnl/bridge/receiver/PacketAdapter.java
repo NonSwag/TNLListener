@@ -25,30 +25,19 @@ class PacketAdapter {
                     InputStream inputStream = proxyServer.getSocket().getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                     String packet;
-                    while (NMSMain.getPlugin().isEnabled() && proxyServer.isConnected()) {
+                    while (NMSMain.getPlugin().isEnabled() && proxyServer.isConnected() && (packet = reader.readLine()) != null) {
                         try {
-                            packet = reader.readLine();
-                            try {
-                                if (packet != null) {
-                                    Packet<PacketListener> decode = PacketUtil.decode(packet, proxyServer.getSocket());
-                                    if (decode != null) {
-                                        PacketEvent event = new PacketEvent(proxyServer.getSocket(), decode, ChannelDirection.BRIDGE_IN);
-                                        EventManager.callEvent(event);
-                                        if (!event.isCancelled()) {
-                                            PacketHandler.readPacket(decode);
-                                        }
-                                    }
-                                }
-                            } catch (Throwable t) {
-                                NMSMain.stacktrace(t);
+                            Packet<PacketListener> decode = PacketUtil.decode(packet, proxyServer.getSocket());
+                            if (decode != null) {
+                                EventManager.callEvent(new PacketEvent(proxyServer.getSocket(), decode, ChannelDirection.BRIDGE_IN));
                             }
-                        } catch (Throwable ignored) {
-                            return;
+                        } catch (Exception e) {
+                            NMSMain.stacktrace(e);
                         }
                     }
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     proxyServer.disconnect();
-                    NMSMain.stacktrace(t);
+                    NMSMain.stacktrace(e);
                 }
             }).start();
         } else {

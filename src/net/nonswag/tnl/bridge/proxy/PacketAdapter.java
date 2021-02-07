@@ -30,22 +30,19 @@ class PacketAdapter {
                     InternetProtocolAddress address = new InternetProtocolAddress(socket.getInetAddress().getHostAddress(), socket.getPort());
                     InputStream inputStream = socket.getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                    Object packet;
+                    String packet;
                     while (!socket.isClosed() && socket.isConnected() && (packet = reader.readLine()) != null) {
                         try {
-                            Packet<PacketListener> decode = PacketUtil.decode(packet.toString(), socket);
+                            Packet<PacketListener> decode = PacketUtil.decode(packet, socket);
                             if (decode != null) {
-                                PacketEvent packetEvent = new PacketEvent(socket, decode, ChannelDirection.BRIDGE_IN);
-                                EventManager.callEvent(packetEvent);
-                                if (!packetEvent.isCancelled()) {
-                                    PacketHandler.readPacket(socket, decode);
-                                }
+                                EventManager.callEvent(new PacketEvent(socket, decode, ChannelDirection.BRIDGE_IN));
                             }
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
                     }
                     Bridge.print("§8[§fconnected-remote§8] §cServer §8'§4" + event.getSocket().getInetAddress().toString() + "§8'§c has disconnected");
+                    Bridge.getConnectedServer().remove(Bridge.getConnectedServer(event.getSocket()));
                 } catch (Throwable t) {
                     t.printStackTrace();
                     ConnectionHandler.stop();

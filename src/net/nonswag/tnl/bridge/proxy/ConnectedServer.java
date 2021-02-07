@@ -1,6 +1,6 @@
 package net.nonswag.tnl.bridge.proxy;
 
-import net.nonswag.tnl.listener.api.server.Server;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -12,15 +12,16 @@ import java.util.Objects;
 public class ConnectedServer {
 
     @Nonnull private final Socket socket;
-    @Nonnull private final Server server;
+    @Nonnull private final RegisteredServer server;
     @Nonnull private final OutputStream outputStream;
     @Nonnull private final PrintWriter printWriter;
 
-    public ConnectedServer(@Nonnull Socket socket, @Nonnull Server server) throws IOException {
+    public ConnectedServer(@Nonnull Socket socket, @Nonnull RegisteredServer server) throws IOException {
         this.socket = socket;
         this.server = server;
         this.outputStream = getSocket().getOutputStream();
         this.printWriter = new PrintWriter(outputStream);
+        Bridge.getConnectedServer().add(this);
     }
 
     @Nonnull
@@ -29,7 +30,7 @@ public class ConnectedServer {
     }
 
     @Nonnull
-    public Server getServer() {
+    public RegisteredServer getServer() {
         return server;
     }
 

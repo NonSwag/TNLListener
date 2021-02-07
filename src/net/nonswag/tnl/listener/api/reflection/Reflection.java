@@ -1,5 +1,6 @@
 package net.nonswag.tnl.listener.api.reflection;
 
+import net.nonswag.tnl.listener.api.object.Set;
 import org.json.simple.JSONObject;
 
 import javax.annotation.Nonnull;
@@ -80,7 +81,13 @@ public class Reflection {
         JSONObject object = new JSONObject();
         JSONObject fields = new JSONObject();
         for (String field : getFields(clazz.getClass())) {
-            fields.put(field, getField(clazz, field));
+            Object o = getField(clazz, field);
+            if (o instanceof Set) {
+                Set<?, ?> set = (Set<?, ?>) o;
+                fields.put(set.getKey().toString(), set.getValue().toString());
+            } else {
+                fields.put(field, o == null ? "" : o.toString());
+            }
         }
         object.put(clazz.getClass().getSimpleName(), fields);
         return object;

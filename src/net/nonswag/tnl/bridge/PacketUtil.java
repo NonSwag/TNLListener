@@ -2,7 +2,6 @@ package net.nonswag.tnl.bridge;
 
 import net.nonswag.tnl.api.event.EventManager;
 import net.nonswag.tnl.bridge.events.MessageDecodeEvent;
-import net.nonswag.tnl.bridge.proxy.Bridge;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -19,7 +18,7 @@ public abstract class PacketUtil {
             EventManager.callEvent(event);
             return event.getPacket();
         } catch (Throwable t) {
-            Bridge.stacktrace(t);
+            t.printStackTrace();
         }
         return null;
     }

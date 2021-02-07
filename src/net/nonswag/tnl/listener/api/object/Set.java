@@ -1,21 +1,18 @@
 package net.nonswag.tnl.listener.api.object;
 
+import org.json.JSONObject;
+
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class Set<V, K> {
+public class Set<K, V> {
 
-    @Nonnull private final V value;
     @Nonnull private final K key;
+    @Nonnull private final V value;
 
-    public Set(@Nonnull V value, @Nonnull K key) {
+    public Set(@Nonnull K key, @Nonnull V value) {
         this.value = value;
         this.key = key;
-    }
-
-    @Nonnull
-    public V getValue() {
-        return value;
     }
 
     @Nonnull
@@ -23,12 +20,16 @@ public class Set<V, K> {
         return key;
     }
 
+    @Nonnull
+    public V getValue() {
+        return value;
+    }
+
     @Override
     public String toString() {
-        return "Set{" +
-                "value=" + value +
-                ", key=" + key +
-                '}';
+        JSONObject object = new JSONObject();
+        object.put(key.toString(), value.toString());
+        return object.toString();
     }
 
     @Override
@@ -36,11 +37,11 @@ public class Set<V, K> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Set<?, ?> set = (Set<?, ?>) o;
-        return value.equals(set.value) && key.equals(set.key);
+        return key.equals(set.key) && value.equals(set.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value, key);
+        return Objects.hash(key, value);
     }
 }

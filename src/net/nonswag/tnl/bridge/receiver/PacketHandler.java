@@ -20,8 +20,4 @@ public abstract class PacketHandler {
             NMSMain.stacktrace(t, "Error while writing packet '" + packet.getName() + "'");
         }
     }
-
-    public static void readPacket(@Nonnull Packet<PacketListener> packet) {
-        System.out.println(packet);
-    }
 }

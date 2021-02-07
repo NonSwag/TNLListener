@@ -1,9 +1,11 @@
 package net.nonswag.tnl.listener.api.file;
 
-import com.sun.istack.internal.Nullable;
 import net.nonswag.tnl.listener.NMSMain;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -158,104 +160,103 @@ public class Configuration {
     @Nullable
     public String getString(Object var) {
         try {
-            return getValue(var).toString();
+            return new net.nonswag.tnl.listener.api.object.Object<>(getValue(var)).toString();
         } catch (Throwable t) {
             return null;
         }
     }
 
-    @Nullable
+    @Nonnull
     public List<String> getStringList(Object var) {
-        try {
-            return Arrays.asList(getValue(var).toString().split(", "));
-        } catch (Throwable t) {
-            return null;
+        String value = getString(var);
+        if (value != null) {
+            return Arrays.asList(value.split(", "));
         }
+        return new ArrayList<>();
     }
 
     @Nullable
     public Integer getInteger(Object var) {
-        try {
-            return Integer.parseInt(getValue(var).toString());
-        } catch (Throwable t) {
-            return null;
+        String value = getString(var);
+        if (value != null) {
+            return Integer.parseInt(value);
         }
+        return null;
     }
 
     @Nullable
     public Double getDouble(Object var) {
-        try {
-            return Double.parseDouble(getValue(var).toString());
-        } catch (Throwable t) {
-            return null;
+        String value = getString(var);
+        if (value != null) {
+            return Double.parseDouble(value);
         }
+        return null;
     }
 
     @Nullable
     public Float getFloat(Object var) {
-        try {
-            return Float.parseFloat(getValue(var).toString());
-        } catch (Throwable t) {
-            return null;
+        String value = getString(var);
+        if (value != null) {
+            return Float.parseFloat(value);
         }
+        return null;
     }
 
     @Nullable
     public Short getShort(Object var) {
-        try {
-            return Short.parseShort(getValue(var).toString());
-        } catch (Throwable t) {
-            return null;
+        String value = getString(var);
+        if (value != null) {
+            return Short.parseShort(value);
         }
+        return null;
     }
 
     @Nullable
     public Byte getByte(Object var) {
-        try {
-            return Byte.parseByte(getValue(var).toString());
-        } catch (Throwable t) {
-            return null;
+        String value = getString(var);
+        if (value != null) {
+            return Byte.parseByte(value);
         }
+        return null;
     }
 
     @Nullable
     public Long getLong(Object var) {
-        try {
-            return Long.parseLong(getValue(var).toString());
-        } catch (Throwable t) {
-            return null;
+        String value = getString(var);
+        if (value != null) {
+            return Long.parseLong(value);
         }
+        return null;
     }
 
     @Nullable
     public Character getCharacter(Object var) {
-        try {
-            String value = getValue(var).toString();
+        String value = getString(var);
+        if (value != null) {
             if (value.length() > 1) {
                 throw new IllegalStateException("A single character can't have more than one chars");
             }
             return value.charAt(0);
-        } catch (Throwable t) {
-            return null;
         }
+        return null;
     }
 
     @Nullable
     public char[] getCharacters(Object var) {
-        try {
-            return getValue(var).toString().toCharArray();
-        } catch (Throwable t) {
-            return null;
+        String value = getString(var);
+        if (value != null) {
+            return value.toCharArray();
         }
+        return null;
     }
 
     @Nullable
     public Boolean getBoolean(Object var) {
-        try {
-            return Boolean.parseBoolean(getValue(var).toString());
-        } catch (Throwable t) {
-            return null;
+        String value = getString(var);
+        if (value != null) {
+            return Boolean.parseBoolean(value);
         }
+        return null;
     }
 
     @Nullable
@@ -288,13 +289,15 @@ public class Configuration {
         }
     }
 
+    @Nonnull
     public HashMap<Object, Object> getValues() {
         HashMap<Object, Object> values = new HashMap<>();
+        if (!isValid()) {
+            return values;
+        }
+        BufferedReader reader;
         try {
-            if (!isValid()) {
-                return values;
-            }
-            BufferedReader reader = new BufferedReader(new FileReader(getFile().getAbsolutePath()));
+            reader = new BufferedReader(new FileReader(getFile().getAbsolutePath()));
             for (Object o : reader.lines().toArray()) {
                 try {
                     List<String> split = Arrays.asList(o.toString().split("="));
@@ -306,8 +309,8 @@ public class Configuration {
                 }
             }
             reader.close();
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return values;
     }

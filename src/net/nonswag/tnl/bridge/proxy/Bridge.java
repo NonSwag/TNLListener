@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.File;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,9 @@ public class Bridge {
     private static int port;
     private static String forwardingSecret = StringUtil.random(16);
 
-    private static final List<ConnectedServer> connectedServer = new ArrayList<>();
+    private static String prefix = "§8[§f§lTNL§8]§r";
+
+    @Nonnull private static final List<ConnectedServer> connectedServer = new ArrayList<>();
 
     @Inject
     public Bridge(ProxyServer server, Logger logger) {
@@ -156,6 +159,14 @@ public class Bridge {
         return logger;
     }
 
+    public static String getPrefix() {
+        return prefix;
+    }
+
+    public static void setPrefix(String prefix) {
+        Bridge.prefix = prefix;
+    }
+
     public static void stacktrace(Throwable throwable, String... strings) {
         Console.stacktrace("§8[§fTNLListener§8-§fBridge§8] §cAn error has occurred");
         if (strings != null && strings.length > 0) {
@@ -196,6 +207,7 @@ public class Bridge {
         }
     }
 
+    @Nonnull
     public static List<ConnectedServer> getConnectedServer() {
         return connectedServer;
     }
@@ -203,7 +215,17 @@ public class Bridge {
     @Nullable
     public static ConnectedServer getConnectedServer(@Nonnull RegisteredServer server) {
         for (ConnectedServer connectedServer : getConnectedServer()) {
-            if (connectedServer.getServer().getName().equalsIgnoreCase(server.getServerInfo().getName())) {
+            if (server.equals(connectedServer.getServer())) {
+                return connectedServer;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public static ConnectedServer getConnectedServer(@Nonnull Socket server) {
+        for (ConnectedServer connectedServer : getConnectedServer()) {
+            if (server.getInetAddress().equals(connectedServer.getServer().getServerInfo().getAddress().getAddress())) {
                 return connectedServer;
             }
         }
