@@ -1,7 +1,7 @@
 package net.nonswag.tnl.bridge.events;
 
 import net.nonswag.tnl.api.event.Event;
-import net.nonswag.tnl.bridge.proxy.handler.ConnectedServer;
+import net.nonswag.tnl.bridge.proxy.ConnectedServer;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;

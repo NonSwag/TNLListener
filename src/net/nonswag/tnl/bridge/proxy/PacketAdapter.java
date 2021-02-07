@@ -32,7 +32,7 @@ class PacketAdapter {
                     Object packet;
                     while (!socket.isClosed() && socket.isConnected() && (packet = reader.readLine()) != null) {
                         try {
-                            Packet<? extends PacketListenerPlayIn> decode = PacketUtil.decode(packet.toString(), socket);
+                            Packet<? extends PacketListener> decode = PacketUtil.decode(packet.toString(), socket);
                             if (decode != null) {
                                 PacketEvent packetEvent = new PacketEvent(socket, decode, ChannelDirection.IN);
                                 EventManager.callEvent(packetEvent);

@@ -1,12 +1,12 @@
 package net.nonswag.tnl.bridge.packets;
 
 import net.nonswag.tnl.bridge.Packet;
-import net.nonswag.tnl.bridge.PacketListenerPlayIn;
+import net.nonswag.tnl.bridge.PacketListener;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class LoginPacket implements Packet<PacketListenerPlayIn> {
+public class LoginPacket implements Packet<PacketListener> {
 
     @Nonnull private final String serverName;
     @Nonnull private final String forwardingSecret;

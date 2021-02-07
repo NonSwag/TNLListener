@@ -1,13 +1,14 @@
 package net.nonswag.tnl.bridge.proxy;
 
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.proxy.VelocityServer;
 import net.nonswag.tnl.api.event.EventManager;
-import net.nonswag.tnl.bridge.proxy.handler.ConnectedServer;
-import net.nonswag.tnl.bridge.proxy.handler.ConnectionHandler;
+import net.nonswag.tnl.bridge.proxy.listeners.JoinListener;
 import net.nonswag.tnl.bridge.proxy.listeners.MessageDecodeListener;
 import net.nonswag.tnl.cloud.api.file.Configuration;
 import net.nonswag.tnl.cloud.api.system.Console;
@@ -15,6 +16,8 @@ import net.nonswag.tnl.cloud.utils.MathUtil;
 import net.nonswag.tnl.listener.utils.StringUtil;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
@@ -36,57 +39,66 @@ public class Bridge {
 
     @Inject
     public Bridge(ProxyServer server, Logger logger) {
-        setServer(server);
-        setVelocityServer(((VelocityServer) server));
-        setLogger(logger);
+        try {
+            setServer(server);
+            setVelocityServer(((VelocityServer) server));
+            setLogger(logger);
 
-        EventManager.registerEvent(new MessageDecodeListener());
+            EventManager.registerEvent(new MessageDecodeListener());
 
-        File configFile = new File("/home/Minecraft/Velocity/plugins/TNLListener/");
-        if (!configFile.exists()) {
-            if (!configFile.mkdir()) {
-                stacktrace("Failed to create the plugin specified plugin folder");
-            }
-        }
-        if (configFile.exists()) {
-            configFile = new File("/home/Minecraft/Velocity/plugins/TNLListener/config.tnl");
+            File configFile = new File("/home/Minecraft/Velocity/plugins/TNLListener/");
             if (!configFile.exists()) {
-                try {
-                    if (!configFile.createNewFile()) {
-                        stacktrace("Failed to create config file");
+                if (!configFile.mkdir()) {
+                    stacktrace("Failed to create the plugin specified plugin folder");
+                }
+            }
+            if (configFile.exists()) {
+                configFile = new File("/home/Minecraft/Velocity/plugins/TNLListener/config.tnl");
+                if (!configFile.exists()) {
+                    try {
+                        if (!configFile.createNewFile()) {
+                            stacktrace("Failed to create config file");
+                        }
+                    } catch (Throwable ignored) {
+                        stacktrace("Failed to create the plugin config");
                     }
-                } catch (Throwable ignored) {
-                    stacktrace("Failed to create the plugin config");
                 }
             }
+            if (configFile.exists()) {
+                setConfig(new Configuration(configFile));
+                try {
+                    Integer port = getConfig().getInteger("port");
+                    if (port == null) {
+                        port = MathUtil.randomInteger(20000, 30000);
+                        getConfig().setValue("port", port);
+                    }
+                    setPort(port);
+                } catch (Throwable t) {
+                    stacktrace(t);
+                }
+                try {
+                    String forwardingSecret = getConfig().getString("forwarding-secret");
+                    if (forwardingSecret == null) {
+                        getConfig().setValue("forwarding-secret", Bridge.forwardingSecret);
+                    } else {
+                        setForwardingSecret(forwardingSecret);
+                    }
+                    print("§aForwarding secret is §8'§6" + getForwardingSecret() + "§8'");
+                    ConnectionHandler.start();
+                } catch (Throwable t) {
+                    stacktrace(t);
+                }
+            } else {
+                stacktrace("Failed to load the config (canceling plugin start)");
+            }
+        } catch (Throwable t) {
+            stacktrace(t);
         }
-        if (configFile.exists()) {
-            setConfig(new Configuration(configFile));
-            try {
-                Integer port = getConfig().getInteger("port");
-                if (port == null) {
-                    port = MathUtil.randomInteger(20000, 30000);
-                    getConfig().setValue("port", port);
-                }
-                setPort(port);
-            } catch (Throwable t) {
-                stacktrace(t);
-            }
-            try {
-                String forwardingSecret = getConfig().getString("forwarding-secret");
-                if (forwardingSecret == null) {
-                    getConfig().setValue("forwarding-secret", Bridge.forwardingSecret);
-                } else {
-                    setForwardingSecret(forwardingSecret);
-                }
-                print("§aForwarding secret is §8'§6" + getForwardingSecret() + "§8'");
-                ConnectionHandler.start();
-            } catch (Throwable t) {
-                stacktrace(t);
-            }
-        } else {
-            stacktrace("Failed to load the config (canceling plugin start)");
-        }
+    }
+
+    @Subscribe
+    public void onProxyInitialize(ProxyInitializeEvent event) {
+        getServer().getEventManager().register(this, new JoinListener());
     }
 
     @Subscribe
@@ -184,5 +196,15 @@ public class Bridge {
 
     public static List<ConnectedServer> getConnectedServer() {
         return connectedServer;
+    }
+
+    @Nullable
+    public static ConnectedServer getConnectedServer(@Nonnull RegisteredServer server) {
+        for (ConnectedServer connectedServer : getConnectedServer()) {
+            if (connectedServer.getServer().getName().equalsIgnoreCase(server.getServerInfo().getName())) {
+                return connectedServer;
+            }
+        }
+        return null;
     }
 }

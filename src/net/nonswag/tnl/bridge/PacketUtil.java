@@ -13,7 +13,7 @@ import java.net.Socket;
 public abstract class PacketUtil {
 
     @Nullable
-    public static Packet<? extends PacketListenerPlayIn> decode(@Nonnull String string, @Nonnull Socket socket) {
+    public static Packet<? extends PacketListener> decode(@Nonnull String string, @Nonnull Socket socket) {
         try {
             MessageDecodeEvent event = new MessageDecodeEvent((JSONObject) new JSONParser().parse(string), socket);
             EventManager.callEvent(event);
@@ -25,7 +25,7 @@ public abstract class PacketUtil {
     }
 
     @Nonnull
-    public static String encode(@Nonnull Packet<? extends PacketListenerPlayOut> packet) {
+    public static String encode(@Nonnull Packet<? extends PacketListener> packet) {
         return packet.encode(packet);
     }
 }
