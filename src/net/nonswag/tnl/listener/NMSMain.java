@@ -181,12 +181,8 @@ public class NMSMain extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new CommandListener(), getPlugin());
 
-        try {
-            new PluginUpdate(getPlugin()).downloadUpdate();
-            setProxyServer(new ProxyServer(getProxyProtocolAddress()));
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
-        }
+        new PluginUpdate(getPlugin()).downloadUpdate();
+        setProxyServer(new ProxyServer(getProxyProtocolAddress()));
 
         TNLListener.onEnable();
     }

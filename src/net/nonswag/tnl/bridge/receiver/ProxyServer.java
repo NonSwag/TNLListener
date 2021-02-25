@@ -5,8 +5,10 @@ import net.nonswag.tnl.listener.enumerations.InternetProtocolAddress;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class ProxyServer {
@@ -79,18 +81,18 @@ public class ProxyServer {
 
     public void connect() {
         if (getSocket() == null || !isConnected()) {
+            Socket socket = new Socket();
             try {
-                setSocket(new Socket(address.getHostname(), address.getPort()));
+                socket.connect(new InetSocketAddress(address.getHostname(), address.getPort()), 3000);
+                setSocket(socket);
                 setOutputStream(getSocket().getOutputStream());
                 if (getOutputStream() != null) {
                     setWriter(new PrintWriter(getOutputStream()));
                 }
                 new PacketAdapter(this);
-            } catch (Throwable t) {
-                t.printStackTrace();
+            } catch (IOException e) {
+                NMSMain.stacktrace(e, "Error while starting the bridge (already started)");
             }
-        } else {
-            NMSMain.stacktrace("Error while starting the bridge (already started)");
         }
     }
 
