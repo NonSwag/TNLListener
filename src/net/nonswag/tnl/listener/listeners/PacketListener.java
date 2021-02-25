@@ -125,7 +125,8 @@ public class PacketListener implements Listener {
                 final EnumDirection direction = ((PacketPlayInUseItem) event.getPacket()).c().getDirection();
                 try {
                     block = block.getRelative(BlockFace.valueOf(direction.name()));
-                } catch (Throwable ignored) { }
+                } catch (Exception ignored) {
+                }
                 org.bukkit.inventory.ItemStack itemStack;
                 if (((PacketPlayInUseItem) event.getPacket()).b().equals(EnumHand.MAIN_HAND)) {
                     itemStack = event.getPlayer().getInventory().getItemInMainHand();
@@ -135,6 +136,16 @@ public class PacketListener implements Listener {
                 PlayerInteractEvent interactEvent = new PlayerInteractEvent(event.getPlayer(), block, itemStack);
                 NMSMain.callEvent(interactEvent);
                 event.setCancelled(interactEvent.isCancelled());
+                if (interactEvent.isCancelled()) {
+                    NMSMain.runTask(() -> {
+                        interactEvent.getBlock().getState().update();
+                        for (BlockFace blockFace : BlockFace.values()) {
+                            Block b = interactEvent.getBlock().getRelative(blockFace).getLocation().getBlock();
+                            event.getPlayer().sendBlockChange(b.getLocation(), b.getBlockData());
+                        }
+                        interactEvent.getPlayer().updateInventory();
+                    });
+                }
             }
         } else if (event.isOutgoing()) {
             if (event.getPacket() instanceof PacketPlayOutSpawnEntity) {

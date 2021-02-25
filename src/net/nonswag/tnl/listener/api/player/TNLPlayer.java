@@ -4,14 +4,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.actionbar.ActionBar;
+import net.nonswag.tnl.listener.api.bossbar.BossBar;
 import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.enumerations.ProtocolVersion;
-import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.api.bossbar.BossBar;
-import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
 import net.nonswag.tnl.listener.eventhandler.InventoryLoadedEvent;
 import net.nonswag.tnl.listener.eventhandler.InventorySafeEvent;
 import org.bukkit.Material;
@@ -189,10 +188,6 @@ public class TNLPlayer {
 
     public long getFirstPlayed() {
         return getPlayer().getFirstPlayed();
-    }
-
-    public long getLastPlayed() {
-        return getPlayer().getLastPlayed();
     }
 
     public boolean hasPlayedBefore() {
@@ -683,10 +678,6 @@ public class TNLPlayer {
         }
     }
 
-    public Sidebar getSidebar() {
-        return Sidebar.getSidebar(player);
-    }
-
     public void loadInventory(String id) {
         File file = new File("plugins/TNLListener/" + getPlayer().getUniqueId() + ".yml");
         try {
@@ -1058,16 +1049,8 @@ public class TNLPlayer {
         return getPlayer().getWalkSpeed();
     }
 
-    public void setResourcePack(String s) {
-        getPlayer().setResourcePack(s);
-    }
-
     public void setResourcePack(String s, byte[] bytes) {
         getPlayer().setResourcePack(s, bytes);
-    }
-
-    public org.bukkit.scoreboard.Scoreboard getScoreboard() {
-        return getPlayer().getScoreboard();
     }
 
     public void setScoreboard(org.bukkit.scoreboard.Scoreboard scoreboard) throws IllegalArgumentException, IllegalStateException {

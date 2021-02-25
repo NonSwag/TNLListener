@@ -1,10 +1,8 @@
 package net.nonswag.tnl.listener.eventhandler;
 
-import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -61,25 +59,6 @@ public class PlayerInteractEvent extends Event implements Cancellable {
     @Override
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
-        if (isCancelled()) {
-            NMSMain.runTask(() -> {
-                getBlock().getState().update();
-                getPlayer().sendBlockChange(getBlock().getLocation(), getBlock().getBlockData());
-                getPlayer().sendBlockChange(getBlock().getRelative(BlockFace.EAST).getLocation(),
-                        getBlock().getRelative(BlockFace.EAST).getLocation().getBlock().getBlockData());
-                getPlayer().sendBlockChange(getBlock().getRelative(BlockFace.NORTH).getLocation(),
-                        getBlock().getRelative(BlockFace.NORTH).getLocation().getBlock().getBlockData());
-                getPlayer().sendBlockChange(getBlock().getRelative(BlockFace.SOUTH).getLocation(),
-                        getBlock().getRelative(BlockFace.SOUTH).getLocation().getBlock().getBlockData());
-                getPlayer().sendBlockChange(getBlock().getRelative(BlockFace.WEST).getLocation(),
-                        getBlock().getRelative(BlockFace.WEST).getLocation().getBlock().getBlockData());
-                getPlayer().sendBlockChange(getBlock().getRelative(BlockFace.UP).getLocation(),
-                        getBlock().getRelative(BlockFace.UP).getLocation().getBlock().getBlockData());
-                getPlayer().sendBlockChange(getBlock().getRelative(BlockFace.DOWN).getLocation(),
-                        getBlock().getRelative(BlockFace.DOWN).getLocation().getBlock().getBlockData());
-            });
-            getPlayer().updateInventory();
-        }
     }
 
     @Override

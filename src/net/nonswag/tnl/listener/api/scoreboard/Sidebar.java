@@ -1,85 +1,44 @@
 package net.nonswag.tnl.listener.api.scoreboard;
 
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_15_R1.scoreboard.CraftScoreboard;
-import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
+import net.minecraft.server.v1_15_R1.*;
+import net.nonswag.tnl.listener.api.player.TNLPlayer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import javax.annotation.Nonnull;
 
 public class Sidebar {
 
-    private static final HashMap<Player, Sidebar> sidebar = new HashMap<>();
-    private final Player player;
-    private List<String> lines = new ArrayList<>();
-    private String title;
+    @Nonnull private static final Scoreboard scoreboard = new Scoreboard();
+    @Nonnull private static final ScoreboardObjective scoreboardObjective = scoreboard.registerObjective("TNLSidebar", IScoreboardCriteria.DUMMY, new ChatMessage(""), IScoreboardCriteria.EnumScoreboardHealthDisplay.INTEGER);
 
-    public Sidebar(Player player) {
-        this.player = player;
+    @Nonnull
+    public static Scoreboard getScoreboard() {
+        return scoreboard;
     }
 
-    public Player getPlayer() {
-        return player;
+    @Nonnull
+    public static ScoreboardObjective getScoreboardObjective() {
+        return scoreboardObjective;
     }
 
-    public List<String> getLines() {
-        return lines;
+    public void add(@Nonnull TNLPlayer player) {
+        player.sendPacket(new PacketPlayOutScoreboardObjective(scoreboardObjective, 1));
+        player.sendPacket(new PacketPlayOutScoreboardObjective(scoreboardObjective, 0));
+        player.sendPacket(new PacketPlayOutScoreboardDisplayObjective(1, scoreboardObjective));
     }
 
-    public Sidebar setLines(List<String> lines) {
-        this.lines = lines;
-        return this;
+    public void remove(@Nonnull TNLPlayer player) {
+        PacketPlayOutScoreboardObjective removePacket = new PacketPlayOutScoreboardObjective(scoreboardObjective, 1);
+        player.sendPacket(removePacket);
     }
 
-    public Sidebar clearLines() {
-        getLines().clear();
-        return this;
+    public void setScore(int score, @Nonnull String text, @Nonnull TNLPlayer player) {
+        PacketPlayOutScoreboardScore packetPlayOutScoreboardScore = new PacketPlayOutScoreboardScore(ScoreboardServer.Action.CHANGE, "TNLSidebar", text, score);
+        ScoreboardScore scoreboardScore = new ScoreboardScore(scoreboard, scoreboardObjective, text);
+        scoreboardScore.setScore(score);
+        player.sendPacket(packetPlayOutScoreboardScore);
     }
 
-    public Sidebar addLine(String line) {
-        getLines().add(line);
-        return this;
-    }
-
-    public Sidebar addLines(String... lines) {
-        getLines().addAll(Arrays.asList(lines));
-        return this;
-    }
-
-    public Sidebar addLines(List<String> lines) {
-        getLines().addAll(lines);
-        return this;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public Sidebar setTitle(String title) {
-        this.title = title;
-        return this;
-    }
-
-    public void sendSidebar() {
-        CraftScoreboard scoreboard = ((CraftScoreboard) Bukkit.getScoreboardManager().getNewScoreboard());
-        Objective objective = scoreboard.registerNewObjective("TNLSidebar", "dummy", getTitle());
-        for (int i = 0; i < getLines().size() && i < 15; i++) {
-            objective.getScore(getLines().get(getLines().size() - i - 1)).setScore(i);
-        }
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        player.setScoreboard(scoreboard);
-    }
-
-    public static HashMap<Player, Sidebar> getSidebar() {
-        return sidebar;
-    }
-
-    public static Sidebar getSidebar(Player player) {
-        final Sidebar sidebar = getSidebar().get(player);
-        return sidebar == null ? new Sidebar(player) : sidebar;
+    public void setTitle(@Nonnull String scoreboardDisplayName) {
+        scoreboardObjective.setDisplayName(new ChatMessage(scoreboardDisplayName));
     }
 }
