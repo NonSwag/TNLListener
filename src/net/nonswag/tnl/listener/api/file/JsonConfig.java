@@ -10,22 +10,12 @@ import net.nonswag.tnl.listener.api.object.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This Version of the Configuration API uses Googles Json (Gson)
- * @see net.nonswag.tnl.cloud.api.file.Config
  * @version 1.0
  * @apiNote Updated Configuration API
- * @see com.google.gson.Gson
- * @see GsonBuilder
- * @see JsonElement
- * @see JsonParser
- * @see com.google.gson.JsonObject
- * @see com.google.gson.JsonArray
  */
 
 public class JsonConfig implements Config {
@@ -48,7 +38,7 @@ public class JsonConfig implements Config {
         JsonElement jsonElement = new JsonObject();
         try {
             JsonFile.create(getFile());
-            jsonElement = JsonParser.parseReader(new FileReader(getFile()));
+            jsonElement = new JsonParser().parse(new FileReader(getFile()));
             if (!(jsonElement instanceof JsonObject)) {
                 jsonElement = new JsonObject();
             }
@@ -131,10 +121,10 @@ public class JsonConfig implements Config {
     @Nonnull
     @Override
     public HashMap<String, JsonElement> getValues() {
-        Set<String> keySet = getJsonElement().getAsJsonObject().keySet();
+        Set<Map.Entry<String, JsonElement>> keySet = getJsonElement().getAsJsonObject().entrySet();
         HashMap<String, JsonElement> values = new HashMap<>();
-        for (String key : keySet) {
-            values.put(key, getValue(key));
+        for (Map.Entry<String, JsonElement> key : keySet) {
+            values.put(key.getKey(), key.getValue());
         }
         return values;
     }

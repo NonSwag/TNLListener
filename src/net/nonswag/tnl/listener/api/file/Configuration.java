@@ -1,7 +1,7 @@
 package net.nonswag.tnl.listener.api.file;
 
 import com.sun.istack.internal.Nullable;
-import net.nonswag.tnl.cloud.api.system.Console;
+import net.nonswag.tnl.listener.NMSMain;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -30,22 +30,22 @@ public class Configuration {
         try {
             if (!configPath.getCanonicalFile().exists()) {
                 if (!configPath.mkdirs()) {
-                    Console.stacktrace("An error has occurred while creating the directory §8'§4" + configPath.getAbsolutePath() + "§8'");
+                    NMSMain.stacktrace("An error has occurred while creating the directory §8'§4" + configPath.getAbsolutePath() + "§8'");
                 }
             }
             if (!configFile.exists()) {
                 if (!configFile.createNewFile()) {
-                    Console.stacktrace("An error has occurred while creating the file §8'§4" + configFile.getAbsolutePath() + "§8'");
+                    NMSMain.stacktrace("An error has occurred while creating the file §8'§4" + configFile.getAbsolutePath() + "§8'");
                 } else {
-                    Console.print("Successfully created the file §8'§6" + configFile.getAbsolutePath() + "§8'");
+                    NMSMain.print("Successfully created the file §8'§6" + configFile.getAbsolutePath() + "§8'");
                 }
             }
         } catch (Exception e) {
-            Console.stacktrace(e);
+            NMSMain.stacktrace(e);
         }
         this.file = configFile;
         if (!isValid()) {
-            Console.stacktrace("The file §8'§4" + this.file.getAbsolutePath() + "§8'§c is invalid");
+            NMSMain.stacktrace("The file §8'§4" + this.file.getAbsolutePath() + "§8'§c is invalid");
         }
     }
 
@@ -56,19 +56,19 @@ public class Configuration {
             try {
                 if (!file.getCanonicalFile().exists()) {
                     if (!file.mkdirs()) {
-                        Console.stacktrace("An error has occurred while creating the directory §8'§4" + file.getAbsolutePath() + "§8'");
+                        NMSMain.stacktrace("An error has occurred while creating the directory §8'§4" + file.getAbsolutePath() + "§8'");
                     }
                 }
                 if (!file.createNewFile()) {
-                    Console.stacktrace("An error has occurred while creating the file §8'§4" + file.getAbsolutePath() + "§8'");
+                    NMSMain.stacktrace("An error has occurred while creating the file §8'§4" + file.getAbsolutePath() + "§8'");
                 } else {
-                    Console.print("Successfully created the file §8'§6" + file.getAbsolutePath() + "§8'");
+                    NMSMain.print("Successfully created the file §8'§6" + file.getAbsolutePath() + "§8'");
                 }
-            } catch (Throwable ignored) {
+            } catch (Exception ignored) {
             }
         }
         if (!isValid()) {
-            Console.stacktrace("The file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
+            NMSMain.stacktrace("The file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
         }
     }
 
@@ -90,9 +90,9 @@ public class Configuration {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(getFile().getAbsolutePath(), true));
                 writer.write(var + "=" + var2 + "\n");
                 writer.close();
-                Console.print("Added new configuration section §8'§6" + var.toString() + "§8'§a with the value §8'§6" + var2.toString() + "§8'");
+                NMSMain.print("Added new configuration section §8'§6" + var.toString() + "§8'§a with the value §8'§6" + var2.toString() + "§8'");
             } catch (Throwable t) {
-                Console.stacktrace(t);
+                NMSMain.stacktrace(t);
             }
         }
     }
@@ -107,12 +107,12 @@ public class Configuration {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(getFile().getAbsolutePath(), true));
                 writer.write(var + "=" + var2 + "\n");
                 writer.close();
-                Console.print("Added new configuration section §8'§6" + var.toString() + "§8'§a with the value §8'§6" + var2.toString() + "§8'");
+                NMSMain.print("Added new configuration section §8'§6" + var.toString() + "§8'§a with the value §8'§6" + var2.toString() + "§8'");
             } else {
                 File temp = new File(".cache.temp");
                 File old = getFile();
                 if (!temp.exists() && !temp.createNewFile()) {
-                    Console.stacktrace("Failed to create the temp file");
+                    NMSMain.stacktrace("Failed to create the temp file");
                 } else {
                     BufferedWriter writer = new BufferedWriter(new FileWriter(temp, true));
                     getValues().forEach((o, o2) -> {
@@ -125,23 +125,23 @@ public class Configuration {
                                 }
                             }
                         } catch (Throwable t) {
-                            Console.stacktrace(t);
+                            NMSMain.stacktrace(t);
                         }
                     });
                     if (!old.delete() || !temp.renameTo(old)) {
-                        Console.stacktrace("Failed to convert temp file to final file");
+                        NMSMain.stacktrace("Failed to convert temp file to final file");
                     }
                     writer.close();
                 }
             }
-        } catch (Throwable t) {
-            Console.stacktrace(t);
+        } catch (Exception e) {
+            NMSMain.stacktrace(e);
         }
     }
 
     @Deprecated
     public Object getOrDefault(@Nonnull Object var, @Nonnull Object defaultValue) {
-        return new net.nonswag.tnl.cloud.api.object.Objects<>(getValue(var)).getOrDefault(defaultValue);
+        return new net.nonswag.tnl.listener.api.object.Objects<>(getValue(var)).getOrDefault(defaultValue);
     }
 
     @Deprecated
@@ -158,13 +158,13 @@ public class Configuration {
                     if (split.size() > 1 && split.get(0).equals(var.toString())) {
                         return String.join("=", split.subList(1, split.size()));
                     }
-                } catch (Throwable t) {
-                    Console.stacktrace(t);
+                } catch (Exception e) {
+                    NMSMain.stacktrace(e);
                 }
             }
             reader.close();
-        } catch (Throwable t) {
-            Console.stacktrace(t);
+        } catch (Exception e) {
+            NMSMain.stacktrace(e);
         }
         return null;
     }
@@ -291,7 +291,7 @@ public class Configuration {
                 File temp = new File(".cache.temp");
                 File old = getFile();
                 if (!temp.exists() && !temp.createNewFile()) {
-                    Console.stacktrace("Failed to create the temp file");
+                    NMSMain.stacktrace("Failed to create the temp file");
                 } else {
                     BufferedWriter writer = new BufferedWriter(new FileWriter(temp, true));
                     getValues().forEach((o, o2) -> {
@@ -299,18 +299,18 @@ public class Configuration {
                             if (!var.toString().equals(o.toString())) {
                                 writer.write(o.toString() + "=" + o2.toString() + "\n");
                             }
-                        } catch (Throwable t) {
-                            Console.stacktrace(t);
+                        } catch (Exception e) {
+                            NMSMain.stacktrace(e);
                         }
                     });
                     if (!old.delete() || !temp.renameTo(old)) {
-                        Console.stacktrace("Failed to convert temp file to final file");
+                        NMSMain.stacktrace("Failed to convert temp file to final file");
                     }
                     writer.close();
                 }
             }
-        } catch (Throwable t) {
-            Console.stacktrace(t);
+        } catch (Exception e) {
+            NMSMain.stacktrace(e);
         }
     }
 
@@ -329,13 +329,13 @@ public class Configuration {
                     if (split.size() > 1) {
                         values.put(split.get(0), String.join("=", split.subList(1, split.size())));
                     }
-                } catch (Throwable t) {
-                    Console.stacktrace(t);
+                } catch (Exception e) {
+                    NMSMain.stacktrace(e);
                 }
             }
             reader.close();
-        } catch (Throwable t) {
-            Console.stacktrace(t);
+        } catch (Exception e) {
+            NMSMain.stacktrace(e);
         }
         return values;
     }

@@ -1,6 +1,6 @@
 package net.nonswag.tnl.listener.api.object;
 
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;

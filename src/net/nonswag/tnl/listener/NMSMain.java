@@ -2,14 +2,12 @@ package net.nonswag.tnl.listener;
 
 import net.nonswag.tnl.listener.api.annotations.Soon;
 import net.nonswag.tnl.listener.api.annotations.UndefinedNullability;
-import net.nonswag.tnl.bridge.receiver.ProxyServer;
-import net.nonswag.tnl.listener.api.command.CommandManager;
 import net.nonswag.tnl.listener.api.server.Server;
-import net.nonswag.tnl.listener.commands.BridgeCommand;
-import net.nonswag.tnl.listener.enumerations.InternetProtocolAddress;
 import net.nonswag.tnl.listener.listeners.CommandListener;
-import net.nonswag.tnl.listener.tabcompleter.BridgeCommandTabCompleter;
-import net.nonswag.tnl.listener.utils.*;
+import net.nonswag.tnl.listener.utils.ConfigUtil;
+import net.nonswag.tnl.listener.utils.FileUtil;
+import net.nonswag.tnl.listener.utils.MathUtil;
+import net.nonswag.tnl.listener.utils.PluginUpdate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -25,7 +23,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class NMSMain extends JavaPlugin {
 
@@ -49,7 +46,6 @@ public class NMSMain extends JavaPlugin {
 
     @UndefinedNullability private static Plugin plugin;
     @UndefinedNullability private static JavaPlugin javaPlugin;
-    @UndefinedNullability private static CommandManager commandManager;
 
     private static boolean betterTNT = true;
     private static boolean betterFallingBlocks = true;
@@ -72,17 +68,10 @@ public class NMSMain extends JavaPlugin {
 
     private static boolean customItemName = true;
 
-    // CloudBridge
-
-    @UndefinedNullability private static ProxyServer proxyServer;
-    @UndefinedNullability private static InternetProtocolAddress proxyProtocolAddress = new InternetProtocolAddress("localhost", 25500);
-    @UndefinedNullability private static String forwardingSecret = StringUtil.random(16);
-
     @Override
     public void onEnable() {
         setPlugin(this);
         setJavaPlugin(this);
-        setCommandManager(new CommandManager(getJavaPlugin()));
         NMSMain.print(Bukkit.getVersion(), Bukkit.getBukkitVersion());
         /*
         if (!Bukkit.getVersion().contains("1.15.2")) {
@@ -97,7 +86,6 @@ public class NMSMain extends JavaPlugin {
         new ConfigUtil.ConfigurationSection("debug", isDebug()).createIfAbsent();
         setServerName(FileUtil.getServerFolder().getName());
         setDebug(ConfigUtil.getConfig().getBoolean("debug", isDebug()));
-        getCommandManager().registerCommand("bridge", "tnl.admin", new BridgeCommand(), new BridgeCommandTabCompleter());
         Bukkit.getMessenger().registerOutgoingPluginChannel(getPlugin(), "BungeeCord");
         new ConfigUtil.ConfigurationSection("commands.use-better-permissions", isBetterPermissions()).createIfAbsent();
         new ConfigUtil.ConfigurationSection("commands.use-better-commands", isBetterCommands()).createIfAbsent();
@@ -124,8 +112,6 @@ public class NMSMain extends JavaPlugin {
         new ConfigUtil.ConfigurationSection("items.standard-custom-name", getStandardItemName()).createIfAbsent();
         new ConfigUtil.ConfigurationSection("items.rare-custom-name", getRareItemName()).createIfAbsent();
         new ConfigUtil.ConfigurationSection("items.epic-custom-name", getEpicItemName()).createIfAbsent();
-        new ConfigUtil.ConfigurationSection("cloud.bridge.address", getProxyProtocolAddress().getAsString()).createIfAbsent();
-        new ConfigUtil.ConfigurationSection("cloud.bridge.forwarding-secret", getForwardingSecret()).createIfAbsent();
         new ConfigUtil.ConfigurationSection("servers", new ArrayList<>(Arrays.asList("example-server-1", "example-server-2", "example-server-3"))).createIfAbsent();
 
         new Thread(() -> {
@@ -174,22 +160,12 @@ public class NMSMain extends JavaPlugin {
         setStandardItemName(ConfigUtil.getString("items.standard-custom-name"));
         setRareItemName(ConfigUtil.getString("items.rare-custom-name"));
         setEpicItemName(ConfigUtil.getString("items.epic-custom-name"));
-        setProxyProtocolAddress(new InternetProtocolAddress(Objects.requireNonNull(ConfigUtil.getConfig().getString("cloud.bridge.address"))));
-        setForwardingSecret(ConfigUtil.getConfig().getString("cloud.bridge.forwarding-secret"));
-
-        print("§aForwarding secret is §8'§6" + getForwardingSecret() + "§8'");
 
         Bukkit.getPluginManager().registerEvents(new CommandListener(), getPlugin());
 
         new PluginUpdate(getPlugin()).downloadUpdate();
-        setProxyServer(new ProxyServer(getProxyProtocolAddress()));
 
         TNLListener.onEnable();
-    }
-
-    @Override
-    public void onDisable() {
-        getProxyServer().disconnect();
     }
 
     public static void callEvent(@Nonnull Event event) {
@@ -395,10 +371,6 @@ public class NMSMain extends JavaPlugin {
         NMSMain.plugin = plugin;
     }
 
-    public static void setCommandManager(CommandManager commandManager) {
-        NMSMain.commandManager = commandManager;
-    }
-
     public static void setAutoUpdater(boolean autoUpdater) {
         NMSMain.autoUpdater = autoUpdater;
     }
@@ -451,24 +423,12 @@ public class NMSMain extends JavaPlugin {
         NMSMain.firstJoinMessage = firstJoinMessage;
     }
 
-    public static void setForwardingSecret(String forwardingSecret) {
-        NMSMain.forwardingSecret = forwardingSecret;
-    }
-
     public static void setJoinMessage(@Nonnull String joinMessage) {
         NMSMain.joinMessage = joinMessage;
     }
 
     public static void setPlayerDirect(@Nonnull String playerDirect) {
         NMSMain.playerDirect = playerDirect;
-    }
-
-    public static void setProxyProtocolAddress(InternetProtocolAddress proxyProtocolAddress) {
-        NMSMain.proxyProtocolAddress = proxyProtocolAddress;
-    }
-
-    public static void setProxyServer(ProxyServer proxyServer) {
-        NMSMain.proxyServer = proxyServer;
     }
 
     public static void setPunishSpamming(boolean punishSpamming) {
@@ -542,25 +502,9 @@ public class NMSMain extends JavaPlugin {
         return javaPlugin;
     }
 
-    public static CommandManager getCommandManager() {
-        return commandManager;
-    }
-
-    public static InternetProtocolAddress getProxyProtocolAddress() {
-        return proxyProtocolAddress;
-    }
-
-    public static ProxyServer getProxyServer() {
-        return proxyServer;
-    }
-
     @Nonnull
     public static String getFirstJoinMessage() {
         return firstJoinMessage;
-    }
-
-    public static String getForwardingSecret() {
-        return forwardingSecret;
     }
 
     @Nonnull

@@ -1,8 +1,10 @@
 package net.nonswag.tnl.listener.api.server;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.api.serializer.PacketSerializer;
-import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -111,10 +113,10 @@ public class Server {
                     output.writeByte(0x00);
                     byte[] in = new byte[PacketSerializer.readVarInt(input)];
                     input.readFully(in);
-                    JSONObject object = new JSONObject(new String(in).substring(3));
-                    JSONObject players = object.getJSONObject("players");
-                    setMaxPlayerCount(players.getInt("max"));
-                    setPlayerCount(players.getInt("online"));
+                    JsonElement object = new JsonParser().parse(new String(in).substring(3));
+                    JsonObject players = object.getAsJsonObject().get("players").getAsJsonObject();
+                    setMaxPlayerCount(players.get("max").getAsInt());
+                    setPlayerCount(players.get("online").getAsInt());
                 } catch (Throwable t) {
                     NMSMain.stacktrace(t);
                 }

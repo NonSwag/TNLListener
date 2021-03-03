@@ -1,14 +1,11 @@
 package net.nonswag.tnl.listener.api.fakeplayer;
 
-import com.google.common.annotations.Beta;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.NMSMain;
-import net.nonswag.tnl.listener.api.mojang.Mojang;
-import net.nonswag.tnl.listener.api.mojang.PlayerProfile;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -87,25 +84,6 @@ public class FakePlayer {
 
     public void setSkin(String value, String signature) {
         setSkinValues(new String[]{value, signature});
-    }
-
-    @Beta
-    public void setSkin(String skin,
-                        String cape,
-                        Mojang.SkinType skinType,
-                        String signature) {
-        setSkin(PlayerProfile.TexturesProperty.createBase64Profile(skin, cape, skinType), signature);
-    }
-
-    @Beta
-    public void setSkin(PlayerProfile.TexturesProperty texturesProperty) {
-        setSkin(texturesProperty.toBase64(), texturesProperty.getSignature());
-        if (texturesProperty.getSkin().isPresent()) {
-            NMSMain.warn("Please use the static link '" + texturesProperty.getSkin().get().toString() + "' for the skin");
-        }
-        if (texturesProperty.getCape().isPresent()) {
-            NMSMain.warn("Please use the static link '" + texturesProperty.getCape().get().toString() + "' for the cape");
-        }
     }
 
     public void spawn() {
