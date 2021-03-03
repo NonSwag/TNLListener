@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Objects;
 
 import javax.annotation.Nonnull;
@@ -47,7 +47,7 @@ public class JsonConfig implements Config {
         this.jsonElement = jsonElement;
         save();
         if (!isValid()) {
-            NMSMain.stacktrace("The file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
+            Logger.error.println("The file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
         }
     }
 
@@ -257,7 +257,7 @@ public class JsonConfig implements Config {
             writer.write(string);
             writer.close();
         } catch (IOException e) {
-            NMSMain.stacktrace(e);
+            Logger.error.println(e);
         }
     }
 }

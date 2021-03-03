@@ -6,6 +6,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -79,7 +80,7 @@ public class FakePlayer {
 
     public void setSkin(String name) {
         setSkinValues(getSkin(name));
-        NMSMain.warn("Please use the properties '" + Arrays.toString(getSkinValues()) + "' instead of the name '" + name + "'");
+        Logger.warn.println("Please use the properties '" + Arrays.toString(getSkinValues()) + "' instead of the name '" + name + "'");
     }
 
     public void setSkin(String value, String signature) {
@@ -102,7 +103,7 @@ public class FakePlayer {
         for (EnumItemSlot slot : EnumItemSlot.values()) {
             receiver.sendPacket(new PacketPlayOutEntityEquipment(getPlayer().getId(), slot, getPlayer().getEquipment(slot)));
         }
-        NMSMain.delayedTask(() -> hideTablistName(receiver), 10);
+        Bukkit.getScheduler().runTaskLater(NMSMain.getInstance(), () -> hideTablistName(receiver), 10);
     }
 
     public void playAnimate(TNLPlayer receiver, Animation animation) {

@@ -7,25 +7,30 @@ import io.netty.handler.codec.EncoderException;
 import net.minecraft.server.v1_15_R1.MinecraftKey;
 import net.minecraft.server.v1_15_R1.PacketDataSerializer;
 import net.minecraft.server.v1_15_R1.PacketPlayOutCustomPayload;
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 
 public class ByteUtils {
 
-    public static void writePacket(TNLPlayer player, String keyPrefix, String keySuffix, String messageContent) {
+    public static void writePacket(@Nonnull TNLPlayer player, @Nonnull String keyPrefix, @Nonnull String keySuffix, @Nonnull String messageContent) {
         try {
             byte[] bytes = getBytes(keySuffix, messageContent);
-            PacketDataSerializer pds = new PacketDataSerializer(Unpooled.wrappedBuffer(bytes));
-            PacketPlayOutCustomPayload payloadPacket = new PacketPlayOutCustomPayload(new MinecraftKey(keyPrefix), pds);
-            player.sendPacket(payloadPacket);
-        } catch (Throwable var6) {
-            NMSMain.stacktrace(var6);
+            if (bytes != null) {
+                PacketDataSerializer pds = new PacketDataSerializer(Unpooled.wrappedBuffer(bytes));
+                PacketPlayOutCustomPayload payloadPacket = new PacketPlayOutCustomPayload(new MinecraftKey(keyPrefix), pds);
+                player.sendPacket(payloadPacket);
+            }
+        } catch (Exception e) {
+            Logger.error.println(e);
         }
     }
 
-    private static byte[] getBytes(String messageKey, String messageContents) {
+    @Nullable
+    private static byte[] getBytes(@Nonnull String messageKey, @Nonnull String messageContents) {
         try {
             ByteBuf byteBuf = Unpooled.buffer();
             stringWriter(byteBuf, messageKey);
@@ -33,13 +38,13 @@ public class ByteUtils {
             byte[] bytes = new byte[byteBuf.readableBytes()];
             byteBuf.readBytes(bytes);
             return bytes;
-        } catch (Throwable var4) {
-            NMSMain.stacktrace(var4);
+        } catch (Exception e) {
+            Logger.error.println(e);
             return null;
         }
     }
 
-    private static void bufferWriter(ByteBuf buffer, int input) {
+    private static void bufferWriter(@Nonnull ByteBuf buffer, int input) {
         while(true) {
             try {
                 if ((input & -128) != 0) {
@@ -49,32 +54,30 @@ public class ByteUtils {
                 }
 
                 buffer.writeByte(input);
-            } catch (Throwable var3) {
-                NMSMain.stacktrace(var3);
+            } catch (Exception e) {
+                Logger.error.println(e);
             }
             return;
         }
     }
 
-    private static void stringWriter(ByteBuf buffer, String string) {
+    private static void stringWriter(@Nonnull ByteBuf buffer, @Nonnull String string) {
         try {
             byte[] b = string.getBytes(StandardCharsets.UTF_8);
             if (b.length > 32767) {
                 throw new EncoderException("String too big (was " + string.length() + " bytes encoded, max " + 32767 + ")");
             }
-
             bufferWriter(buffer, b.length);
             buffer.writeBytes(b);
-        } catch (Throwable var3) {
-            NMSMain.stacktrace(var3);
+        } catch (Exception e) {
+            Logger.error.println(e);
         }
     }
 
-    private static int bufferReader(ByteBuf buffer) {
+    private static int bufferReader(@Nonnull ByteBuf buffer) {
         try {
             int i = 0;
             int j = 0;
-
             byte b0;
             do {
                 b0 = buffer.readByte();
@@ -83,15 +86,15 @@ public class ByteUtils {
                     throw new RuntimeException("VarInt too big");
                 }
             } while((b0 & 128) == 128);
-
             return i;
-        } catch (Throwable var4) {
-            NMSMain.stacktrace(var4);
+        } catch (Exception e) {
+            Logger.error.println(e);
             return 0;
         }
     }
 
-    private static String stringReader(ByteBuf buffer, int maxLength) {
+    @Nonnull
+    private static String stringReader(@Nonnull ByteBuf buffer, int maxLength) {
         try {
             int i = bufferReader(buffer);
             if (i > maxLength * 4) {
@@ -108,8 +111,8 @@ public class ByteUtils {
                     return s;
                 }
             }
-        } catch (Throwable var5) {
-            NMSMain.stacktrace(var5);
+        } catch (Exception e) {
+            Logger.error.println(e);
             return "";
         }
     }

@@ -1,24 +1,23 @@
 package net.nonswag.tnl.listener.utils;
 
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Objects;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.Plugin;
 
 import javax.annotation.Nonnull;
 
 public class ConfigUtil {
 
     private static FileConfiguration config;
-    private static final Plugin plugin = NMSMain.getPlugin();
 
     public static void initConfig() {
-        plugin.saveConfig();
+        TNLListener.getInstance().getMain().saveConfig();
         if(config == null) {
-            config = plugin.getConfig();
+            config = TNLListener.getInstance().getMain().getConfig();
         }
-        plugin.reloadConfig();
-        config = plugin.getConfig();
+        TNLListener.getInstance().getMain().reloadConfig();
+        config = TNLListener.getInstance().getMain().getConfig();
     }
 
     public static FileConfiguration getConfig() { return config; }
@@ -42,10 +41,6 @@ public class ConfigUtil {
     @Override
     public int hashCode() {
         return super.hashCode();
-    }
-
-    public static Plugin getPlugin() {
-        return plugin;
     }
 
     public static void setConfig(FileConfiguration config) {
@@ -95,9 +90,9 @@ public class ConfigUtil {
         public void create() {
             try {
                 ConfigUtil.set(path, value);
-                NMSMain.print("Successfully set '" + path + "' to '" + value.toString() + "'");
-            } catch (Throwable t) {
-                NMSMain.stacktrace(t);
+                Logger.info.println("Successfully set '" + path + "' to '" + value.toString() + "'");
+            } catch (Exception e) {
+                Logger.error.println(e);
             }
         }
 

@@ -66,7 +66,7 @@ public class PlayerDamageBlockEvent extends Event implements Cancellable {
         if (isCancelled()) {
             if (getBlockDamageType().equals(BlockDamageType.STOP_DESTROY_BLOCK)
                     || getBlockDamageType().equals(BlockDamageType.START_DESTROY_BLOCK)) {
-                NMSMain.runTask(() -> {
+                Bukkit.getScheduler().runTask(NMSMain.getInstance(), () -> {
                     getBlock().getState().update();
                     getPlayer().sendBlockChange(getBlock().getLocation(), getBlock().getBlockData());
                     getPlayer().sendBlockChange(getBlock().getRelative(BlockFace.EAST).getLocation(),

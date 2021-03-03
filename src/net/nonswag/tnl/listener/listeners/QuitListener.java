@@ -2,6 +2,7 @@ package net.nonswag.tnl.listener.listeners;
 
 import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,18 +15,18 @@ public class QuitListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         try {
             event.setQuitMessage(null);
-            if(NMSMain.isCustomQuitMessage() && !NMSMain.getQuitMessage().equalsIgnoreCase("")) {
+            if(TNLListener.getInstance().isCustomQuitMessage() && !TNLListener.getInstance().getQuitMessage().equalsIgnoreCase("")) {
                 for (Player all : Bukkit.getOnlinePlayers()) {
                     if (!all.equals(event.getPlayer())) {
-                        all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getQuitMessage().replace("%player%", event.getPlayer().getName()));
+                        all.sendMessage(TNLListener.getInstance().getPrefix() + " " + TNLListener.getInstance().getQuitMessage().replace("%player%", event.getPlayer().getName()));
                     } else {
-                        all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getQuitMessage().replace("%player%", NMSMain.getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())));
+                        all.sendMessage(TNLListener.getInstance().getPrefix() + " " + TNLListener.getInstance().getQuitMessage().replace("%player%", TNLListener.getInstance().getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())));
                     }
                 }
             }
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (Exception e) {
+            Logger.error.println(e);
         }
-        NMSMain.runTaskAsynchronously(TNLListener::updatePlayers);
+        Bukkit.getScheduler().runTaskAsynchronously(NMSMain.getInstance(), TNLListener.getInstance()::updatePlayers);
     }
 }

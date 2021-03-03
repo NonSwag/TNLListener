@@ -1,11 +1,13 @@
 package net.nonswag.tnl.listener.api.file;
 
 import com.sun.istack.internal.Nullable;
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.logger.Logger;
 
 import javax.annotation.Nonnull;
 import java.io.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @deprecated Configuration API
@@ -30,22 +32,22 @@ public class Configuration {
         try {
             if (!configPath.getCanonicalFile().exists()) {
                 if (!configPath.mkdirs()) {
-                    NMSMain.stacktrace("An error has occurred while creating the directory §8'§4" + configPath.getAbsolutePath() + "§8'");
+                    Logger.error.println("An error has occurred while creating the directory §8'§4" + configPath.getAbsolutePath() + "§8'");
                 }
             }
             if (!configFile.exists()) {
                 if (!configFile.createNewFile()) {
-                    NMSMain.stacktrace("An error has occurred while creating the file §8'§4" + configFile.getAbsolutePath() + "§8'");
+                    Logger.error.println("An error has occurred while creating the file §8'§4" + configFile.getAbsolutePath() + "§8'");
                 } else {
-                    NMSMain.print("Successfully created the file §8'§6" + configFile.getAbsolutePath() + "§8'");
+                    Logger.info.println("Successfully created the file §8'§6" + configFile.getAbsolutePath() + "§8'");
                 }
             }
         } catch (Exception e) {
-            NMSMain.stacktrace(e);
+            Logger.error.println(e);
         }
         this.file = configFile;
         if (!isValid()) {
-            NMSMain.stacktrace("The file §8'§4" + this.file.getAbsolutePath() + "§8'§c is invalid");
+            Logger.error.println("The file §8'§4" + this.file.getAbsolutePath() + "§8'§c is invalid");
         }
     }
 
@@ -56,19 +58,19 @@ public class Configuration {
             try {
                 if (!file.getCanonicalFile().exists()) {
                     if (!file.mkdirs()) {
-                        NMSMain.stacktrace("An error has occurred while creating the directory §8'§4" + file.getAbsolutePath() + "§8'");
+                        Logger.error.println("An error has occurred while creating the directory §8'§4" + file.getAbsolutePath() + "§8'");
                     }
                 }
                 if (!file.createNewFile()) {
-                    NMSMain.stacktrace("An error has occurred while creating the file §8'§4" + file.getAbsolutePath() + "§8'");
+                    Logger.error.println("An error has occurred while creating the file §8'§4" + file.getAbsolutePath() + "§8'");
                 } else {
-                    NMSMain.print("Successfully created the file §8'§6" + file.getAbsolutePath() + "§8'");
+                    Logger.info.println("Successfully created the file §8'§6" + file.getAbsolutePath() + "§8'");
                 }
             } catch (Exception ignored) {
             }
         }
         if (!isValid()) {
-            NMSMain.stacktrace("The file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
+            Logger.error.println("The file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
         }
     }
 
@@ -90,9 +92,9 @@ public class Configuration {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(getFile().getAbsolutePath(), true));
                 writer.write(var + "=" + var2 + "\n");
                 writer.close();
-                NMSMain.print("Added new configuration section §8'§6" + var.toString() + "§8'§a with the value §8'§6" + var2.toString() + "§8'");
+                Logger.info.println("Added new configuration section §8'§6" + var.toString() + "§8'§a with the value §8'§6" + var2.toString() + "§8'");
             } catch (Throwable t) {
-                NMSMain.stacktrace(t);
+                Logger.error.println(t);
             }
         }
     }
@@ -107,12 +109,12 @@ public class Configuration {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(getFile().getAbsolutePath(), true));
                 writer.write(var + "=" + var2 + "\n");
                 writer.close();
-                NMSMain.print("Added new configuration section §8'§6" + var.toString() + "§8'§a with the value §8'§6" + var2.toString() + "§8'");
+                Logger.info.println("Added new configuration section §8'§6" + var.toString() + "§8'§a with the value §8'§6" + var2.toString() + "§8'");
             } else {
                 File temp = new File(".cache.temp");
                 File old = getFile();
                 if (!temp.exists() && !temp.createNewFile()) {
-                    NMSMain.stacktrace("Failed to create the temp file");
+                    Logger.error.println("Failed to create the temp file");
                 } else {
                     BufferedWriter writer = new BufferedWriter(new FileWriter(temp, true));
                     getValues().forEach((o, o2) -> {
@@ -125,17 +127,17 @@ public class Configuration {
                                 }
                             }
                         } catch (Throwable t) {
-                            NMSMain.stacktrace(t);
+                            Logger.error.println(t);
                         }
                     });
                     if (!old.delete() || !temp.renameTo(old)) {
-                        NMSMain.stacktrace("Failed to convert temp file to final file");
+                        Logger.error.println("Failed to convert temp file to final file");
                     }
                     writer.close();
                 }
             }
         } catch (Exception e) {
-            NMSMain.stacktrace(e);
+            Logger.error.println(e);
         }
     }
 
@@ -159,12 +161,12 @@ public class Configuration {
                         return String.join("=", split.subList(1, split.size()));
                     }
                 } catch (Exception e) {
-                    NMSMain.stacktrace(e);
+                    Logger.error.println(e);
                 }
             }
             reader.close();
         } catch (Exception e) {
-            NMSMain.stacktrace(e);
+            Logger.error.println(e);
         }
         return null;
     }
@@ -291,7 +293,7 @@ public class Configuration {
                 File temp = new File(".cache.temp");
                 File old = getFile();
                 if (!temp.exists() && !temp.createNewFile()) {
-                    NMSMain.stacktrace("Failed to create the temp file");
+                    Logger.error.println("Failed to create the temp file");
                 } else {
                     BufferedWriter writer = new BufferedWriter(new FileWriter(temp, true));
                     getValues().forEach((o, o2) -> {
@@ -300,17 +302,17 @@ public class Configuration {
                                 writer.write(o.toString() + "=" + o2.toString() + "\n");
                             }
                         } catch (Exception e) {
-                            NMSMain.stacktrace(e);
+                            Logger.error.println(e);
                         }
                     });
                     if (!old.delete() || !temp.renameTo(old)) {
-                        NMSMain.stacktrace("Failed to convert temp file to final file");
+                        Logger.error.println("Failed to convert temp file to final file");
                     }
                     writer.close();
                 }
             }
         } catch (Exception e) {
-            NMSMain.stacktrace(e);
+            Logger.error.println(e);
         }
     }
 
@@ -330,12 +332,12 @@ public class Configuration {
                         values.put(split.get(0), String.join("=", split.subList(1, split.size())));
                     }
                 } catch (Exception e) {
-                    NMSMain.stacktrace(e);
+                    Logger.error.println(e);
                 }
             }
             reader.close();
         } catch (Exception e) {
-            NMSMain.stacktrace(e);
+            Logger.error.println(e);
         }
         return values;
     }

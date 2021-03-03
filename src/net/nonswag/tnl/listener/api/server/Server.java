@@ -3,7 +3,7 @@ package net.nonswag.tnl.listener.api.server;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.serializer.PacketSerializer;
 
 import javax.annotation.Nonnull;
@@ -117,10 +117,10 @@ public class Server {
                     JsonObject players = object.getAsJsonObject().get("players").getAsJsonObject();
                     setMaxPlayerCount(players.get("max").getAsInt());
                     setPlayerCount(players.get("online").getAsInt());
-                } catch (Throwable t) {
-                    NMSMain.stacktrace(t);
+                } catch (Exception e) {
+                    Logger.error.println(e);
                 }
-            } catch (Throwable ignored) {
+            } catch (Exception ignored) {
                 setOnline(false);
                 setPlayerCount(0);
                 setMaxPlayerCount(0);

@@ -1,6 +1,6 @@
 package net.nonswag.tnl.listener.utils;
 
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
@@ -98,9 +98,9 @@ public class GlobalConfigUtil {
         public void create() {
             try {
                 ConfigUtil.set(path, value);
-                NMSMain.print("Successfully set '" + path + "' to '" + value.toString() + "'");
+                Logger.info.println("Successfully set '" + path + "' to '" + value.toString() + "'");
             } catch (Throwable t) {
-                NMSMain.stacktrace(t);
+                Logger.error.println(t);
             }
         }
 

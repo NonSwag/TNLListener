@@ -1,5 +1,5 @@
 name: TNLListener
-version: "2.3"
+version: "2.4"
 main: net.nonswag.tnl.listener.NMSMain
 author: NonSwag
 website: https://www.thenextlvl.net/

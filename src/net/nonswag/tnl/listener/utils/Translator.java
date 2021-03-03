@@ -1,15 +1,16 @@
 package net.nonswag.tnl.listener.utils;
 
 import com.google.gson.JsonParser;
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.enumerations.Language;
 
+import javax.annotation.Nonnull;
 import java.io.InputStreamReader;
 import java.net.URL;
 
 public class Translator {
 
-    public static String translate(String string, Language from, Language to) {
+    public static String translate(@Nonnull String string, @Nonnull Language from, @Nonnull Language to) {
         try {
             if (from.equals(to)) {
                 return string;
@@ -18,8 +19,8 @@ public class Translator {
             InputStreamReader reader = new InputStreamReader(url.openStream());
             String translatedText = new JsonParser().parse(reader).getAsJsonObject().get("responseData").getAsJsonObject().get("translatedText").getAsString();
             return translatedText.replace("\"\"", "").replace(",", "").replace("match", "").replace("-", "").replace("\\\\u", "").replace("\\u", "").replace("~", "");
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (Exception e) {
+            Logger.error.println(e);
         }
         return string;
     }

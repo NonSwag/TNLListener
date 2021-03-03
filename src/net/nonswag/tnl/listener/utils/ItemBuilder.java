@@ -1,7 +1,7 @@
 package net.nonswag.tnl.listener.utils;
 
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -14,7 +14,10 @@ import org.bukkit.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
 
 public class ItemBuilder {
 
@@ -101,8 +104,8 @@ public class ItemBuilder {
     public ItemBuilder setSkullImgURL(@Nonnull String url) {
         try {
             setSkullValue(Base64.getEncoder().encodeToString(("{\"textures\":{\"SKIN\":{\"url\":\"" + new URI(url).toString() + "\"}}}").getBytes()));
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (Exception e) {
+            Logger.error.println(e);
         }
         return this;
     }
@@ -111,8 +114,8 @@ public class ItemBuilder {
     public ItemBuilder setSkullValue(@Nonnull String base64) {
         try {
             modifyNBT("{SkullOwner:{Id:\"" + new UUID(base64.hashCode(), base64.hashCode()) + "\",Properties:{textures:[{Value:\"" + base64 + "\"}]}}}");
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (Exception e) {
+            Logger.error.println(e);
         }
         return this;
     }

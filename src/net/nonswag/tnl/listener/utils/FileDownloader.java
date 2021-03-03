@@ -1,16 +1,17 @@
 package net.nonswag.tnl.listener.utils;
 
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.logger.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
 public class FileDownloader {
 
-    public static void downloadFile(String url, String saveDir) throws Throwable {
+    public static void downloadFile(String url, String saveDir) throws IOException {
         HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
         connection.setRequestMethod("GET");
         connection.connect();
@@ -34,18 +35,18 @@ public class FileDownloader {
                 FileOutputStream outputStream = new FileOutputStream(saveFilePath);
                 int bytesRead;
                 byte[] buffer = new byte[4096];
-                NMSMain.print("Starting download of file '" + fileName + "'");
+                Logger.info.println("Starting download of file '" + fileName + "'");
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     outputStream.write(buffer, 0, bytesRead);
                 }
                 outputStream.close();
                 inputStream.close();
-                NMSMain.print("Successfully downloaded file '" + fileName + "'");
+                Logger.info.println("Successfully downloaded file '" + fileName + "'");
             } else {
-                NMSMain.stacktrace("No file was found");
+                Logger.error.println("No file was found");
             }
         } else {
-            NMSMain.stacktrace("No file was found. Server replied HTTP code: " + responseCode);
+            Logger.error.println("No file was found. Server replied HTTP code: " + responseCode);
         }
         connection.disconnect();
     }

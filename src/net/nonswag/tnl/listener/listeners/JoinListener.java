@@ -3,6 +3,7 @@ package net.nonswag.tnl.listener.listeners;
 import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.adapter.PacketAdapter;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -17,33 +18,33 @@ public class JoinListener implements Listener {
         try {
             TNLPlayer player = TNLPlayer.cast(event.getPlayer());
             PacketAdapter.inject(player);
-            if (NMSMain.isCustomJoinMessage() || NMSMain.isCustomFirstJoinMessage()) {
+            if (TNLListener.getInstance().isCustomJoinMessage() || TNLListener.getInstance().isCustomFirstJoinMessage()) {
                 event.setJoinMessage(null);
                 if (player.hasPlayedBefore()) {
-                    if (NMSMain.isCustomJoinMessage() && !NMSMain.getJoinMessage().equalsIgnoreCase("")) {
+                    if (TNLListener.getInstance().isCustomJoinMessage() && !TNLListener.getInstance().getJoinMessage().equalsIgnoreCase("")) {
                         for (Player all : Bukkit.getOnlinePlayers()) {
                             if (!all.equals(event.getPlayer())) {
-                                all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getJoinMessage().replace("%player%", event.getPlayer().getName()));
+                                all.sendMessage(TNLListener.getInstance().getPrefix() + " " + TNLListener.getInstance().getJoinMessage().replace("%player%", event.getPlayer().getName()));
                             } else {
-                                all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getJoinMessage().replace("%player%", NMSMain.getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())));
+                                all.sendMessage(TNLListener.getInstance().getPrefix() + " " + TNLListener.getInstance().getJoinMessage().replace("%player%", TNLListener.getInstance().getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())));
                             }
                         }
                     }
                 } else {
-                    if (NMSMain.isCustomFirstJoinMessage() && !NMSMain.getFirstJoinMessage().equalsIgnoreCase("")) {
+                    if (TNLListener.getInstance().isCustomFirstJoinMessage() && !TNLListener.getInstance().getFirstJoinMessage().equalsIgnoreCase("")) {
                         for (Player all : Bukkit.getOnlinePlayers()) {
                             if (!all.equals(event.getPlayer())) {
-                                all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getFirstJoinMessage().replace("%player%", event.getPlayer().getName()));
+                                all.sendMessage(TNLListener.getInstance().getPrefix() + " " + TNLListener.getInstance().getFirstJoinMessage().replace("%player%", event.getPlayer().getName()));
                             } else {
-                                all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getFirstJoinMessage().replace("%player%", NMSMain.getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())));
+                                all.sendMessage(TNLListener.getInstance().getPrefix() + " " + TNLListener.getInstance().getFirstJoinMessage().replace("%player%", TNLListener.getInstance().getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())));
                             }
                         }
                     }
                 }
             }
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (Exception e) {
+            Logger.error.println(e);
         }
-        NMSMain.runTaskAsynchronously(TNLListener::updatePlayers);
+        Bukkit.getScheduler().runTaskAsynchronously(NMSMain.getInstance(), TNLListener.getInstance()::updatePlayers);
     }
 }

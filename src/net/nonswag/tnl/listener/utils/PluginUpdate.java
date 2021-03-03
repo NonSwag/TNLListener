@@ -1,6 +1,6 @@
 package net.nonswag.tnl.listener.utils;
 
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import org.bukkit.plugin.Plugin;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -54,14 +54,14 @@ public class PluginUpdate {
                 return;
             }
             if (latestVersion == null) {
-                NMSMain.stacktrace("The Plugin '" + plugin + "' is not a (public) plugin by TheNextLvl.net");
+                Logger.error.println("The Plugin '" + plugin + "' is not a (public) plugin by TheNextLvl.net");
             } else {
                 setLatestVersion(latestVersion);
                 setUpToDate(getCurrentVersion().equals(getLatestVersion()));
             }
             connection.disconnect();
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t, false);
+        } catch (Exception e) {
+            Logger.error.println(e, false);
         }
     }
 
@@ -73,11 +73,11 @@ public class PluginUpdate {
         if (!isUpToDate()) {
             try {
                 FileDownloader.downloadFile("https://www.thenextlvl.net/plugins/" + getPlugin() + ".jar", new File("plugins/").getAbsolutePath());
-            } catch (Throwable t) {
-                NMSMain.stacktrace(t, true);
+            } catch (Exception e) {
+                Logger.error.println(e, true);
             }
         } else {
-            NMSMain.print("The plugin '" + getPlugin() + "' is up to date");
+            Logger.info.println("The plugin '" + getPlugin() + "' is up to date");
         }
     }
 

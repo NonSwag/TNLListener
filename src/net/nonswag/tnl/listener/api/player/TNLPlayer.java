@@ -7,6 +7,7 @@ import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.title.Title;
@@ -100,10 +101,10 @@ public class TNLPlayer {
 
     @Nonnull
     public static TNLPlayer cast(@Nonnull Player player) {
-        if (!TNLListener.getPlayerHashMap().containsKey(player)) {
-            TNLListener.getPlayerHashMap().put(player, new TNLPlayer(player));
+        if (!TNLListener.getInstance().getPlayerHashMap().containsKey(player)) {
+            TNLListener.getInstance().getPlayerHashMap().put(player, new TNLPlayer(player));
         }
-        return TNLListener.getPlayerHashMap().get(player);
+        return TNLListener.getInstance().getPlayerHashMap().get(player);
     }
 
     @Nonnull
@@ -307,7 +308,7 @@ public class TNLPlayer {
         if (Bukkit.isPrimaryThread()) {
             getPlayerConnection().sendPacket(packet);
         } else {
-            NMSMain.runTask(() -> getPlayerConnection().sendPacket(packet));
+            Bukkit.getScheduler().runTask(NMSMain.getInstance(), () -> getPlayerConnection().sendPacket(packet));
         }
     }
 
@@ -326,7 +327,7 @@ public class TNLPlayer {
     }
 
     public void disconnect() {
-        disconnect(NMSMain.getPrefix() + "\n§cDisconnected");
+        disconnect(TNLListener.getInstance().getPrefix() + "\n§cDisconnected");
     }
 
     public void disconnect(@Nonnull String kickMessage) {
@@ -335,7 +336,7 @@ public class TNLPlayer {
                 getPlayerConnection().disconnect(kickMessage);
             }
         } else {
-            NMSMain.runTask(() -> {
+            Bukkit.getScheduler().runTask(NMSMain.getInstance(), () -> {
                 if (!getPlayerConnection().processedDisconnect) {
                     getPlayerConnection().disconnect(kickMessage);
                 }
@@ -360,7 +361,7 @@ public class TNLPlayer {
     }
 
     private static HashMap<World, String> getWorldAliasHashMap() {
-        return TNLListener.getWorldAliasHashMap();
+        return TNLListener.getInstance().getWorldAliasHashMap();
     }
 
     public static String getWorldAlias(World world) {
@@ -509,7 +510,7 @@ public class TNLPlayer {
         try {
             if (!file.exists()) {
                 if (!file.createNewFile()) {
-                    NMSMain.stacktrace(new NoSuchFileException("Failed to create file"));
+                    Logger.error.println(new NoSuchFileException("Failed to create file"));
                 }
             }
             if (file.exists()) {
@@ -517,10 +518,10 @@ public class TNLPlayer {
                 ItemStack[] contents = getBukkitPlayer().getInventory().getContents();
                 inventory.set(id, Arrays.asList(contents));
                 inventory.save(file);
-                NMSMain.callEvent(new InventorySafeEvent(!Bukkit.isPrimaryThread(), this, id));
+                Bukkit.getPluginManager().callEvent(new InventorySafeEvent(!Bukkit.isPrimaryThread(), this, id));
             }
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (Exception e) {
+            Logger.error.println(e);
         }
     }
 
@@ -549,7 +550,7 @@ public class TNLPlayer {
     }
 
     public void disguise(net.minecraft.server.v1_15_R1.EntityLiving entity) {
-        disguise(entity, TNLListener.getOnlinePlayers());
+        disguise(entity, TNLListener.getInstance().getOnlinePlayers());
     }
 
     private static final HashMap<UUID, List<String>> bossBars = new HashMap<>();
@@ -642,8 +643,8 @@ public class TNLPlayer {
                             animation.getTitle().getTimeOut());
                     Thread.sleep(50);
                 } while (!spaces.isEmpty());
-            } catch (Throwable t) {
-                NMSMain.stacktrace(t);
+            } catch (Exception e) {
+                Logger.error.println(e);
             }
         }).start();
     }
@@ -667,14 +668,14 @@ public class TNLPlayer {
                 DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
                 dataOutputStream.writeUTF("Connect");
                 dataOutputStream.writeUTF(server.getName());
-                getBukkitPlayer().sendPluginMessage(NMSMain.getPlugin(), "BungeeCord", byteArrayOutputStream.toByteArray());
-                getBukkitPlayer().sendMessage(NMSMain.getPrefix() + " §aConnecting you to server §6" + server.getName());
+                getBukkitPlayer().sendPluginMessage(NMSMain.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
+                getBukkitPlayer().sendMessage(TNLListener.getInstance().getPrefix() + " §aConnecting you to server §6" + server.getName());
             } else {
-                getBukkitPlayer().sendMessage(NMSMain.getPrefix() + " §cThe server §4" + server.getName() + "§c is Offline");
+                getBukkitPlayer().sendMessage(TNLListener.getInstance().getPrefix() + " §cThe server §4" + server.getName() + "§c is Offline");
             }
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
-            getBukkitPlayer().sendMessage(NMSMain.getPrefix() + " §cFailed to connect you to server §4" + server.getName());
+        } catch (Exception e) {
+            Logger.error.println(e);
+            getBukkitPlayer().sendMessage(TNLListener.getInstance().getPrefix() + " §cFailed to connect you to server §4" + server.getName());
         }
     }
 
@@ -695,12 +696,12 @@ public class TNLPlayer {
                 } else {
                     this.getInventory().clear();
                 }
-                NMSMain.callEvent(new InventoryLoadedEvent(!Bukkit.isPrimaryThread(), this, id));
+                Bukkit.getPluginManager().callEvent(new InventoryLoadedEvent(!Bukkit.isPrimaryThread(), this, id));
             } else {
-                NMSMain.stacktrace("Unknown InventoryID '" + id + "' for player '" + getName() + "'");
+                Logger.error.println("Unknown InventoryID '" + id + "' for player '" + getName() + "'");
             }
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (Exception e) {
+            Logger.error.println(e);
         }
     }
 
@@ -708,9 +709,9 @@ public class TNLPlayer {
         File file = new File("plugins/TNLListener/");
         if (!file.exists()) {
             if (file.mkdirs()) {
-                NMSMain.print("Successfully created folder '" + file.getAbsolutePath() + "'");
+                Logger.info.println("Successfully created folder '" + file.getAbsolutePath() + "'");
             } else {
-                NMSMain.stacktrace("Failed to create folder '" + file.getAbsolutePath() + "'",
+                Logger.error.println("Failed to create folder '" + file.getAbsolutePath() + "'",
                         "Check if your software runs with the permission '777', 'root' or higher",
                         "Cloud and any kind of Remote software may cause issues if the server loads from a template");
             }
@@ -1005,24 +1006,12 @@ public class TNLPlayer {
         getEntityPlayer().setArrowCount(arrows);
     }
 
-    public void hidePlayer(TNLPlayer player) {
-        hidePlayer(NMSMain.getPlugin(), player);
+    public void hidePlayer(@Nonnull TNLPlayer player) {
+        this.sendPacket(new PacketPlayOutEntityDestroy(player.getEntityId()));
     }
 
-    public void hidePlayer(Plugin plugin, TNLPlayer player) {
-        this.getBukkitPlayer().hidePlayer(plugin, player.getBukkitPlayer());
-    }
-
-    public void showPlayer(TNLPlayer player) {
-        showPlayer(NMSMain.getPlugin(), player);
-    }
-
-    public void showPlayer(Plugin plugin, TNLPlayer player) {
-        this.getBukkitPlayer().showPlayer(plugin, player.getBukkitPlayer());
-    }
-
-    public boolean canSee(TNLPlayer player) {
-        return this.getBukkitPlayer().canSee(player.getBukkitPlayer());
+    public void showPlayer(@Nonnull TNLPlayer player) {
+        this.sendPacket(new PacketPlayOutSpawnEntityLiving(player.getEntityPlayer()));
     }
 
     public boolean isFlying() {
@@ -1053,10 +1042,6 @@ public class TNLPlayer {
         getBukkitPlayer().setResourcePack(s, bytes);
     }
 
-    public void setScoreboard(org.bukkit.scoreboard.Scoreboard scoreboard) throws IllegalArgumentException, IllegalStateException {
-        getBukkitPlayer().setScoreboard(scoreboard);
-    }
-
     public boolean isHealthScaled() {
         return getBukkitPlayer().isHealthScaled();
     }
@@ -1073,11 +1058,12 @@ public class TNLPlayer {
         return getBukkitPlayer().getHealthScale();
     }
 
+    @Nullable
     public Entity getSpectatorTarget() {
         return getBukkitPlayer().getSpectatorTarget();
     }
 
-    public void setSpectatorTarget(Entity entity) {
+    public void setSpectatorTarget(@Nonnull Entity entity) {
         getBukkitPlayer().setSpectatorTarget(entity);
     }
 

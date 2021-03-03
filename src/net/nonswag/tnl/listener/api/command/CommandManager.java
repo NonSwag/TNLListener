@@ -1,6 +1,7 @@
 package net.nonswag.tnl.listener.api.command;
 
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
@@ -49,13 +50,13 @@ public class CommandManager {
             pluginCommand.setAliases(pluginCommand.getAliases());
             if (permission != null) {
                 pluginCommand.setPermission(permission);
-                pluginCommand.setPermissionMessage(NMSMain.getPrefix() + " §cYou have no Rights §8(§4" + permission + "§8)");
+                pluginCommand.setPermissionMessage(TNLListener.getInstance().getPrefix() + " §cYou have no Rights §8(§4" + permission + "§8)");
             }
             if (tabCompleter != null) {
                 pluginCommand.setTabCompleter(tabCompleter);
             }
         } else {
-            NMSMain.stacktrace("The command '" + command + "' is not registered in your plugin.yml");
+            Logger.error.println("The command '" + command + "' is not registered in your plugin.yml");
         }
     }
 }

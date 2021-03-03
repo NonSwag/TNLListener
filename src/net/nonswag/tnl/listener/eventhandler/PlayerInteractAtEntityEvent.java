@@ -6,6 +6,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
@@ -15,7 +16,7 @@ public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
     private final int entityId;
     private boolean cancelled = false;
 
-    public PlayerInteractAtEntityEvent(TNLPlayer player, int entityId) {
+    public PlayerInteractAtEntityEvent(@Nonnull TNLPlayer player, int entityId) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.entityId = entityId;

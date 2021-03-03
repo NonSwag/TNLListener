@@ -19,7 +19,7 @@ public class PermissionManager implements Permissions, ServerOperator {
 
     public PermissionManager(@Nonnull TNLPlayer player) {
         this.player = player;
-        this.attachment = player.getBukkitPlayer().addAttachment(NMSMain.getPlugin());
+        this.attachment = player.getBukkitPlayer().addAttachment(NMSMain.getInstance());
     }
 
     @Nonnull

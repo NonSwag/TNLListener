@@ -2,6 +2,7 @@ package net.nonswag.tnl.listener.listeners;
 
 import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,29 +15,29 @@ public class KickListener implements Listener {
     public void onKick(PlayerKickEvent event) {
         try {
             if (event.getReason().equals("disconnect.spam")) {
-                if (NMSMain.isPunishSpamming()) {
-                    event.setReason(NMSMain.getKickMessageSpamming());
+                if (TNLListener.getInstance().isPunishSpamming()) {
+                    event.setReason(TNLListener.getInstance().getKickMessageSpamming());
                 } else {
                     event.setCancelled(true);
                 }
             }
             event.setLeaveMessage("");
-            if (!event.isCancelled() && NMSMain.isCustomKickMessage() && !NMSMain.getJoinMessage().equalsIgnoreCase("")) {
+            if (!event.isCancelled() && TNLListener.getInstance().isCustomKickMessage() && !TNLListener.getInstance().getJoinMessage().equalsIgnoreCase("")) {
                 for (Player all : Bukkit.getOnlinePlayers()) {
                     if (!all.equals(event.getPlayer())) {
-                        all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getKickMessage().replace("%player%", event.getPlayer().getName()).replace("%reason%", event.getReason()));
+                        all.sendMessage(TNLListener.getInstance().getPrefix() + " " + TNLListener.getInstance().getKickMessage().replace("%player%", event.getPlayer().getName()).replace("%reason%", event.getReason()));
                     } else {
-                        all.sendMessage(NMSMain.getPrefix() + " " + NMSMain.getQuitMessage().replace("%player%", NMSMain.getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())).replace("%reason%", event.getReason()));
+                        all.sendMessage(TNLListener.getInstance().getPrefix() + " " + TNLListener.getInstance().getQuitMessage().replace("%player%", TNLListener.getInstance().getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())).replace("%reason%", event.getReason()));
                     }
                 }
             }
             String reason = event.getReason();
-            if (!reason.startsWith(NMSMain.getPrefix() + "")) {
-                event.setReason(NMSMain.getPrefix() + "\n§c" + event.getReason());
+            if (!reason.startsWith(TNLListener.getInstance().getPrefix() + "")) {
+                event.setReason(TNLListener.getInstance().getPrefix() + "\n§c" + event.getReason());
             }
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (Exception e) {
+            Logger.error.println(e);
         }
-        NMSMain.runTaskAsynchronously(TNLListener::updatePlayers);
+        Bukkit.getScheduler().runTaskAsynchronously(NMSMain.getInstance(), () -> TNLListener.getInstance().updatePlayers());
     }
 }

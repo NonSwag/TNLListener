@@ -1,13 +1,17 @@
 package net.nonswag.tnl.listener.adapter;
 
 import io.netty.channel.*;
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.eventhandler.PlayerPacketEvent;
+import org.bukkit.Bukkit;
+
+import javax.annotation.Nonnull;
 
 public class PacketAdapter {
 
-    public static void uninject(TNLPlayer player) {
+    public static void uninject(@Nonnull TNLPlayer player) {
         try {
             Channel channel = player.getNetworkManager().channel;
             if (channel.pipeline().get(player.getName() + "-TNLListener") != null) {
@@ -19,20 +23,20 @@ public class PacketAdapter {
         }
     }
 
-    public static void inject(TNLPlayer player) {
+    public static void inject(@Nonnull TNLPlayer player) {
         try {
             if (player.getNetworkManager() == null || !player.isOnline()) {
                 if (player.getPlayerConnection() == null) {
-                    NMSMain.stacktrace("Failed to inject " + player.getName(), "The player connection can't be null");
-                    player.disconnect(NMSMain.getPrefix() + "\n" +
+                    Logger.error.println("Failed to inject " + player.getName(), "The player connection can't be null");
+                    player.disconnect(TNLListener.getInstance().getPrefix() + "\n" +
                             "§cThere are some unaccepted values in your connection");
                 } else if (!player.isOnline()) {
-                    NMSMain.stacktrace("Failed to inject " + player.getName(), "The player can't be offline");
-                    player.disconnect(NMSMain.getPrefix() + "\n" +
+                    Logger.error.println("Failed to inject " + player.getName(), "The player can't be offline");
+                    player.disconnect(TNLListener.getInstance().getPrefix() + "\n" +
                             "§cYou are online but your connection is offline?!");
                 } else {
-                    NMSMain.stacktrace("Failed to inject " + player, "Reached an unreachable statement?!");
-                    player.disconnect(NMSMain.getPrefix() + "\n§cReached an unreachable statement?!");
+                    Logger.error.println("Failed to inject " + player, "Reached an unreachable statement?!");
+                    player.disconnect(TNLListener.getInstance().getPrefix() + "\n§cReached an unreachable statement?!");
                 }
                 return;
             }
@@ -44,12 +48,12 @@ public class PacketAdapter {
                 public void channelRead(ChannelHandlerContext channelHandlerContext, Object packetObject) {
                     try {
                         PlayerPacketEvent event = new PlayerPacketEvent(player, packetObject);
-                        NMSMain.callEvent(event);
+                        Bukkit.getPluginManager().callEvent(event);
                         if (!event.isCancelled()) {
                             super.channelRead(channelHandlerContext, event.getPacket());
                         }
-                    } catch (Throwable t) {
-                        NMSMain.stacktrace(t);
+                    } catch (Exception e) {
+                        Logger.error.println(e);
                         uninject(player);
                     }
                 }
@@ -58,12 +62,12 @@ public class PacketAdapter {
                 public void write(ChannelHandlerContext channelHandlerContext, Object packetObject, ChannelPromise channelPromise) {
                     try {
                         PlayerPacketEvent event = new PlayerPacketEvent(player, packetObject);
-                        NMSMain.callEvent(event);
+                        Bukkit.getPluginManager().callEvent(event);
                         if (!event.isCancelled()) {
                             super.write(channelHandlerContext, event.getPacket(), channelPromise);
                         }
-                    } catch (Throwable t) {
-                        NMSMain.stacktrace(t);
+                    } catch (Exception e) {
+                        Logger.error.println(e);
                         uninject(player);
                     }
                 }
@@ -75,9 +79,9 @@ public class PacketAdapter {
             } catch (Throwable ignored) {
                 uninject(player);
             }
-        } catch (Throwable t) {
+        } catch (Exception e) {
             uninject(player);
-            NMSMain.stacktrace(t);
+            Logger.error.println(e);
         }
     }
 }
