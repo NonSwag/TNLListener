@@ -2,8 +2,6 @@ package net.nonswag.tnl.listener.api.player;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.TNLListener;
@@ -87,7 +85,7 @@ import java.util.*;
  *
  **/
 
-public class TNLPlayer implements Audience {
+public class TNLPlayer {
 
     @Nonnull private final Player bukkitPlayer;
     @Nonnull private final Scoreboard tnlOptionPacketScoreboard = new Scoreboard();
@@ -325,14 +323,6 @@ public class TNLPlayer implements Audience {
 
     public void sendMessage(String s) {
         getBukkitPlayer().sendMessage(s);
-    }
-
-    @Override
-    public void sendMessage(@Nonnull Component component) {
-    }
-
-    public void playSound(@Nonnull Sound sound, @Nonnull SoundCategory soundCategory) {
-
     }
 
     public void disconnect() {
