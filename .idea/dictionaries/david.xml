@@ -7,7 +7,10 @@
       <w>backflip</w>
       <w>balaring</w>
       <w>banane</w>
+      <w>basedrum</w>
+      <w>blastfurnace</w>
       <w>blockbuild</w>
+      <w>bobber</w>
       <w>breakdance</w>
       <w>bukkit</w>
       <w>buuuh</w>
@@ -19,19 +22,23 @@
       <w>copyclipboard</w>
       <w>craftbukkit</w>
       <w>craftukkit</w>
+      <w>crit</w>
       <w>crosshair</w>
       <w>ctor</w>
       <w>derp</w>
       <w>dont</w>
+      <w>dragonbreath</w>
       <w>elytra</w>
       <w>ender</w>
       <w>fconnected</w>
+      <w>firecharge</w>
       <w>flexi</w>
       <w>flexicap</w>
       <w>flexicute</w>
       <w>flexilost</w>
       <w>flexiuff</w>
       <w>flexiwow</w>
+      <w>flintandsteel</w>
       <w>fremote</w>
       <w>fserver</w>
       <w>gamemode</w>
@@ -45,24 +52,29 @@
       <w>keybind</w>
       <w>kickboxer</w>
       <w>kinyarwanda</w>
+      <w>knockback</w>
       <w>kyrgyz</w>
       <w>laby</w>
       <w>labycool</w>
       <w>labymod</w>
       <w>labywings</w>
       <w>langpair</w>
+      <w>leatherworker</w>
       <w>levelup</w>
       <w>llangpair</w>
       <w>lumpi</w>
       <w>luxenbourgish</w>
       <w>magikarp</w>
       <w>maneki</w>
+      <w>mellohi</w>
       <w>mindblow</w>
       <w>minecart</w>
       <w>minecraft</w>
       <w>mojang</w>
+      <w>mooshroom</w>
       <w>namespaced</w>
       <w>naruto</w>
+      <w>nodamage</w>
       <w>nonswag</w>
       <w>nyanja</w>
       <w>odia</w>
@@ -72,6 +84,8 @@
       <w>patu</w>
       <w>pika</w>
       <w>playerlist</w>
+      <w>pling</w>
+      <w>purreow</w>
       <w>representer</w>
       <w>reved</w>
       <w>riptiding</w>
@@ -84,16 +98,22 @@
       <w>sinhala</w>
       <w>softwares</w>
       <w>spiritendo</w>
+      <w>stal</w>
+      <w>stonecutter</w>
+      <w>strad</w>
       <w>suggestcommand</w>
       <w>tajik</w>
       <w>teleport</w>
       <w>tellraw</w>
       <w>tnllistener</w>
+      <w>toolsmith</w>
       <w>tryingtofly</w>
       <w>turkmen</w>
       <w>undiscover</w>
       <w>uyghur</w>
       <w>waveover</w>
+      <w>weaponsmith</w>
+      <w>wololo</w>
     </words>
   </dictionary>
 </component>

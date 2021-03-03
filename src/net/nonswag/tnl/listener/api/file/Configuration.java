@@ -1,92 +1,104 @@
 package net.nonswag.tnl.listener.api.file;
 
-import net.nonswag.tnl.listener.NMSMain;
+import com.sun.istack.internal.Nullable;
+import net.nonswag.tnl.cloud.api.system.Console;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
+/**
+ * @deprecated Configuration API
+ * @see JsonConfig
+ * @apiNote outdated
+ */
+
+@Deprecated
 public class Configuration {
 
-    private final File file;
+    @Nonnull private final File file;
 
-    public Configuration(String file) {
+    @Deprecated
+    public Configuration(@Nonnull String file) {
         this(new File(file));
     }
 
-    public Configuration(String path, String file) {
+    @Deprecated
+    public Configuration(@Nonnull String path, @Nonnull String file) {
         File configPath = new File(path);
         File configFile = new File((path + "/" + file));
         try {
             if (!configPath.getCanonicalFile().exists()) {
                 if (!configPath.mkdirs()) {
-                    NMSMain.stacktrace("An error has occurred while creating the directory '" + configPath.getAbsolutePath() + "'");
+                    Console.stacktrace("An error has occurred while creating the directory §8'§4" + configPath.getAbsolutePath() + "§8'");
                 }
             }
             if (!configFile.exists()) {
                 if (!configFile.createNewFile()) {
-                    NMSMain.stacktrace("An error has occurred while creating the file '" + configFile.getAbsolutePath() + "'");
+                    Console.stacktrace("An error has occurred while creating the file §8'§4" + configFile.getAbsolutePath() + "§8'");
                 } else {
-                    NMSMain.print("Successfully created the file '" + configFile.getAbsolutePath() + "'");
+                    Console.print("Successfully created the file §8'§6" + configFile.getAbsolutePath() + "§8'");
                 }
             }
-        } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+        } catch (Exception e) {
+            Console.stacktrace(e);
         }
         this.file = configFile;
         if (!isValid()) {
-            NMSMain.stacktrace("The file '" + this.file.getAbsolutePath() + "' is invalid");
+            Console.stacktrace("The file §8'§4" + this.file.getAbsolutePath() + "§8'§c is invalid");
         }
     }
 
-    public Configuration(File file) {
+    @Deprecated
+    public Configuration(@Nonnull File file) {
         this.file = file;
         if (!file.exists()) {
             try {
                 if (!file.getCanonicalFile().exists()) {
                     if (!file.mkdirs()) {
-                        NMSMain.stacktrace("An error has occurred while creating the directory '" + file.getAbsolutePath() + "'");
+                        Console.stacktrace("An error has occurred while creating the directory §8'§4" + file.getAbsolutePath() + "§8'");
                     }
                 }
                 if (!file.createNewFile()) {
-                    NMSMain.stacktrace("An error has occurred while creating the file '" + file.getAbsolutePath() + "'");
+                    Console.stacktrace("An error has occurred while creating the file §8'§4" + file.getAbsolutePath() + "§8'");
                 } else {
-                    NMSMain.print("Successfully created the file '" + file.getAbsolutePath() + "'");
+                    Console.print("Successfully created the file §8'§6" + file.getAbsolutePath() + "§8'");
                 }
             } catch (Throwable ignored) {
             }
         }
         if (!isValid()) {
-            NMSMain.stacktrace("The file '" + file.getAbsolutePath() + "' is invalid");
+            Console.stacktrace("The file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
         }
     }
 
+    @Deprecated
+    @Nonnull
     public File getFile() {
         return file;
     }
 
+    @Deprecated
     private boolean isValid() {
         return getFile().exists() && getFile().isFile();
     }
 
-    public void setValueIfAbsent(Object var, Object var2) {
+    @Deprecated
+    public void setValueIfAbsent(@Nonnull Object var, @Nonnull Object var2) {
         if (getValue(var) == null) {
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(getFile().getAbsolutePath(), true));
                 writer.write(var + "=" + var2 + "\n");
                 writer.close();
-                NMSMain.print("Added new configuration section '" + var.toString() + "' with the value '" + var2.toString() + "'");
+                Console.print("Added new configuration section §8'§6" + var.toString() + "§8'§a with the value §8'§6" + var2.toString() + "§8'");
             } catch (Throwable t) {
-                NMSMain.stacktrace(t);
+                Console.stacktrace(t);
             }
         }
     }
 
-    public void setValue(Object var, Object var2) {
+    @Deprecated
+    public void setValue(@Nonnull Object var, @Nonnull Object var2) {
         try {
             if (!isValid()) {
                 throw new IllegalArgumentException("Invalid Configuration");
@@ -95,46 +107,46 @@ public class Configuration {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(getFile().getAbsolutePath(), true));
                 writer.write(var + "=" + var2 + "\n");
                 writer.close();
-                NMSMain.print("Added new configuration section '" + var.toString() + "' with the value '" + var2.toString() + "'");
+                Console.print("Added new configuration section §8'§6" + var.toString() + "§8'§a with the value §8'§6" + var2.toString() + "§8'");
             } else {
                 File temp = new File(".cache.temp");
                 File old = getFile();
                 if (!temp.exists() && !temp.createNewFile()) {
-                    NMSMain.stacktrace("Failed to create the temp file");
+                    Console.stacktrace("Failed to create the temp file");
                 } else {
                     BufferedWriter writer = new BufferedWriter(new FileWriter(temp, true));
                     getValues().forEach((o, o2) -> {
                         try {
                             if (var.toString().equals(o.toString())) {
-                                if (var2 != null) {
-                                    writer.write(o.toString() + "=" + var2.toString() + "\n");
-                                }
+                                writer.write(o.toString() + "=" + var2.toString() + "\n");
                             } else {
                                 if (o2 != null) {
                                     writer.write(o.toString() + "=" + o2.toString() + "\n");
                                 }
                             }
                         } catch (Throwable t) {
-                            NMSMain.stacktrace(t);
+                            Console.stacktrace(t);
                         }
                     });
                     if (!old.delete() || !temp.renameTo(old)) {
-                        NMSMain.stacktrace("Failed to convert temp file to final file");
+                        Console.stacktrace("Failed to convert temp file to final file");
                     }
                     writer.close();
                 }
             }
         } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+            Console.stacktrace(t);
         }
     }
 
-    public Object getOrDefault(Object var, Object defaultValue) {
-        return new net.nonswag.tnl.cloud.api.object.Object<>(getValue(var)).getOrDefault(defaultValue);
+    @Deprecated
+    public Object getOrDefault(@Nonnull Object var, @Nonnull Object defaultValue) {
+        return new net.nonswag.tnl.cloud.api.object.Objects<>(getValue(var)).getOrDefault(defaultValue);
     }
 
+    @Deprecated
     @Nullable
-    public Object getValue(Object var) {
+    public Object getValue(@Nonnull Object var) {
         try {
             if (!isValid()) {
                 return null;
@@ -147,157 +159,170 @@ public class Configuration {
                         return String.join("=", split.subList(1, split.size()));
                     }
                 } catch (Throwable t) {
-                    NMSMain.stacktrace(t);
+                    Console.stacktrace(t);
                 }
             }
             reader.close();
         } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+            Console.stacktrace(t);
         }
         return null;
     }
 
+    @Deprecated
     @Nullable
-    public String getString(Object var) {
+    public String getString(@Nonnull Object var) {
         try {
-            return new net.nonswag.tnl.listener.api.object.Object<>(getValue(var)).toString();
+            return getValue(var).toString();
         } catch (Throwable t) {
             return null;
         }
     }
 
-    @Nonnull
-    public List<String> getStringList(Object var) {
-        String value = getString(var);
-        if (value != null) {
-            return Arrays.asList(value.split(", "));
+    @Deprecated
+    @Nullable
+    public List<String> getStringList(@Nonnull Object var) {
+        try {
+            return Arrays.asList(getValue(var).toString().split(", "));
+        } catch (Throwable t) {
+            return null;
         }
-        return new ArrayList<>();
     }
 
+    @Deprecated
     @Nullable
-    public Integer getInteger(Object var) {
-        String value = getString(var);
-        if (value != null) {
-            return Integer.parseInt(value);
+    public Integer getInteger(@Nonnull Object var) {
+        try {
+            return Integer.parseInt(getValue(var).toString());
+        } catch (Throwable t) {
+            return null;
         }
-        return null;
     }
 
+    @Deprecated
     @Nullable
-    public Double getDouble(Object var) {
-        String value = getString(var);
-        if (value != null) {
-            return Double.parseDouble(value);
+    public Double getDouble(@Nonnull Object var) {
+        try {
+            return Double.parseDouble(getValue(var).toString());
+        } catch (Throwable t) {
+            return null;
         }
-        return null;
     }
 
+    @Deprecated
     @Nullable
-    public Float getFloat(Object var) {
-        String value = getString(var);
-        if (value != null) {
-            return Float.parseFloat(value);
+    public Float getFloat(@Nonnull Object var) {
+        try {
+            return Float.parseFloat(getValue(var).toString());
+        } catch (Throwable t) {
+            return null;
         }
-        return null;
     }
 
+    @Deprecated
     @Nullable
-    public Short getShort(Object var) {
-        String value = getString(var);
-        if (value != null) {
-            return Short.parseShort(value);
+    public Short getShort(@Nonnull Object var) {
+        try {
+            return Short.parseShort(getValue(var).toString());
+        } catch (Throwable t) {
+            return null;
         }
-        return null;
     }
 
+    @Deprecated
     @Nullable
-    public Byte getByte(Object var) {
-        String value = getString(var);
-        if (value != null) {
-            return Byte.parseByte(value);
+    public Byte getByte(@Nonnull Object var) {
+        try {
+            return Byte.parseByte(getValue(var).toString());
+        } catch (Throwable t) {
+            return null;
         }
-        return null;
     }
 
+    @Deprecated
     @Nullable
-    public Long getLong(Object var) {
-        String value = getString(var);
-        if (value != null) {
-            return Long.parseLong(value);
+    public Long getLong(@Nonnull Object var) {
+        try {
+            return Long.parseLong(getValue(var).toString());
+        } catch (Throwable t) {
+            return null;
         }
-        return null;
     }
 
+    @Deprecated
     @Nullable
-    public Character getCharacter(Object var) {
-        String value = getString(var);
-        if (value != null) {
+    public Character getCharacter(@Nonnull Object var) {
+        try {
+            String value = getValue(var).toString();
             if (value.length() > 1) {
                 throw new IllegalStateException("A single character can't have more than one chars");
             }
             return value.charAt(0);
+        } catch (Throwable t) {
+            return null;
         }
-        return null;
     }
 
+    @Deprecated
     @Nullable
-    public char[] getCharacters(Object var) {
-        String value = getString(var);
-        if (value != null) {
-            return value.toCharArray();
+    public char[] getCharacters(@Nonnull Object var) {
+        try {
+            return getValue(var).toString().toCharArray();
+        } catch (Throwable t) {
+            return null;
         }
-        return null;
     }
 
+    @Deprecated
     @Nullable
-    public Boolean getBoolean(Object var) {
-        String value = getString(var);
-        if (value != null) {
-            return Boolean.parseBoolean(value);
+    public Boolean getBoolean(@Nonnull Object var) {
+        try {
+            return Boolean.parseBoolean(getValue(var).toString());
+        } catch (Throwable t) {
+            return null;
         }
-        return null;
     }
 
+    @Deprecated
     @Nullable
-    public void removeValue(Object var) {
+    public void removeValue(@Nonnull Object var) {
         try {
             if (isValid()) {
                 File temp = new File(".cache.temp");
                 File old = getFile();
                 if (!temp.exists() && !temp.createNewFile()) {
-                    NMSMain.stacktrace("Failed to create the temp file");
+                    Console.stacktrace("Failed to create the temp file");
                 } else {
                     BufferedWriter writer = new BufferedWriter(new FileWriter(temp, true));
                     getValues().forEach((o, o2) -> {
                         try {
-                            if (!var.equals(o)) {
+                            if (!var.toString().equals(o.toString())) {
                                 writer.write(o.toString() + "=" + o2.toString() + "\n");
                             }
                         } catch (Throwable t) {
-                            NMSMain.stacktrace(t);
+                            Console.stacktrace(t);
                         }
                     });
                     if (!old.delete() || !temp.renameTo(old)) {
-                        NMSMain.stacktrace("Failed to convert temp file to final file");
+                        Console.stacktrace("Failed to convert temp file to final file");
                     }
                     writer.close();
                 }
             }
         } catch (Throwable t) {
-            NMSMain.stacktrace(t);
+            Console.stacktrace(t);
         }
     }
 
+    @Deprecated
     @Nonnull
     public HashMap<Object, Object> getValues() {
         HashMap<Object, Object> values = new HashMap<>();
-        if (!isValid()) {
-            return values;
-        }
-        BufferedReader reader;
         try {
-            reader = new BufferedReader(new FileReader(getFile().getAbsolutePath()));
+            if (!isValid()) {
+                return values;
+            }
+            BufferedReader reader = new BufferedReader(new FileReader(getFile().getAbsolutePath()));
             for (Object o : reader.lines().toArray()) {
                 try {
                     List<String> split = Arrays.asList(o.toString().split("="));
@@ -305,12 +330,12 @@ public class Configuration {
                         values.put(split.get(0), String.join("=", split.subList(1, split.size())));
                     }
                 } catch (Throwable t) {
-                    NMSMain.stacktrace(t);
+                    Console.stacktrace(t);
                 }
             }
             reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            Console.stacktrace(t);
         }
         return values;
     }

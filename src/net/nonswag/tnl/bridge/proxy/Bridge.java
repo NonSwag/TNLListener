@@ -11,7 +11,7 @@ import net.nonswag.tnl.api.event.EventManager;
 import net.nonswag.tnl.bridge.proxy.listeners.JoinListener;
 import net.nonswag.tnl.bridge.proxy.listeners.MessageDecodeListener;
 import net.nonswag.tnl.bridge.proxy.listeners.PacketListener;
-import net.nonswag.tnl.cloud.api.file.Configuration;
+import net.nonswag.tnl.listener.api.file.JsonConfig;
 import net.nonswag.tnl.cloud.api.system.Console;
 import net.nonswag.tnl.cloud.utils.MathUtil;
 import net.nonswag.tnl.listener.utils.StringUtil;
@@ -32,7 +32,7 @@ public class Bridge {
     private static VelocityServer velocityServer;
     private static Logger logger;
 
-    private static Configuration config;
+    private static JsonConfig config;
 
     private static int port;
     private static String forwardingSecret = StringUtil.random(16);
@@ -51,50 +51,28 @@ public class Bridge {
             EventManager.registerEvent(new MessageDecodeListener());
             EventManager.registerEvent(new PacketListener());
 
-            File configFile = new File("/home/Minecraft/Velocity/plugins/TNLListener/");
-            if (!configFile.exists()) {
-                if (!configFile.mkdir()) {
-                    stacktrace("Failed to create the plugin specified plugin folder");
+            setConfig(new JsonConfig(new File("/home/Minecraft/Velocity/plugins/TNLListener/config.json")));
+            try {
+                Integer port = getConfig().getInteger("port");
+                if (port == null) {
+                    port = MathUtil.randomInteger(20000, 30000);
+                    getConfig().set("port", port);
                 }
+                setPort(port);
+            } catch (Throwable t) {
+                stacktrace(t);
             }
-            if (configFile.exists()) {
-                configFile = new File("/home/Minecraft/Velocity/plugins/TNLListener/config.tnl");
-                if (!configFile.exists()) {
-                    try {
-                        if (!configFile.createNewFile()) {
-                            stacktrace("Failed to create config file");
-                        }
-                    } catch (Throwable ignored) {
-                        stacktrace("Failed to create the plugin config");
-                    }
+            try {
+                String forwardingSecret = getConfig().getString("forwarding-secret");
+                if (forwardingSecret == null) {
+                    getConfig().set("forwarding-secret", Bridge.forwardingSecret);
+                } else {
+                    setForwardingSecret(forwardingSecret);
                 }
-            }
-            if (configFile.exists()) {
-                setConfig(new Configuration(configFile));
-                try {
-                    Integer port = getConfig().getInteger("port");
-                    if (port == null) {
-                        port = MathUtil.randomInteger(20000, 30000);
-                        getConfig().setValue("port", port);
-                    }
-                    setPort(port);
-                } catch (Throwable t) {
-                    stacktrace(t);
-                }
-                try {
-                    String forwardingSecret = getConfig().getString("forwarding-secret");
-                    if (forwardingSecret == null) {
-                        getConfig().setValue("forwarding-secret", Bridge.forwardingSecret);
-                    } else {
-                        setForwardingSecret(forwardingSecret);
-                    }
-                    print("§aForwarding secret is §8'§6" + getForwardingSecret() + "§8'");
-                    ConnectionHandler.start();
-                } catch (Throwable t) {
-                    stacktrace(t);
-                }
-            } else {
-                stacktrace("Failed to load the config (canceling plugin start)");
+                print("§aForwarding secret is §8'§6" + getForwardingSecret() + "§8'");
+                ConnectionHandler.start();
+            } catch (Throwable t) {
+                stacktrace(t);
             }
         } catch (Throwable t) {
             stacktrace(t);
@@ -127,11 +105,11 @@ public class Bridge {
         Bridge.forwardingSecret = forwardingSecret;
     }
 
-    public static void setConfig(Configuration config) {
+    public static void setConfig(JsonConfig config) {
         Bridge.config = config;
     }
 
-    public static Configuration getConfig() {
+    public static JsonConfig getConfig() {
         return config;
     }
 

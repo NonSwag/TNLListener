@@ -6,13 +6,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public abstract class TNLListener {
 
+    @Nonnull
     private static final HashMap<World, String> worldAliasHashMap = new HashMap<>();
+    @Nonnull
     private static final HashMap<Player, TNLPlayer> playerHashMap = new HashMap<>();
 
     public static void onEnable() {
@@ -31,14 +34,17 @@ public abstract class TNLListener {
         }
     }
 
+    @Nonnull
     public static List<TNLPlayer> getOnlinePlayers() {
         return new ArrayList<>(getPlayerHashMap().values());
     }
 
+    @Nonnull
     public static HashMap<World, String> getWorldAliasHashMap() {
         return worldAliasHashMap;
     }
 
+    @Nonnull
     public static HashMap<Player, TNLPlayer> getPlayerHashMap() {
         return playerHashMap;
     }

@@ -2,12 +2,14 @@ package net.nonswag.tnl.listener.api.player;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.NMSMain;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
-import net.nonswag.tnl.listener.api.permission.Permissions;
+import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.enumerations.ProtocolVersion;
@@ -43,10 +45,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.*;
 import org.bukkit.map.MapView;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -54,6 +52,8 @@ import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -61,57 +61,92 @@ import java.net.InetSocketAddress;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
 
-public class TNLPlayer {
+/**
+ * TNLPlayer is a more net.minecraft.server based player
+ *
+ * @see TNLPlayer#backflip()
+ * @see TNLPlayer#bungeeConnect(net.nonswag.tnl.listener.api.server.Server)
+ * @see TNLPlayer#cast(Entity)
+ * @see TNLPlayer#cast(Object)
+ * @see TNLPlayer#cast(Player)
+ * @see TNLPlayer#cast(String)
+ * @see TNLPlayer#cast(TNLPlayer)
+ * @see TNLPlayer#cast(CommandSender)
+ * @see TNLPlayer#cast(CraftPlayer)
+ * @see TNLPlayer#cast(HumanEntity)
+ * @see TNLPlayer#cast(LivingEntity)
+ * @see TNLPlayer#getVirtualStorage()
+ * @see TNLPlayer#updateBossBar(BossBar)
+ * @see TNLPlayer#hideBossBar(BossBar)
+ * @see TNLPlayer#sendBossBar(BossBar)
+ * @see TNLPlayer#sendBossBar(BossBar, long)
+ * @see TNLPlayer#getBossBars(UUID)
+ * @see TNLPlayer#resetTitle()
+ * @see TNLPlayer#sendTitle(Title)
+ * @see TNLPlayer#sendTitle(Title.Animation)
+ *
+ **/
 
-    private final Player player;
-    private final Scoreboard tnlOptionPacketScoreboard = new Scoreboard();
-    private final ScoreboardTeam tnlOptionPacketTeam = new ScoreboardTeam(getTnlOptionPacketScoreboard(), "TNLOptionPacket");
-    private final HashMap<String, Object> virtualStorage = new HashMap<>();
+public class TNLPlayer implements Audience {
 
-    protected TNLPlayer(Player player) {
-        this.player = player;
+    @Nonnull private final Player bukkitPlayer;
+    @Nonnull private final Scoreboard tnlOptionPacketScoreboard = new Scoreboard();
+    @Nonnull private final ScoreboardTeam tnlOptionPacketTeam = new ScoreboardTeam(getTnlOptionPacketScoreboard(), "TNLOptionPacket");
+    @Nonnull private final HashMap<String, Object> virtualStorage = new HashMap<>();
+    @Nonnull private final PermissionManager permissionManager;
+
+    protected TNLPlayer(@Nonnull Player bukkitPlayer) {
+        this.bukkitPlayer = bukkitPlayer;
+        this.permissionManager = new PermissionManager(this);
     }
 
-    public static TNLPlayer cast(Player player) {
+    @Nonnull
+    public static TNLPlayer cast(@Nonnull Player player) {
         if (!TNLListener.getPlayerHashMap().containsKey(player)) {
             TNLListener.getPlayerHashMap().put(player, new TNLPlayer(player));
         }
         return TNLListener.getPlayerHashMap().get(player);
     }
 
-    public static TNLPlayer cast(CraftPlayer craftPlayer) {
+    @Nonnull
+    public static TNLPlayer cast(@Nonnull CraftPlayer craftPlayer) {
         return cast((Player) craftPlayer);
     }
 
-    public static TNLPlayer cast(CommandSender sender) {
+    @Nullable
+    public static TNLPlayer cast(@Nullable CommandSender sender) {
         if (sender instanceof Player) {
             return cast((Player) sender);
         }
         return null;
     }
 
-    public static TNLPlayer cast(HumanEntity humanEntity) {
+    @Nullable
+    public static TNLPlayer cast(@Nullable HumanEntity humanEntity) {
         if (humanEntity instanceof Player) {
             return cast((Player) humanEntity);
         }
         return null;
     }
 
-    public static TNLPlayer cast(Entity entity) {
+    @Nullable
+    public static TNLPlayer cast(@Nullable Entity entity) {
         if (entity instanceof Player) {
             return cast((Player) entity);
         }
         return null;
     }
 
-    public static TNLPlayer cast(LivingEntity livingEntity) {
+    @Nullable
+    public static TNLPlayer cast(@Nullable LivingEntity livingEntity) {
         if (livingEntity instanceof Player) {
             return cast((Player) livingEntity);
         }
         return null;
     }
 
-    public static TNLPlayer cast(String string) {
+    @Nullable
+    public static TNLPlayer cast(@Nonnull String string) {
         Player player = Bukkit.getPlayer(string);
         if (player != null) {
             return cast(player);
@@ -119,14 +154,16 @@ public class TNLPlayer {
         return null;
     }
 
-    public static TNLPlayer cast(Object object) {
+    @Nullable
+    public static TNLPlayer cast(@Nullable Object object) {
         if (object instanceof Player) {
             return cast(((Player) object));
         }
         return null;
     }
 
-    public static TNLPlayer cast(TNLPlayer player) {
+    @Nullable
+    public static TNLPlayer cast(@Nullable TNLPlayer player) {
         return player;
     }
 
@@ -162,108 +199,110 @@ public class TNLPlayer {
         return getEntityPlayer().ping;
     }
 
-    public void getProtocolVersion() {
-
+    @Nonnull
+    public PermissionManager getPermissionManager() {
+        return permissionManager;
     }
 
     public boolean isOnline() {
-        return getPlayer().isOnline();
+        return getBukkitPlayer().isOnline();
     }
 
     public boolean isBanned() {
-        return getPlayer().isBanned();
+        return getBukkitPlayer().isBanned();
     }
 
     public boolean isWhitelisted() {
-        return getPlayer().isWhitelisted();
+        return getBukkitPlayer().isWhitelisted();
     }
 
     public void setWhitelisted(boolean b) {
-        getPlayer().setWhitelisted(b);
+        getBukkitPlayer().setWhitelisted(b);
     }
 
-    public Player getPlayer() {
-        return player;
+    @Nonnull
+    public Player getBukkitPlayer() {
+        return bukkitPlayer;
     }
 
     public long getFirstPlayed() {
-        return getPlayer().getFirstPlayed();
+        return getBukkitPlayer().getFirstPlayed();
     }
 
     public boolean hasPlayedBefore() {
-        return getPlayer().hasPlayedBefore();
+        return getBukkitPlayer().hasPlayedBefore();
     }
 
     public void incrementStatistic(Statistic statistic) throws IllegalArgumentException {
-        getPlayer().incrementStatistic(statistic);
+        getBukkitPlayer().incrementStatistic(statistic);
     }
 
     public void decrementStatistic(Statistic statistic) throws IllegalArgumentException {
-        getPlayer().decrementStatistic(statistic);
+        getBukkitPlayer().decrementStatistic(statistic);
     }
 
     public void incrementStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-        getPlayer().incrementStatistic(statistic, i);
+        getBukkitPlayer().incrementStatistic(statistic, i);
     }
 
     public void decrementStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-        getPlayer().decrementStatistic(statistic, i);
+        getBukkitPlayer().decrementStatistic(statistic, i);
     }
 
     public void setStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-        getPlayer().setStatistic(statistic, i);
+        getBukkitPlayer().setStatistic(statistic, i);
     }
 
     public int getStatistic(Statistic statistic) throws IllegalArgumentException {
-        return getPlayer().getStatistic(statistic);
+        return getBukkitPlayer().getStatistic(statistic);
     }
 
     public void incrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-        getPlayer().incrementStatistic(statistic, material);
+        getBukkitPlayer().incrementStatistic(statistic, material);
     }
 
     public void decrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-        getPlayer().decrementStatistic(statistic, material);
+        getBukkitPlayer().decrementStatistic(statistic, material);
     }
 
     public int getStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-        return getPlayer().getStatistic(statistic, material);
+        return getBukkitPlayer().getStatistic(statistic, material);
     }
 
     public void incrementStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-        getPlayer().incrementStatistic(statistic, material, i);
+        getBukkitPlayer().incrementStatistic(statistic, material, i);
     }
 
     public void decrementStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-        getPlayer().decrementStatistic(statistic, material, i);
+        getBukkitPlayer().decrementStatistic(statistic, material, i);
     }
 
     public void setStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-        getPlayer().setStatistic(statistic, material, i);
+        getBukkitPlayer().setStatistic(statistic, material, i);
     }
 
     public void incrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-        getPlayer().incrementStatistic(statistic, entityType);
+        getBukkitPlayer().incrementStatistic(statistic, entityType);
     }
 
     public void decrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-        getPlayer().decrementStatistic(statistic, entityType);
+        getBukkitPlayer().decrementStatistic(statistic, entityType);
     }
 
     public int getStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-        return getPlayer().getStatistic(statistic, entityType);
+        return getBukkitPlayer().getStatistic(statistic, entityType);
     }
 
     public void incrementStatistic(Statistic statistic, EntityType entityType, int i) throws IllegalArgumentException {
-        getPlayer().incrementStatistic(statistic, entityType, i);
+        getBukkitPlayer().incrementStatistic(statistic, entityType, i);
     }
 
     public void decrementStatistic(Statistic statistic, EntityType entityType, int i) {
-        getPlayer().decrementStatistic(statistic, entityType, i);
+        getBukkitPlayer().decrementStatistic(statistic, entityType, i);
     }
 
     public void setStatistic(Statistic statistic, EntityType entityType, int i) {
-        getPlayer().setStatistic(statistic, entityType, i);
+        getBukkitPlayer().setStatistic(statistic, entityType, i);
     }
 
     public void sendPacket(Packet<?> packet) {
@@ -285,18 +324,22 @@ public class TNLPlayer {
     }
 
     public void sendMessage(String s) {
-        getPlayer().sendMessage(s);
+        getBukkitPlayer().sendMessage(s);
     }
 
-    public void sendMessage(String[] strings) {
-        getPlayer().sendMessage(strings);
+    @Override
+    public void sendMessage(@Nonnull Component component) {
+    }
+
+    public void playSound(@Nonnull Sound sound, @Nonnull SoundCategory soundCategory) {
+
     }
 
     public void disconnect() {
         disconnect(NMSMain.getPrefix() + "\n§cDisconnected");
     }
 
-    public void disconnect(String kickMessage) {
+    public void disconnect(@Nonnull String kickMessage) {
         if (Bukkit.isPrimaryThread()) {
             if (!getPlayerConnection().processedDisconnect) {
                 getPlayerConnection().disconnect(kickMessage);
@@ -310,32 +353,12 @@ public class TNLPlayer {
         }
     }
 
-    public List<String> getPermissions() {
-        return Permissions.getPermissions(getPlayer());
-    }
-
-    public void addPermission(String permission) {
-        Permissions.add(getPlayer(), permission);
-    }
-
-    public void addPermissions(String... permissions) {
-        Permissions.add(getPlayer(), permissions);
-    }
-
-    public void removePermission(String permission) {
-        Permissions.remove(getPlayer(), permission);
-    }
-
-    public void removePermissions(String... permissions) {
-        Permissions.remove(getPlayer(), permissions);
-    }
-
     public String getWorldAlias() {
         return getWorldAlias(getWorld());
     }
 
     public void setRules(ScoreboardTeamBase.EnumNameTagVisibility rule, ScoreboardTeamBase.EnumTeamPush rule1) {
-        getTnlOptionPacketScoreboard().addPlayerToTeam(getPlayer().getName(), getTnlOptionPacketTeam());
+        getTnlOptionPacketScoreboard().addPlayerToTeam(getBukkitPlayer().getName(), getTnlOptionPacketTeam());
         if (rule != null) {
             getTnlOptionPacketTeam().setNameTagVisibility(rule);
         }
@@ -359,140 +382,140 @@ public class TNLPlayer {
     }
 
     public String getName() {
-        return getPlayer().getName();
+        return getBukkitPlayer().getName();
     }
 
     public PlayerInventory getInventory() {
-        return getPlayer().getInventory();
+        return getBukkitPlayer().getInventory();
     }
 
     public Inventory getEnderChest() {
-        return getPlayer().getEnderChest();
+        return getBukkitPlayer().getEnderChest();
     }
 
     public MainHand getMainHand() {
-        return getPlayer().getMainHand();
+        return getBukkitPlayer().getMainHand();
     }
 
     public boolean setWindowProperty(InventoryView.Property property, int i) {
-        return getPlayer().setWindowProperty(property, i);
+        return getBukkitPlayer().setWindowProperty(property, i);
     }
 
     public InventoryView getOpenInventory() {
-        return getPlayer().getOpenInventory();
+        return getBukkitPlayer().getOpenInventory();
     }
 
     public InventoryView openInventory(Inventory inventory) {
-        return getPlayer().openInventory(inventory);
+        return getBukkitPlayer().openInventory(inventory);
     }
 
     public InventoryView openWorkbench(Location location, boolean b) {
-        return getPlayer().openWorkbench(location, b);
+        return getBukkitPlayer().openWorkbench(location, b);
     }
 
     public InventoryView openEnchanting(Location location, boolean b) {
-        return getPlayer().openEnchanting(location, b);
+        return getBukkitPlayer().openEnchanting(location, b);
     }
 
     public void openInventory(InventoryView inventoryView) {
-        getPlayer().openInventory(inventoryView);
+        getBukkitPlayer().openInventory(inventoryView);
     }
 
     public InventoryView openMerchant(Villager villager, boolean b) {
-        return getPlayer().openMerchant(villager, b);
+        return getBukkitPlayer().openMerchant(villager, b);
     }
 
     public InventoryView openMerchant(Merchant merchant, boolean b) {
-        return getPlayer().openMerchant(merchant, b);
+        return getBukkitPlayer().openMerchant(merchant, b);
     }
 
     public void closeInventory() {
-        getPlayer().closeInventory();
+        getBukkitPlayer().closeInventory();
     }
 
     public void setItemOnCursor(ItemStack itemStack) {
-        getPlayer().setItemOnCursor(itemStack);
+        getBukkitPlayer().setItemOnCursor(itemStack);
     }
 
     public int getCooldown(Material material) {
-        return getPlayer().getCooldown(material);
+        return getBukkitPlayer().getCooldown(material);
     }
 
     public void setCooldown(Material material, int i) {
-        getPlayer().setCooldown(material, i);
+        getBukkitPlayer().setCooldown(material, i);
     }
 
     public int getSleepTicks() {
-        return getPlayer().getSleepTicks();
+        return getBukkitPlayer().getSleepTicks();
     }
 
     public Location getBedSpawnLocation() {
-        return getPlayer().getBedSpawnLocation();
+        return getBukkitPlayer().getBedSpawnLocation();
     }
 
     public void setBedSpawnLocation(Location location) {
-        getPlayer().setBedSpawnLocation(location);
+        getBukkitPlayer().setBedSpawnLocation(location);
     }
 
     public void setBedSpawnLocation(Location location, boolean b) {
-        getPlayer().setBedSpawnLocation(location, b);
+        getBukkitPlayer().setBedSpawnLocation(location, b);
     }
 
     public boolean sleep(Location location, boolean b) {
-        return getPlayer().sleep(location, b);
+        return getBukkitPlayer().sleep(location, b);
     }
 
     public void wakeup(boolean b) {
-        getPlayer().wakeup(b);
+        getBukkitPlayer().wakeup(b);
     }
 
     public Location getBedLocation() {
-        return getPlayer().getBedLocation();
+        return getBukkitPlayer().getBedLocation();
     }
 
     public GameMode getGameMode() {
-        return getPlayer().getGameMode();
+        return getBukkitPlayer().getGameMode();
     }
 
     public void setGameMode(GameMode gameMode) {
-        getPlayer().setGameMode(gameMode);
+        getBukkitPlayer().setGameMode(gameMode);
     }
 
     public boolean isBlocking() {
-        return getPlayer().isBlocking();
+        return getBukkitPlayer().isBlocking();
     }
 
     public boolean isHandRaised() {
-        return getPlayer().isHandRaised();
+        return getBukkitPlayer().isHandRaised();
     }
 
     public int getExpToLevel() {
-        return getPlayer().getExpToLevel();
+        return getBukkitPlayer().getExpToLevel();
     }
 
     public float getAttackCooldown() {
-        return getPlayer().getAttackCooldown();
+        return getBukkitPlayer().getAttackCooldown();
     }
 
     public boolean discoverRecipe(NamespacedKey namespacedKey) {
-        return getPlayer().discoverRecipe(namespacedKey);
+        return getBukkitPlayer().discoverRecipe(namespacedKey);
     }
 
     public int discoverRecipes(Collection<NamespacedKey> collection) {
-        return getPlayer().discoverRecipes(collection);
+        return getBukkitPlayer().discoverRecipes(collection);
     }
 
     public boolean undiscoverRecipe(NamespacedKey namespacedKey) {
-        return getPlayer().undiscoverRecipe(namespacedKey);
+        return getBukkitPlayer().undiscoverRecipe(namespacedKey);
     }
 
     public int undiscoverRecipes(Collection<NamespacedKey> collection) {
-        return getPlayer().undiscoverRecipes(collection);
+        return getBukkitPlayer().undiscoverRecipes(collection);
     }
 
     public void saveInventory(String id) {
         mkdirInventories();
-        File file = new File("plugins/TNLListener/" + getPlayer().getUniqueId() + ".yml");
+        File file = new File("plugins/TNLListener/" + getBukkitPlayer().getUniqueId() + ".yml");
         try {
             if (!file.exists()) {
                 if (!file.createNewFile()) {
@@ -501,7 +524,7 @@ public class TNLPlayer {
             }
             if (file.exists()) {
                 YamlConfiguration inventory = YamlConfiguration.loadConfiguration(file);
-                ItemStack[] contents = getPlayer().getInventory().getContents();
+                ItemStack[] contents = getBukkitPlayer().getInventory().getContents();
                 inventory.set(id, Arrays.asList(contents));
                 inventory.save(file);
                 NMSMain.callEvent(new InventorySafeEvent(!Bukkit.isPrimaryThread(), this, id));
@@ -511,15 +534,10 @@ public class TNLPlayer {
         }
     }
 
-    public void hideTabListName(Player[] players) {
-        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
-        if(players == null) {
-            for(Player all : Bukkit.getOnlinePlayers()) {
-                sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, entityPlayer));
-            }
-        } else {
-            for(Player all : players) {
-                sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, entityPlayer));
+    public void hideTabListName(@Nonnull TNLPlayer[] players) {
+        for (TNLPlayer all : players) {
+            if (!all.equals(this)) {
+                sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, all.getEntityPlayer()));
             }
         }
     }
@@ -590,25 +608,25 @@ public class TNLPlayer {
     }
 
     public void sendBossBar(BossBar bossBar, long millis) {
-        if (getBossHashMap().get(getPlayer().getUniqueId()) != null) {
-            hideBossBar(getBossHashMap().get(getPlayer().getUniqueId()));
+        if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null) {
+            hideBossBar(getBossHashMap().get(getBukkitPlayer().getUniqueId()));
         }
-        getBossHashMap().put(getPlayer().getUniqueId(), bossBar);
+        getBossHashMap().put(getBukkitPlayer().getUniqueId(), bossBar);
         sendBossBar(bossBar);
         new Thread(() -> {
             try {
                 Thread.sleep(millis);
             } catch (Throwable ignored) {
             }
-            if (getBossHashMap().get(getPlayer().getUniqueId()) != null
-                    && getBossHashMap().get(getPlayer().getUniqueId()).equals(bossBar)) {
-                hideBossBar(getBossHashMap().get(getPlayer().getUniqueId()));
+            if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null
+                    && getBossHashMap().get(getBukkitPlayer().getUniqueId()).equals(bossBar)) {
+                hideBossBar(getBossHashMap().get(getBukkitPlayer().getUniqueId()));
             }
         }).start();
     }
 
     public void sendTitle(Title title) {
-        sendTitle(title.getTitle(),
+        getBukkitPlayer().sendTitle(title.getTitle(),
                 title.getSubtitle(),
                 title.getTimeIn(),
                 title.getTimeStay(),
@@ -622,7 +640,7 @@ public class TNLPlayer {
                 String spaces = "          ";
                 do {
                     spaces = spaces.replaceFirst(" ", "");
-                    sendTitle((animation.getDesign().getSecondaryColor() +
+                    getBukkitPlayer().sendTitle((animation.getDesign().getSecondaryColor() +
                                     "- " +
                                     animation.getDesign().getPrimaryColor() +
                                     String.join(spaces, split) +
@@ -640,20 +658,12 @@ public class TNLPlayer {
         }).start();
     }
 
-    public void sendTitle(String title,
-                          String subTitle,
-                          int timeIn,
-                          int timeStay,
-                          int timeOut) {
-        getPlayer().sendTitle(title, subTitle, timeIn, timeStay, timeOut);
-    }
-
     public void sendActionBar(ActionBar actionBar) {
         sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + actionBar.getText() + "\"}"), ChatMessageType.a((byte) 2)));
     }
 
     public CraftPlayer getCraftPlayer() {
-        return ((CraftPlayer) getPlayer());
+        return ((CraftPlayer) getBukkitPlayer());
     }
 
     public EntityPlayer getEntityPlayer() {
@@ -667,19 +677,19 @@ public class TNLPlayer {
                 DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
                 dataOutputStream.writeUTF("Connect");
                 dataOutputStream.writeUTF(server.getName());
-                getPlayer().sendPluginMessage(NMSMain.getPlugin(), "BungeeCord", byteArrayOutputStream.toByteArray());
-                getPlayer().sendMessage(NMSMain.getPrefix() + " §aConnecting you to server §6" + server.getName());
+                getBukkitPlayer().sendPluginMessage(NMSMain.getPlugin(), "BungeeCord", byteArrayOutputStream.toByteArray());
+                getBukkitPlayer().sendMessage(NMSMain.getPrefix() + " §aConnecting you to server §6" + server.getName());
             } else {
-                getPlayer().sendMessage(NMSMain.getPrefix() + " §cThe server §4" + server.getName() + "§c is Offline");
+                getBukkitPlayer().sendMessage(NMSMain.getPrefix() + " §cThe server §4" + server.getName() + "§c is Offline");
             }
         } catch (Throwable t) {
             NMSMain.stacktrace(t);
-            getPlayer().sendMessage(NMSMain.getPrefix() + " §cFailed to connect you to server §4" + server.getName());
+            getBukkitPlayer().sendMessage(NMSMain.getPrefix() + " §cFailed to connect you to server §4" + server.getName());
         }
     }
 
     public void loadInventory(String id) {
-        File file = new File("plugins/TNLListener/" + getPlayer().getUniqueId() + ".yml");
+        File file = new File("plugins/TNLListener/" + getBukkitPlayer().getUniqueId() + ".yml");
         try {
             if (file.exists()) {
                 YamlConfiguration inventory = YamlConfiguration.loadConfiguration(file);
@@ -718,75 +728,75 @@ public class TNLPlayer {
     }
 
     public String getDisplayName() {
-        return getPlayer().getDisplayName();
+        return getBukkitPlayer().getDisplayName();
     }
 
     public void setDisplayName(String s) {
-        getPlayer().setDisplayName(s);
+        getBukkitPlayer().setDisplayName(s);
     }
 
     public String getPlayerListName() {
-        return getPlayer().getPlayerListName();
+        return getBukkitPlayer().getPlayerListName();
     }
 
     public void setPlayerListName(String s) {
-        getPlayer().setPlayerListName(s);
+        getBukkitPlayer().setPlayerListName(s);
     }
 
     public String getPlayerListHeader() {
-        return getPlayer().getPlayerListHeader();
+        return getBukkitPlayer().getPlayerListHeader();
     }
 
     public String getPlayerListFooter() {
-        return getPlayer().getPlayerListFooter();
+        return getBukkitPlayer().getPlayerListFooter();
     }
 
     public void setPlayerListHeader(String s) {
-        getPlayer().setPlayerListHeader(s);
+        getBukkitPlayer().setPlayerListHeader(s);
     }
 
     public void setPlayerListFooter(String s) {
-        getPlayer().setPlayerListFooter(s);
+        getBukkitPlayer().setPlayerListFooter(s);
     }
 
     public void setPlayerListHeaderFooter(String s, String s1) {
-        getPlayer().setPlayerListHeaderFooter(s, s1);
+        getBukkitPlayer().setPlayerListHeaderFooter(s, s1);
     }
 
     public void setCompassTarget(Location location) {
-        getPlayer().setCompassTarget(location);
+        getBukkitPlayer().setCompassTarget(location);
     }
 
     public Location getCompassTarget() {
-        return getPlayer().getCompassTarget();
+        return getBukkitPlayer().getCompassTarget();
     }
 
     public InetSocketAddress getAddress() {
-        return getPlayer().getAddress();
+        return getBukkitPlayer().getAddress();
     }
 
     public boolean isConversing() {
-        return getPlayer().isConversing();
+        return getBukkitPlayer().isConversing();
     }
 
     public void acceptConversationInput(String s) {
-        getPlayer().acceptConversationInput(s);
+        getBukkitPlayer().acceptConversationInput(s);
     }
 
     public boolean beginConversation(Conversation conversation) {
-        return getPlayer().beginConversation(conversation);
+        return getBukkitPlayer().beginConversation(conversation);
     }
 
     public void abandonConversation(Conversation conversation) {
-        getPlayer().abandonConversation(conversation);
+        getBukkitPlayer().abandonConversation(conversation);
     }
 
     public void abandonConversation(Conversation conversation, ConversationAbandonedEvent conversationAbandonedEvent) {
-        getPlayer().abandonConversation(conversation, conversationAbandonedEvent);
+        getBukkitPlayer().abandonConversation(conversation, conversationAbandonedEvent);
     }
 
     public void sendRawMessage(String s) {
-        getPlayer().sendRawMessage(s);
+        getBukkitPlayer().sendRawMessage(s);
     }
 
     public void sendRawMessage(String s, ChatMessageType chatMessageType) {
@@ -794,211 +804,211 @@ public class TNLPlayer {
     }
 
     public void kickPlayer(String s) {
-        getPlayer().kickPlayer(s);
+        getBukkitPlayer().kickPlayer(s);
     }
 
     public void chat(String s) {
-        getPlayer().chat(s);
+        getBukkitPlayer().chat(s);
     }
 
     public boolean performCommand(String s) {
-        return getPlayer().performCommand(s);
+        return getBukkitPlayer().performCommand(s);
     }
 
     public boolean isSneaking() {
-        return getPlayer().isSneaking();
+        return getBukkitPlayer().isSneaking();
     }
 
     public void setSneaking(boolean b) {
-        getPlayer().setSneaking(b);
+        getBukkitPlayer().setSneaking(b);
     }
 
     public boolean isSprinting() {
-        return getPlayer().isSprinting();
+        return getBukkitPlayer().isSprinting();
     }
 
     public void setSprinting(boolean b) {
-        getPlayer().setSprinting(b);
+        getBukkitPlayer().setSprinting(b);
     }
 
     public void saveData() {
-        getPlayer().saveData();
+        getBukkitPlayer().saveData();
     }
 
     public void loadData() {
-        getPlayer().loadData();
+        getBukkitPlayer().loadData();
     }
 
     public void setSleepingIgnored(boolean b) {
-        getPlayer().setSleepingIgnored(b);
+        getBukkitPlayer().setSleepingIgnored(b);
     }
 
     public boolean isSleepingIgnored() {
-        return getPlayer().isSleepingIgnored();
+        return getBukkitPlayer().isSleepingIgnored();
     }
 
     public void playNote(Location location, Instrument instrument, Note note) {
-        getPlayer().playNote(location, instrument, note);
+        getBukkitPlayer().playNote(location, instrument, note);
     }
 
     public void playSound(Location location, Sound sound, float v, float v1) {
-        getPlayer().playSound(location, sound, v, v1);
+        getBukkitPlayer().playSound(location, sound, v, v1);
     }
 
     public void playSound(Location location, String s, float v, float v1) {
-        getPlayer().playSound(location, s, v, v1);
+        getBukkitPlayer().playSound(location, s, v, v1);
     }
 
     public void playSound(Location location, Sound sound, SoundCategory soundCategory, float v, float v1) {
-        getPlayer().playSound(location, sound, soundCategory, v, v1);
+        getBukkitPlayer().playSound(location, sound, soundCategory, v, v1);
     }
 
     public void playSound(Location location, String s, SoundCategory soundCategory, float v, float v1) {
-        getPlayer().playSound(location, s, soundCategory, v, v1);
+        getBukkitPlayer().playSound(location, s, soundCategory, v, v1);
     }
 
     public void stopSound(Sound sound) {
-        getPlayer().stopSound(sound);
+        getBukkitPlayer().stopSound(sound);
     }
 
     public void stopSound(String s) {
-        getPlayer().stopSound(s);
+        getBukkitPlayer().stopSound(s);
     }
 
     public void stopSound(Sound sound, SoundCategory soundCategory) {
-        getPlayer().stopSound(sound, soundCategory);
+        getBukkitPlayer().stopSound(sound, soundCategory);
     }
 
     public void stopSound(String s, SoundCategory soundCategory) {
-        getPlayer().stopSound(s, soundCategory);
+        getBukkitPlayer().stopSound(s, soundCategory);
     }
 
     public <T> void playEffect(Location location, Effect effect, T t) {
-        getPlayer().playEffect(location, effect, t);
+        getBukkitPlayer().playEffect(location, effect, t);
     }
 
     public void sendBlockChange(Location location, BlockData blockData) {
-        getPlayer().sendBlockChange(location, blockData);
+        getBukkitPlayer().sendBlockChange(location, blockData);
     }
 
     public void sendSignChange(Location location, String[] strings) throws IllegalArgumentException {
-        getPlayer().sendSignChange(location, strings);
+        getBukkitPlayer().sendSignChange(location, strings);
     }
 
     public void sendSignChange(Location location, String[] strings, DyeColor dyeColor) throws IllegalArgumentException {
-        getPlayer().sendSignChange(location, strings, dyeColor);
+        getBukkitPlayer().sendSignChange(location, strings, dyeColor);
     }
 
     public void sendMap(MapView mapView) {
-        getPlayer().sendMap(mapView);
+        getBukkitPlayer().sendMap(mapView);
     }
 
     public void updateInventory() {
-        getPlayer().updateInventory();
+        getBukkitPlayer().updateInventory();
     }
 
     public void setPlayerTime(long l, boolean b) {
-        getPlayer().setPlayerTime(l, b);
+        getBukkitPlayer().setPlayerTime(l, b);
     }
 
     public long getPlayerTime() {
-        return getPlayer().getPlayerTime();
+        return getBukkitPlayer().getPlayerTime();
     }
 
     public long getPlayerTimeOffset() {
-        return getPlayer().getPlayerTimeOffset();
+        return getBukkitPlayer().getPlayerTimeOffset();
     }
 
     public boolean isPlayerTimeRelative() {
-        return getPlayer().isPlayerTimeRelative();
+        return getBukkitPlayer().isPlayerTimeRelative();
     }
 
     public void resetPlayerTime() {
-        getPlayer().resetPlayerTime();
+        getBukkitPlayer().resetPlayerTime();
     }
 
     public void setPlayerWeather(WeatherType weatherType) {
-        getPlayer().setPlayerWeather(weatherType);
+        getBukkitPlayer().setPlayerWeather(weatherType);
     }
 
     public WeatherType getPlayerWeather() {
-        return getPlayer().getPlayerWeather();
+        return getBukkitPlayer().getPlayerWeather();
     }
 
     public void resetPlayerWeather() {
-        getPlayer().resetPlayerWeather();
+        getBukkitPlayer().resetPlayerWeather();
     }
 
     public void giveExp(int i) {
-        getPlayer().giveExp(i);
+        getBukkitPlayer().giveExp(i);
     }
 
     public void giveExpLevels(int i) {
-        getPlayer().giveExpLevels(i);
+        getBukkitPlayer().giveExpLevels(i);
     }
 
     public float getExp() {
-        return getPlayer().getExp();
+        return getBukkitPlayer().getExp();
     }
 
     public void setExp(float v) {
-        getPlayer().setExp(v);
+        getBukkitPlayer().setExp(v);
     }
 
     public int getLevel() {
-        return getPlayer().getLevel();
+        return getBukkitPlayer().getLevel();
     }
 
     public void setLevel(int i) {
-        getPlayer().setLevel(i);
+        getBukkitPlayer().setLevel(i);
     }
 
     public int getTotalExperience() {
-        return getPlayer().getTotalExperience();
+        return getBukkitPlayer().getTotalExperience();
     }
 
     public void setTotalExperience(int i) {
-        getPlayer().setTotalExperience(i);
+        getBukkitPlayer().setTotalExperience(i);
     }
 
     public void sendExperienceChange(float v) {
-        getPlayer().sendExperienceChange(v);
+        getBukkitPlayer().sendExperienceChange(v);
     }
 
     public void sendExperienceChange(float v, int i) {
-        getPlayer().sendExperienceChange(v, i);
+        getBukkitPlayer().sendExperienceChange(v, i);
     }
 
     public float getExhaustion() {
-        return getPlayer().getExhaustion();
+        return getBukkitPlayer().getExhaustion();
     }
 
     public void setExhaustion(float v) {
-        getPlayer().setExhaustion(v);
+        getBukkitPlayer().setExhaustion(v);
     }
 
     public float getSaturation() {
-        return getPlayer().getSaturation();
+        return getBukkitPlayer().getSaturation();
     }
 
     public void setSaturation(float v) {
-        getPlayer().setSaturation(v);
+        getBukkitPlayer().setSaturation(v);
     }
 
     public int getFoodLevel() {
-        return getPlayer().getFoodLevel();
+        return getBukkitPlayer().getFoodLevel();
     }
 
     public void setFoodLevel(int i) {
-        getPlayer().setFoodLevel(i);
+        getBukkitPlayer().setFoodLevel(i);
     }
 
     public boolean getAllowFlight() {
-        return getPlayer().getAllowFlight();
+        return getBukkitPlayer().getAllowFlight();
     }
 
     public void setAllowFlight(boolean b) {
-        getPlayer().setAllowFlight(b);
+        getBukkitPlayer().setAllowFlight(b);
     }
 
     public void setArrowCount(int arrows) {
@@ -1010,7 +1020,7 @@ public class TNLPlayer {
     }
 
     public void hidePlayer(Plugin plugin, TNLPlayer player) {
-        this.getPlayer().hidePlayer(plugin, player.getPlayer());
+        this.getBukkitPlayer().hidePlayer(plugin, player.getBukkitPlayer());
     }
 
     public void showPlayer(TNLPlayer player) {
@@ -1018,307 +1028,307 @@ public class TNLPlayer {
     }
 
     public void showPlayer(Plugin plugin, TNLPlayer player) {
-        this.getPlayer().showPlayer(plugin, player.getPlayer());
+        this.getBukkitPlayer().showPlayer(plugin, player.getBukkitPlayer());
     }
 
     public boolean canSee(TNLPlayer player) {
-        return this.getPlayer().canSee(player.getPlayer());
+        return this.getBukkitPlayer().canSee(player.getBukkitPlayer());
     }
 
     public boolean isFlying() {
-        return getPlayer().isFlying();
+        return getBukkitPlayer().isFlying();
     }
 
     public void setFlying(boolean b) {
-        getPlayer().setFlying(b);
+        getBukkitPlayer().setFlying(b);
     }
 
     public void setFlySpeed(float v) throws IllegalArgumentException {
-        getPlayer().setFlySpeed(v);
+        getBukkitPlayer().setFlySpeed(v);
     }
 
     public void setWalkSpeed(float v) throws IllegalArgumentException {
-        getPlayer().setWalkSpeed(v);
+        getBukkitPlayer().setWalkSpeed(v);
     }
 
     public float getFlySpeed() {
-        return getPlayer().getFlySpeed();
+        return getBukkitPlayer().getFlySpeed();
     }
 
     public float getWalkSpeed() {
-        return getPlayer().getWalkSpeed();
+        return getBukkitPlayer().getWalkSpeed();
     }
 
     public void setResourcePack(String s, byte[] bytes) {
-        getPlayer().setResourcePack(s, bytes);
+        getBukkitPlayer().setResourcePack(s, bytes);
     }
 
     public void setScoreboard(org.bukkit.scoreboard.Scoreboard scoreboard) throws IllegalArgumentException, IllegalStateException {
-        getPlayer().setScoreboard(scoreboard);
+        getBukkitPlayer().setScoreboard(scoreboard);
     }
 
     public boolean isHealthScaled() {
-        return getPlayer().isHealthScaled();
+        return getBukkitPlayer().isHealthScaled();
     }
 
     public void setHealthScaled(boolean b) {
-        getPlayer().setHealthScaled(b);
+        getBukkitPlayer().setHealthScaled(b);
     }
 
     public void setHealthScale(double v) throws IllegalArgumentException {
-        getPlayer().setHealthScale(v);
+        getBukkitPlayer().setHealthScale(v);
     }
 
     public double getHealthScale() {
-        return getPlayer().getHealthScale();
+        return getBukkitPlayer().getHealthScale();
     }
 
     public Entity getSpectatorTarget() {
-        return getPlayer().getSpectatorTarget();
+        return getBukkitPlayer().getSpectatorTarget();
     }
 
     public void setSpectatorTarget(Entity entity) {
-        getPlayer().setSpectatorTarget(entity);
+        getBukkitPlayer().setSpectatorTarget(entity);
     }
 
     public void resetTitle() {
-        getPlayer().resetTitle();
+        sendTitle(Title.EMPTY);
     }
 
     public void spawnParticle(Particle particle, Location location, int i) {
-        getPlayer().spawnParticle(particle, location, i);
+        getBukkitPlayer().spawnParticle(particle, location, i);
     }
 
     public void spawnParticle(Particle particle, double v, double v1, double v2, int i) {
-        getPlayer().spawnParticle(particle, v, v1, v2, i);
+        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i);
     }
 
     public <T> void spawnParticle(Particle particle, Location location, int i, T t) {
-        getPlayer().spawnParticle(particle, location, i, t);
+        getBukkitPlayer().spawnParticle(particle, location, i, t);
     }
 
     public <T> void spawnParticle(Particle particle, double v, double v1, double v2, int i, T t) {
-        getPlayer().spawnParticle(particle, v, v1, v2, i, t);
+        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i, t);
     }
 
     public void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2) {
-        getPlayer().spawnParticle(particle, location, i, v, v1, v2);
+        getBukkitPlayer().spawnParticle(particle, location, i, v, v1, v2);
     }
 
     public void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5) {
-        getPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5);
+        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5);
     }
 
     public <T> void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2, T t) {
-        getPlayer().spawnParticle(particle, location, i, v, v1, v2, t);
+        getBukkitPlayer().spawnParticle(particle, location, i, v, v1, v2, t);
     }
 
     public <T> void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5, T t) {
-        getPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, t);
+        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, t);
     }
 
     public void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2, double v3) {
-        getPlayer().spawnParticle(particle, location, i, v, v1, v2, v3);
+        getBukkitPlayer().spawnParticle(particle, location, i, v, v1, v2, v3);
     }
 
     public void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5, double v6) {
-        getPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, v6);
+        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, v6);
     }
 
     public <T> void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2, double v3, T t) {
-        getPlayer().spawnParticle(particle, location, i, v, v1, v2, v3, t);
+        getBukkitPlayer().spawnParticle(particle, location, i, v, v1, v2, v3, t);
     }
 
     public <T> void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5, double v6, T t) {
-        getPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, v6, t);
+        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, v6, t);
     }
 
     public AdvancementProgress getAdvancementProgress(Advancement advancement) {
-        return getPlayer().getAdvancementProgress(advancement);
+        return getBukkitPlayer().getAdvancementProgress(advancement);
     }
 
     public int getClientViewDistance() {
-        return getPlayer().getClientViewDistance();
+        return getBukkitPlayer().getClientViewDistance();
     }
 
     public String getLocale() {
-        return getPlayer().getLocale();
+        return getBukkitPlayer().getLocale();
     }
 
     public void updateCommands() {
-        getPlayer().updateCommands();
+        getBukkitPlayer().updateCommands();
     }
 
     public void openBook(ItemStack itemStack) {
-        getPlayer().openBook(itemStack);
+        getBukkitPlayer().openBook(itemStack);
     }
 
     public Location getLocation() {
-        return getPlayer().getLocation();
+        return getBukkitPlayer().getLocation();
     }
 
     public Location getLocation(Location location) {
-        return getPlayer().getLocation(location);
+        return getBukkitPlayer().getLocation(location);
     }
 
     public Location getTargetLocation(int i) {
-        return getLocation().clone().add(getPlayer().getLocation().getDirection().multiply(i));
+        return getLocation().clone().add(getBukkitPlayer().getLocation().getDirection().multiply(i));
     }
 
     public void setVelocity(Vector vector) {
-        getPlayer().setVelocity(vector);
+        getBukkitPlayer().setVelocity(vector);
     }
 
     public Vector getVelocity() {
-        return getPlayer().getVelocity();
+        return getBukkitPlayer().getVelocity();
     }
 
     public double getHeight() {
-        return getPlayer().getHeight();
+        return getBukkitPlayer().getHeight();
     }
 
     public double getWidth() {
-        return getPlayer().getWidth();
+        return getBukkitPlayer().getWidth();
     }
 
     public BoundingBox getBoundingBox() {
-        return getPlayer().getBoundingBox();
+        return getBukkitPlayer().getBoundingBox();
     }
 
     public boolean isOnGround() {
-        return getPlayer().isOnGround();
+        return getBukkitPlayer().isOnGround();
     }
 
     public World getWorld() {
-        return getPlayer().getWorld();
+        return getBukkitPlayer().getWorld();
     }
 
     public WorldServer getWorldServer() {
-        return ((CraftWorld) getPlayer().getWorld()).getHandle();
+        return ((CraftWorld) getBukkitPlayer().getWorld()).getHandle();
     }
 
     public void setRotation(float v, float v1) {
-        getPlayer().setRotation(v, v1);
+        getBukkitPlayer().setRotation(v, v1);
     }
 
     public boolean teleport(Location location) {
-        return getPlayer().teleport(location);
+        return getBukkitPlayer().teleport(location);
     }
 
     public boolean teleport(Location location, PlayerTeleportEvent.TeleportCause teleportCause) {
-        return getPlayer().teleport(location, teleportCause);
+        return getBukkitPlayer().teleport(location, teleportCause);
     }
 
     public boolean teleport(Entity entity) {
-        return getPlayer().teleport(entity);
+        return getBukkitPlayer().teleport(entity);
     }
 
     public boolean teleport(Entity entity, PlayerTeleportEvent.TeleportCause teleportCause) {
-        return getPlayer().teleport(entity, teleportCause);
+        return getBukkitPlayer().teleport(entity, teleportCause);
     }
 
     public List<Entity> getNearbyEntities(double v, double v1, double v2) {
-        return getPlayer().getNearbyEntities(v, v1, v2);
+        return getBukkitPlayer().getNearbyEntities(v, v1, v2);
     }
 
     public int getEntityId() {
-        return getPlayer().getEntityId();
+        return getBukkitPlayer().getEntityId();
     }
 
     public int getFireTicks() {
-        return getPlayer().getFireTicks();
+        return getBukkitPlayer().getFireTicks();
     }
 
     public int getMaxFireTicks() {
-        return getPlayer().getMaxFireTicks();
+        return getBukkitPlayer().getMaxFireTicks();
     }
 
     public void setFireTicks(int i) {
-        getPlayer().setFireTicks(i);
+        getBukkitPlayer().setFireTicks(i);
     }
 
     public void remove() {
-        getPlayer().remove();
+        getBukkitPlayer().remove();
     }
 
     public boolean isDead() {
-        return getPlayer().isDead();
+        return getBukkitPlayer().isDead();
     }
 
     public boolean isValid() {
-        return getPlayer().isValid();
+        return getBukkitPlayer().isValid();
     }
 
     public Server getServer() {
-        return getPlayer().getServer();
+        return getBukkitPlayer().getServer();
     }
 
     public List<Entity> getPassengers() {
-        return getPlayer().getPassengers();
+        return getBukkitPlayer().getPassengers();
     }
 
     public boolean addPassenger(Entity entity) {
-        return getPlayer().addPassenger(entity);
+        return getBukkitPlayer().addPassenger(entity);
     }
 
     public boolean removePassenger(Entity entity) {
-        return getPlayer().removePassenger(entity);
+        return getBukkitPlayer().removePassenger(entity);
     }
 
     public boolean isEmpty() {
-        return getPlayer().isEmpty();
+        return getBukkitPlayer().isEmpty();
     }
 
     public boolean eject() {
-        return getPlayer().eject();
+        return getBukkitPlayer().eject();
     }
 
     public float getFallDistance() {
-        return getPlayer().getFallDistance();
+        return getBukkitPlayer().getFallDistance();
     }
 
     public void setFallDistance(float v) {
-        getPlayer().setFallDistance(v);
+        getBukkitPlayer().setFallDistance(v);
     }
 
     public void setLastDamageCause(EntityDamageEvent entityDamageEvent) {
-        getPlayer().setLastDamageCause(entityDamageEvent);
+        getBukkitPlayer().setLastDamageCause(entityDamageEvent);
     }
 
     public EntityDamageEvent getLastDamageCause() {
-        return getPlayer().getLastDamageCause();
+        return getBukkitPlayer().getLastDamageCause();
     }
 
     public UUID getUniqueId() {
-        return getPlayer().getUniqueId();
+        return getBukkitPlayer().getUniqueId();
     }
 
     public int getTicksLived() {
-        return getPlayer().getTicksLived();
+        return getBukkitPlayer().getTicksLived();
     }
 
     public void setTicksLived(int i) {
-        getPlayer().setTicksLived(i);
+        getBukkitPlayer().setTicksLived(i);
     }
 
     public void playEffect(EntityEffect entityEffect) {
-        getPlayer().playEffect(entityEffect);
+        getBukkitPlayer().playEffect(entityEffect);
     }
 
     public EntityType getType() {
-        return getPlayer().getType();
+        return getBukkitPlayer().getType();
     }
 
     public boolean isInsideVehicle() {
-        return getPlayer().isInsideVehicle();
+        return getBukkitPlayer().isInsideVehicle();
     }
 
     public boolean leaveVehicle() {
-        return getPlayer().leaveVehicle();
+        return getBukkitPlayer().leaveVehicle();
     }
 
     public Entity getVehicle() {
-        return getPlayer().getVehicle();
+        return getBukkitPlayer().getVehicle();
     }
 
     public ProtocolVersion getVersion() {
@@ -1326,75 +1336,75 @@ public class TNLPlayer {
     }
 
     public void setCustomNameVisible(boolean b) {
-        getPlayer().setCustomNameVisible(b);
+        getBukkitPlayer().setCustomNameVisible(b);
     }
 
     public boolean isCustomNameVisible() {
-        return getPlayer().isCustomNameVisible();
+        return getBukkitPlayer().isCustomNameVisible();
     }
 
     public void setGlowing(boolean b) {
-        getPlayer().setGlowing(b);
+        getBukkitPlayer().setGlowing(b);
     }
 
     public boolean isGlowing() {
-        return getPlayer().isGlowing();
+        return getBukkitPlayer().isGlowing();
     }
 
     public void setInvulnerable(boolean b) {
-        getPlayer().setInvulnerable(b);
+        getBukkitPlayer().setInvulnerable(b);
     }
 
     public boolean isInvulnerable() {
-        return getPlayer().isInvulnerable();
+        return getBukkitPlayer().isInvulnerable();
     }
 
     public boolean isSilent() {
-        return getPlayer().isSilent();
+        return getBukkitPlayer().isSilent();
     }
 
     public void setSilent(boolean b) {
-        getPlayer().setSilent(b);
+        getBukkitPlayer().setSilent(b);
     }
 
     public boolean hasGravity() {
-        return getPlayer().hasGravity();
+        return getBukkitPlayer().hasGravity();
     }
 
     public void setGravity(boolean b) {
-        getPlayer().setGravity(b);
+        getBukkitPlayer().setGravity(b);
     }
 
     public int getPortalCooldown() {
-        return getPlayer().getPortalCooldown();
+        return getBukkitPlayer().getPortalCooldown();
     }
 
     public void setPortalCooldown(int i) {
-        getPlayer().setPortalCooldown(i);
+        getBukkitPlayer().setPortalCooldown(i);
     }
 
     public Set<String> getScoreboardTags() {
-        return getPlayer().getScoreboardTags();
+        return getBukkitPlayer().getScoreboardTags();
     }
 
     public boolean addScoreboardTag(String s) {
-        return getPlayer().addScoreboardTag(s);
+        return getBukkitPlayer().addScoreboardTag(s);
     }
 
     public boolean removeScoreboardTag(String s) {
-        return getPlayer().removeScoreboardTag(s);
+        return getBukkitPlayer().removeScoreboardTag(s);
     }
 
     public PistonMoveReaction getPistonMoveReaction() {
-        return getPlayer().getPistonMoveReaction();
+        return getBukkitPlayer().getPistonMoveReaction();
     }
 
     public BlockFace getFacing() {
-        return getPlayer().getFacing();
+        return getBukkitPlayer().getFacing();
     }
 
     public Pose getPose() {
-        return getPlayer().getPose();
+        return getBukkitPlayer().getPose();
     }
 
     public BackFlip backflip() {
@@ -1402,347 +1412,292 @@ public class TNLPlayer {
     }
 
     public Map<String, Object> serialize() {
-        return getPlayer().serialize();
+        return getBukkitPlayer().serialize();
     }
 
     public double getEyeHeight() {
-        return getPlayer().getEyeHeight();
+        return getBukkitPlayer().getEyeHeight();
     }
 
     public double getEyeHeight(boolean b) {
-        return getPlayer().getEyeHeight(b);
+        return getBukkitPlayer().getEyeHeight(b);
     }
 
     public Location getEyeLocation() {
-        return getPlayer().getEyeLocation();
+        return getBukkitPlayer().getEyeLocation();
     }
 
     public List<Block> getLineOfSight(Set<Material> set, int i) {
-        return getPlayer().getLineOfSight(set, i);
+        return getBukkitPlayer().getLineOfSight(set, i);
     }
 
     public Block getTargetBlock(Set<Material> set, int i) {
-        return getPlayer().getTargetBlock(set, i);
+        return getBukkitPlayer().getTargetBlock(set, i);
     }
 
     public List<Block> getLastTwoTargetBlocks(Set<Material> set, int i) {
-        return getPlayer().getLastTwoTargetBlocks(set, i);
+        return getBukkitPlayer().getLastTwoTargetBlocks(set, i);
     }
 
     public Block getTargetBlockExact(int i) {
-        return getPlayer().getTargetBlockExact(i);
+        return getBukkitPlayer().getTargetBlockExact(i);
     }
 
     public Block getTargetBlockExact(int i, FluidCollisionMode fluidCollisionMode) {
-        return getPlayer().getTargetBlockExact(i, fluidCollisionMode);
+        return getBukkitPlayer().getTargetBlockExact(i, fluidCollisionMode);
     }
 
     public RayTraceResult rayTraceBlocks(double v) {
-        return getPlayer().rayTraceBlocks(v);
+        return getBukkitPlayer().rayTraceBlocks(v);
     }
 
     public RayTraceResult rayTraceBlocks(double v, FluidCollisionMode fluidCollisionMode) {
-        return getPlayer().rayTraceBlocks(v, fluidCollisionMode);
+        return getBukkitPlayer().rayTraceBlocks(v, fluidCollisionMode);
     }
 
     public int getRemainingAir() {
-        return getPlayer().getRemainingAir();
+        return getBukkitPlayer().getRemainingAir();
     }
 
     public void setRemainingAir(int i) {
-        getPlayer().setRemainingAir(i);
+        getBukkitPlayer().setRemainingAir(i);
     }
 
     public int getMaximumAir() {
-        return getPlayer().getMaximumAir();
+        return getBukkitPlayer().getMaximumAir();
     }
 
     public void setMaximumAir(int i) {
-        getPlayer().setMaximumNoDamageTicks(i);
+        getBukkitPlayer().setMaximumNoDamageTicks(i);
     }
 
     public int getMaximumNoDamageTicks() {
-        return getPlayer().getMaximumNoDamageTicks();
+        return getBukkitPlayer().getMaximumNoDamageTicks();
     }
 
     public void setMaximumNoDamageTicks(int i) {
-        getPlayer().setMaximumNoDamageTicks(i);
+        getBukkitPlayer().setMaximumNoDamageTicks(i);
     }
 
     public double getLastDamage() {
-        return getPlayer().getLastDamage();
+        return getBukkitPlayer().getLastDamage();
     }
 
     public void setLastDamage(double v) {
-        getPlayer().setLastDamage(v);
+        getBukkitPlayer().setLastDamage(v);
     }
 
     public int getNoDamageTicks() {
-        return getPlayer().getNoDamageTicks();
+        return getBukkitPlayer().getNoDamageTicks();
     }
 
     public void setNoDamageTicks(int i) {
-        getPlayer().setNoDamageTicks(i);
+        getBukkitPlayer().setNoDamageTicks(i);
     }
 
     public TNLPlayer getKiller() {
-        if (getPlayer().getKiller() != null) {
-            return TNLPlayer.cast(getPlayer().getKiller());
+        if (getBukkitPlayer().getKiller() != null) {
+            return TNLPlayer.cast(getBukkitPlayer().getKiller());
         }
         return null;
     }
 
     public boolean addPotionEffect(PotionEffect potionEffect) {
-        return getPlayer().addPotionEffect(potionEffect);
+        return getBukkitPlayer().addPotionEffect(potionEffect);
     }
 
     public boolean addPotionEffects(Collection<PotionEffect> collection) {
-        return getPlayer().addPotionEffects(collection);
+        return getBukkitPlayer().addPotionEffects(collection);
     }
 
     public boolean hasPotionEffect(PotionEffectType potionEffectType) {
-        return getPlayer().hasPotionEffect(potionEffectType);
+        return getBukkitPlayer().hasPotionEffect(potionEffectType);
     }
 
     public PotionEffect getPotionEffect(PotionEffectType potionEffectType) {
-        return getPlayer().getPotionEffect(potionEffectType);
+        return getBukkitPlayer().getPotionEffect(potionEffectType);
     }
 
     public void removePotionEffect(PotionEffectType potionEffectType) {
-        getPlayer().removePotionEffect(potionEffectType);
+        getBukkitPlayer().removePotionEffect(potionEffectType);
     }
 
     public Collection<PotionEffect> getActivePotionEffects() {
-        return getPlayer().getActivePotionEffects();
+        return getBukkitPlayer().getActivePotionEffects();
     }
 
     public boolean hasLineOfSight(Entity entity) {
-        return getPlayer().hasLineOfSight(entity);
+        return getBukkitPlayer().hasLineOfSight(entity);
     }
 
     public boolean getRemoveWhenFarAway() {
-        return getPlayer().getRemoveWhenFarAway();
+        return getBukkitPlayer().getRemoveWhenFarAway();
     }
 
     public void setRemoveWhenFarAway(boolean b) {
-        getPlayer().setRemoveWhenFarAway(b);
+        getBukkitPlayer().setRemoveWhenFarAway(b);
     }
 
     public EntityEquipment getEquipment() {
-        return getPlayer().getEquipment();
+        return getBukkitPlayer().getEquipment();
     }
 
     public void setCanPickupItems(boolean b) {
-        getPlayer().setCanPickupItems(b);
+        getBukkitPlayer().setCanPickupItems(b);
     }
 
     public boolean getCanPickupItems() {
-        return getPlayer().getCanPickupItems();
+        return getBukkitPlayer().getCanPickupItems();
     }
 
     public boolean isLeashed() {
-        return getPlayer().isLeashed();
+        return getBukkitPlayer().isLeashed();
     }
 
     public Entity getLeashHolder() throws IllegalStateException {
-        return getPlayer().getLeashHolder();
+        return getBukkitPlayer().getLeashHolder();
     }
 
     public boolean setLeashHolder(Entity entity) {
-        return getPlayer().setLeashHolder(entity);
+        return getBukkitPlayer().setLeashHolder(entity);
     }
 
     public boolean isGliding() {
-        return getPlayer().isGliding();
+        return getBukkitPlayer().isGliding();
     }
 
     public void setGliding(boolean b) {
-        getPlayer().setGliding(b);
+        getBukkitPlayer().setGliding(b);
     }
 
     public boolean isSwimming() {
-        return getPlayer().isSwimming();
+        return getBukkitPlayer().isSwimming();
     }
 
     public void setSwimming(boolean b) {
-        getPlayer().setSwimming(b);
+        getBukkitPlayer().setSwimming(b);
     }
 
     public boolean isRiptiding() {
-        return getPlayer().isRiptiding();
+        return getBukkitPlayer().isRiptiding();
     }
 
     public boolean isSleeping() {
-        return getPlayer().isSleeping();
+        return getBukkitPlayer().isSleeping();
     }
 
     public void setAI(boolean b) {
-        getPlayer().setAI(b);
+        getBukkitPlayer().setAI(b);
     }
 
     public boolean hasAI() {
-        return getPlayer().hasAI();
+        return getBukkitPlayer().hasAI();
     }
 
     public void attack(Entity entity) {
-        getPlayer().attack(entity);
+        getBukkitPlayer().attack(entity);
     }
 
     public void swingMainHand() {
-        getPlayer().swingMainHand();
+        getBukkitPlayer().swingMainHand();
     }
 
     public void swingOffHand() {
-        getPlayer().swingOffHand();
+        getBukkitPlayer().swingOffHand();
     }
 
     public void setCollidable(boolean b) {
-        getPlayer().setCollidable(b);
+        getBukkitPlayer().setCollidable(b);
     }
 
     public boolean isCollidable() {
-        return getPlayer().isCollidable();
+        return getBukkitPlayer().isCollidable();
     }
 
     public <T> T getMemory(MemoryKey<T> memoryKey) {
-        return getPlayer().getMemory(memoryKey);
+        return getBukkitPlayer().getMemory(memoryKey);
     }
 
     public <T> void setMemory(MemoryKey<T> memoryKey, T t) {
-        getPlayer().setMemory(memoryKey, t);
+        getBukkitPlayer().setMemory(memoryKey, t);
     }
 
     public AttributeInstance getAttribute(Attribute attribute) {
-        return getPlayer().getAttribute(attribute);
+        return getBukkitPlayer().getAttribute(attribute);
     }
 
     public void damage(double v) {
-        getPlayer().damage(v);
+        getBukkitPlayer().damage(v);
     }
 
     public void damage(double v, Entity entity) {
-        getPlayer().damage(v, entity);
+        getBukkitPlayer().damage(v, entity);
     }
 
     public double getHealth() {
-        return getPlayer().getHealth();
+        return getBukkitPlayer().getHealth();
     }
 
     public void setHealth(double v) {
-        getPlayer().setHealth(v);
+        getBukkitPlayer().setHealth(v);
     }
 
     public double getAbsorptionAmount() {
-        return getPlayer().getAbsorptionAmount();
+        return getBukkitPlayer().getAbsorptionAmount();
     }
 
     public void setAbsorptionAmount(double v) {
-        getPlayer().setAbsorptionAmount(v);
+        getBukkitPlayer().setAbsorptionAmount(v);
     }
 
     public String getCustomName() {
-        return getPlayer().getCustomName();
+        return getBukkitPlayer().getCustomName();
     }
 
     public void setCustomName(String s) {
-        getPlayer().setCustomName(s);
+        getBukkitPlayer().setCustomName(s);
     }
 
     public void setMetadata(String s, MetadataValue metadataValue) {
-        getPlayer().setMetadata(s, metadataValue);
+        getBukkitPlayer().setMetadata(s, metadataValue);
     }
 
     public List<MetadataValue> getMetadata(String s) {
-        return getPlayer().getMetadata(s);
+        return getBukkitPlayer().getMetadata(s);
     }
 
     public boolean hasMetadata(String s) {
-        return getPlayer().hasMetadata(s);
+        return getBukkitPlayer().hasMetadata(s);
     }
 
     public void removeMetadata(String s, Plugin plugin) {
-        getPlayer().removeMetadata(s, plugin);
-    }
-
-    public boolean isPermissionSet(String s) {
-        return getPlayer().isPermissionSet(s);
-    }
-
-    public boolean isPermissionSet(Permission permission) {
-        return getPlayer().isPermissionSet(permission);
-    }
-
-    public boolean hasPermission(String s) {
-        return getPlayer().hasPermission(s);
-    }
-
-    public boolean hasPermission(Permission permission) {
-        return getPlayer().hasPermission(permission);
-    }
-
-    public PermissionAttachment addAttachment(Plugin plugin, String s, boolean b) {
-        return getPlayer().addAttachment(plugin, s, b);
-    }
-
-    public PermissionAttachment addAttachment(Plugin plugin) {
-        return getPlayer().addAttachment(plugin);
-    }
-
-    public PermissionAttachment addAttachment(Plugin plugin, String s, boolean b, int i) {
-        return getPlayer().addAttachment(plugin, s, b, i);
-    }
-
-    public PermissionAttachment addAttachment(Plugin plugin, int i) {
-        return getPlayer().addAttachment(plugin, i);
-    }
-
-    public void removeAttachment(PermissionAttachment permissionAttachment) {
-        getPlayer().removeAttachment(permissionAttachment);
-    }
-
-    public void recalculatePermissions() {
-        getPlayer().recalculatePermissions();
-    }
-
-    public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        return getPlayer().getEffectivePermissions();
-    }
-
-    public boolean isOp() {
-        return getPlayer().isOp();
-    }
-
-    public void setOp(boolean b) {
-        getPlayer().setOp(b);
-    }
-
-    public PersistentDataContainer getPersistentDataContainer() {
-        return getPlayer().getPersistentDataContainer();
+        getBukkitPlayer().removeMetadata(s, plugin);
     }
 
     public void sendPluginMessage(Plugin plugin, String s, byte[] bytes) {
-        getPlayer().sendPluginMessage(plugin, s, bytes);
+        getBukkitPlayer().sendPluginMessage(plugin, s, bytes);
     }
 
     public Set<String> getListeningPluginChannels() {
-        return getPlayer().getListeningPluginChannels();
+        return getBukkitPlayer().getListeningPluginChannels();
     }
 
     public <T extends Projectile> T launchProjectile(Class<? extends T> aClass) {
-        return getPlayer().launchProjectile(aClass);
+        return getBukkitPlayer().launchProjectile(aClass);
     }
 
     public <T extends Projectile> T launchProjectile(Class<? extends T> aClass, Vector vector) {
-        return getPlayer().launchProjectile(aClass, vector);
+        return getBukkitPlayer().launchProjectile(aClass, vector);
     }
 
     @Override
     public String toString() {
         return "TNLPlayer{" +
-                "player=" + player +
+                "bukkitPlayer=" + bukkitPlayer +
                 ", tnlOptionPacketScoreboard=" + tnlOptionPacketScoreboard +
                 ", tnlOptionPacketTeam=" + tnlOptionPacketTeam +
                 ", virtualStorage=" + virtualStorage +
+                ", permissionManager=" + permissionManager +
                 '}';
     }
 
@@ -1751,11 +1706,11 @@ public class TNLPlayer {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TNLPlayer player = (TNLPlayer) o;
-        return getUniqueId().equals(player.getUniqueId());
+        return bukkitPlayer.equals(player.bukkitPlayer) && tnlOptionPacketScoreboard.equals(player.tnlOptionPacketScoreboard) && tnlOptionPacketTeam.equals(player.tnlOptionPacketTeam) && virtualStorage.equals(player.virtualStorage) && permissionManager.equals(player.permissionManager);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUniqueId());
+        return Objects.hash(bukkitPlayer, tnlOptionPacketScoreboard, tnlOptionPacketTeam, virtualStorage, permissionManager);
     }
 }

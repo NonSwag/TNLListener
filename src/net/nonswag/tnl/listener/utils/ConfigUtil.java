@@ -1,11 +1,11 @@
 package net.nonswag.tnl.listener.utils;
 
 import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.api.object.Objects;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 public class ConfigUtil {
 
@@ -27,7 +27,7 @@ public class ConfigUtil {
 
     @Nonnull
     public static String getString(String path) {
-        return new net.nonswag.tnl.listener.api.object.Object<>(getConfig().getString(path)).getOrDefault("");
+        return new Objects<>(getConfig().getString(path)).getOrDefault("");
     }
 
     public static Object get(String path) {
@@ -114,13 +114,13 @@ public class ConfigUtil {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             ConfigurationSection that = (ConfigurationSection) o;
-            return Objects.equals(path, that.path) &&
-                    Objects.equals(value, that.value);
+            return java.util.Objects.equals(path, that.path) &&
+                    java.util.Objects.equals(value, that.value);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(path, value);
+            return java.util.Objects.hash(path, value);
         }
 
         @Override
