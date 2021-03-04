@@ -16,10 +16,6 @@ import java.util.Objects;
 
 public class PluginUpdate {
 
-    public static void main(String[] args) {
-        new PluginUpdate("TNLListener", "1.0").downloadUpdate();
-    }
-
     @Nonnull private final String plugin;
     @Nonnull private final String currentVersion;
     @Nonnull private String latestVersion = "UNKNOWN";
