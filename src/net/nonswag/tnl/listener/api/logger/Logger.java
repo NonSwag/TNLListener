@@ -6,6 +6,8 @@ import net.nonswag.tnl.listener.api.object.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class Logger {
 
@@ -71,7 +73,7 @@ public class Logger {
                     if (getPrefix().isEmpty()) {
                         System.out.println(string);
                     } else {
-                        System.out.println(prefix + " " + string);
+                        System.out.println(Placeholder.replace(prefix, new Placeholder("logger", getName()), new Placeholder("thread", Thread.currentThread().getName()), new Placeholder("time", new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()))) + " " + string);
                     }
                 }
             }

@@ -1,7 +1,7 @@
 package net.nonswag.tnl.listener.eventhandler;
 
 import net.minecraft.server.v1_15_R1.PacketPlayInBlockDig;
-import net.nonswag.tnl.listener.NMSMain;
+import net.nonswag.tnl.listener.TNLMain;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -66,7 +66,7 @@ public class PlayerDamageBlockEvent extends Event implements Cancellable {
         if (isCancelled()) {
             if (getBlockDamageType().equals(BlockDamageType.STOP_DESTROY_BLOCK)
                     || getBlockDamageType().equals(BlockDamageType.START_DESTROY_BLOCK)) {
-                Bukkit.getScheduler().runTask(NMSMain.getInstance(), () -> {
+                Bukkit.getScheduler().runTask(TNLMain.getInstance(), () -> {
                     getBlock().getState().update();
                     getPlayer().sendBlockChange(getBlock().getLocation(), getBlock().getBlockData());
                     getPlayer().sendBlockChange(getBlock().getRelative(BlockFace.EAST).getLocation(),

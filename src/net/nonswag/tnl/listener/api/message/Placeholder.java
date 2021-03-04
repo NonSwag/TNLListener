@@ -83,11 +83,11 @@ public class Placeholder {
 
     @Nonnull
     public static String replace(@Nonnull Object value, @Nonnull Placeholder... placeholders) {
-        StringBuilder stringBuilder = new StringBuilder();
+        String string = value.toString();
         for (Placeholder placeholder : placeholders) {
-            stringBuilder.append(placeholder.replace(value));
+            string = placeholder.replace(string);
         }
-        return stringBuilder.toString();
+        return string;
     }
 
     @Override

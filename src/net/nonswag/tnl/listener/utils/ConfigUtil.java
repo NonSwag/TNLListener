@@ -1,6 +1,6 @@
 package net.nonswag.tnl.listener.utils;
 
-import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.TNLMain;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Objects;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -12,12 +12,12 @@ public class ConfigUtil {
     private static FileConfiguration config;
 
     public static void initConfig() {
-        TNLListener.getInstance().getMain().saveConfig();
+        TNLMain.getInstance().saveConfig();
         if(config == null) {
-            config = TNLListener.getInstance().getMain().getConfig();
+            config = TNLMain.getInstance().getConfig();
         }
-        TNLListener.getInstance().getMain().reloadConfig();
-        config = TNLListener.getInstance().getMain().getConfig();
+        TNLMain.getInstance().reloadConfig();
+        config = TNLMain.getInstance().getConfig();
     }
 
     public static FileConfiguration getConfig() { return config; }

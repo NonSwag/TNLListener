@@ -12,6 +12,7 @@ import net.nonswag.tnl.listener.utils.PluginUpdate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
@@ -32,8 +33,6 @@ public class TNLListener {
     private final HashMap<World, String> worldAliasHashMap = new HashMap<>();
     @Nonnull
     private final HashMap<Player, TNLPlayer> playerHashMap = new HashMap<>();
-    @Nonnull
-    private final NMSMain main;
     @Nonnull
     private String permissionMessage = "§cYou have no Rights §8(§4%permission%§8)";
     @Nonnull
@@ -60,6 +59,8 @@ public class TNLListener {
     private String playerDirect = "§8(§7You§8) §6%player%";
     @Nonnull
     private String serverName = "unknown";
+    @Nonnull
+    private final String version;
     private boolean betterTNT = true;
     private boolean betterFallingBlocks = true;
     private boolean debug = true;
@@ -75,29 +76,23 @@ public class TNLListener {
     private boolean customFirstJoinMessage = true;
     private boolean customItemName = true;
 
-    protected TNLListener(@Nonnull NMSMain main) {
-        this.main = main;
-    }
-
     protected TNLListener() {
-        this.main = new NMSMain();
+        this.version = ((CraftServer) Bukkit.getServer()).getHandle().getServer().getVersion();
     }
 
     protected void enable() {
-        Logger.info.println(Bukkit.getVersion(), Bukkit.getBukkitVersion());
-        /*
-        if (!Bukkit.getVersion().contains("1.15.2")) {
-            Bukkit.getPluginManager().disablePlugin(getPlugin());
+        Bukkit.getLogger().setFilter(record -> false);
+        if (!getVersion().equalsIgnoreCase("1.15.2")) {
+            System.exit(1);
             return;
         }
-         */
-        Bukkit.getPluginManager().registerEvents(new PacketListener(), getMain());
-        Bukkit.getPluginManager().registerEvents(new JoinListener(), getMain());
-        Bukkit.getPluginManager().registerEvents(new InteractListener(), getMain());
-        Bukkit.getPluginManager().registerEvents(new KickListener(), getMain());
-        Bukkit.getPluginManager().registerEvents(new QuitListener(), getMain());
-        Bukkit.getPluginManager().registerEvents(new CommandListener(), getMain());
-        FileUtil.setServerFolder(getMain().getDataFolder().getAbsoluteFile().getParentFile().getParentFile());
+        Bukkit.getPluginManager().registerEvents(new PacketListener(), TNLMain.getInstance());
+        Bukkit.getPluginManager().registerEvents(new JoinListener(), TNLMain.getInstance());
+        Bukkit.getPluginManager().registerEvents(new InteractListener(), TNLMain.getInstance());
+        Bukkit.getPluginManager().registerEvents(new KickListener(), TNLMain.getInstance());
+        Bukkit.getPluginManager().registerEvents(new QuitListener(), TNLMain.getInstance());
+        Bukkit.getPluginManager().registerEvents(new CommandListener(), TNLMain.getInstance());
+        FileUtil.setServerFolder(TNLMain.getInstance().getDataFolder().getAbsoluteFile().getParentFile().getParentFile());
         FileUtil.setLogFolder(FileUtil.getFile("/logs/"));
         FileUtil.setPluginFolder(FileUtil.getFile("/plugins/"));
         ConfigUtil.initConfig();
@@ -178,8 +173,8 @@ public class TNLListener {
         setEpicItemName(ConfigUtil.getString("items.epic-custom-name"));
         setServerName(FileUtil.getServerFolder().getName());
 
-        Bukkit.getMessenger().registerOutgoingPluginChannel(getMain(), "BungeeCord");
-        new PluginUpdate(getMain()).downloadUpdate();
+        Bukkit.getMessenger().registerOutgoingPluginChannel(TNLMain.getInstance(), "BungeeCord");
+        new PluginUpdate(TNLMain.getInstance()).downloadUpdate();
     }
 
     public void updatePlayers() {
@@ -188,11 +183,6 @@ public class TNLListener {
                 getPlayerHashMap().remove(player);
             }
         }
-    }
-
-    @Nonnull
-    public NMSMain getMain() {
-        return main;
     }
 
     @Nonnull
@@ -442,6 +432,11 @@ public class TNLListener {
     @Nonnull
     public static TNLListener getInstance() {
         return instance;
+    }
+
+    @Nonnull
+    public String getVersion() {
+        return version;
     }
 
     @Soon
