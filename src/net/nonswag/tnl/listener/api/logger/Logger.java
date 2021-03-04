@@ -6,6 +6,7 @@ import net.nonswag.tnl.listener.api.object.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -15,6 +16,17 @@ public class Logger {
     @Nonnull public static final Logger warn = new Logger("§8[§e%time% §8|§e %logger% §8| §e%thread%§8]§r", "Warn");
     @Nonnull public static final Logger debug = new Logger("§8[§6%time% §8|§6 %logger% §8| §6%thread%§8]§r", "Debug");
     @Nonnull public static final Logger error = new Logger("§8[§4%time% §8|§4 %logger% §8| §4%thread%§8]§r", "Error");
+
+    static {
+        FileOutputStream outputStream = new FileOutputStream(FileDescriptor.out);
+        System.setOut(new PrintStream(outputStream, true));
+
+        FileOutputStream errorStream = new FileOutputStream(FileDescriptor.err);
+        System.setErr(new PrintStream(errorStream, true));
+
+        FileInputStream inputStream = new FileInputStream(FileDescriptor.in);
+        System.setIn(new BufferedInputStream(inputStream));
+    }
 
     @Nonnull protected final String prefix;
     @Nonnull protected final String name;

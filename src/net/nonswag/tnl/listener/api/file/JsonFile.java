@@ -17,7 +17,7 @@ public class JsonFile {
     public static void create(@Nonnull File file) throws IOException {
         if (!file.exists()) {
             if (file.getAbsoluteFile().getParentFile().mkdirs()) {
-                Logger.info.println("§aGenerated directories §8'§6" + file.getAbsoluteFile().getPath() + "§8'");
+                Logger.info.println("§aGenerated directories §8'§6" + file.getAbsoluteFile().getParent() + "§8'");
             }
             if (file.createNewFile()) {
                 Logger.info.println("§aGenerated file §8'§6" + file.getAbsolutePath() + "§8'");
