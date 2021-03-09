@@ -14,6 +14,7 @@ import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.util.Vector;
 
+import javax.annotation.Nonnull;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
@@ -22,16 +23,24 @@ import java.util.UUID;
 
 public class FakePlayer {
 
+    @Nonnull
     private final String name;
+    @Nonnull
     private final Location location;
+    @Nonnull
     private final TNLPlayer[] receivers;
+    @Nonnull
     private final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
+    @Nonnull
     private final WorldServer worldServer;
+    @Nonnull
     private final GameProfile profile;
+    @Nonnull
     private final EntityPlayer player;
+    @Nonnull
     private String[] skinValues = {"", ""};
 
-    public FakePlayer(String name, Location location, TNLPlayer... receivers) {
+    public FakePlayer(@Nonnull String name, @Nonnull Location location, @Nonnull TNLPlayer... receivers) {
         this.name = name;
         this.location = location;
         this.receivers = receivers;
@@ -41,49 +50,57 @@ public class FakePlayer {
         this.player.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
     }
 
+    @Nonnull
     public String getName() {
         return name;
     }
 
+    @Nonnull
     public Location getLocation() {
         return location;
     }
 
+    @Nonnull
     public TNLPlayer[] getReceivers() {
         return receivers;
     }
 
+    @Nonnull
     public MinecraftServer getServer() {
         return server;
     }
 
+    @Nonnull
     public WorldServer getWorldServer() {
         return worldServer;
     }
 
+    @Nonnull
     public GameProfile getProfile() {
         return profile;
     }
 
+    @Nonnull
     public EntityPlayer getPlayer() {
         return player;
     }
 
+    @Nonnull
     public String[] getSkinValues() {
         return skinValues;
     }
 
-    public void setSkinValues(String[] skinValues) {
+    public void setSkinValues(@Nonnull String[] skinValues) {
         this.skinValues = skinValues;
         this.profile.getProperties().put("textures", new Property("textures", skinValues[0], skinValues[1]));
     }
 
-    public void setSkin(String name) {
+    public void setSkin(@Nonnull String name) {
         setSkinValues(getSkin(name));
         Logger.warn.println("Please use the properties '" + Arrays.toString(getSkinValues()) + "' instead of the name '" + name + "'");
     }
 
-    public void setSkin(String value, String signature) {
+    public void setSkin(@Nonnull String value, @Nonnull String signature) {
         setSkinValues(new String[]{value, signature});
     }
 
@@ -93,7 +110,7 @@ public class FakePlayer {
         }
     }
 
-    public void spawn(TNLPlayer receiver) {
+    public void spawn(@Nonnull TNLPlayer receiver) {
         getPlayer().getDataWatcher().set(DataWatcherRegistry.a.a(16), (byte) 127);
         getPlayer().ping = 32;
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, getPlayer()));
@@ -106,23 +123,23 @@ public class FakePlayer {
         Bukkit.getScheduler().runTaskLater(TNLMain.getInstance(), () -> hideTablistName(receiver), 10);
     }
 
-    public void playAnimate(TNLPlayer receiver, Animation animation) {
+    public void playAnimate(@Nonnull TNLPlayer receiver, @Nonnull Animation animation) {
         receiver.sendPacket(new PacketPlayOutAnimation(getPlayer(), animation.getId()));
     }
 
-    public void playStatus(TNLPlayer receiver, Status status) {
+    public void playStatus(@Nonnull TNLPlayer receiver, @Nonnull Status status) {
         receiver.sendPacket(new PacketPlayOutEntityStatus(getPlayer(), status.getId()));
     }
 
-    public void setVelocity(TNLPlayer receiver, Vector vector) {
+    public void setVelocity(@Nonnull TNLPlayer receiver, @Nonnull Vector vector) {
         receiver.sendPacket(new PacketPlayOutEntityVelocity(getPlayer().getId(), new Vec3D(vector.getX(), vector.getY(), vector.getZ())));
     }
 
-    public void hideTablistName(TNLPlayer receiver) {
+    public void hideTablistName(@Nonnull TNLPlayer receiver) {
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, getPlayer()));
     }
 
-    public void showTablistName(TNLPlayer receiver) {
+    public void showTablistName(@Nonnull TNLPlayer receiver) {
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, getPlayer()));
     }
 
@@ -132,12 +149,13 @@ public class FakePlayer {
         }
     }
 
-    public void deSpawn(TNLPlayer receiver) {
+    public void deSpawn(@Nonnull TNLPlayer receiver) {
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, getPlayer()));
         receiver.sendPacket(new PacketPlayOutEntityDestroy(getPlayer().getId()));
     }
 
-    private String[] getSkin(String player) {
+    @Nonnull
+    private String[] getSkin(@Nonnull String player) {
         String value = "";
         String signature = "";
         try {
@@ -149,7 +167,7 @@ public class FakePlayer {
             JsonObject property = new JsonParser().parse(reader1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
             value = property.get("value").getAsString();
             signature = property.get("signature").getAsString();
-        } catch (Throwable ignored) {
+        } catch (Exception ignored) {
         }
         return new String[]{value, signature};
     }
@@ -189,8 +207,7 @@ public class FakePlayer {
         SWING_OFFHAND(3),
         NORMAL_DAMAGE(1),
         CRITICAL_DAMAGE(4),
-        MAGICAL_DAMAGE(5),
-        ;
+        MAGICAL_DAMAGE(5);
 
         private final int id;
 
@@ -217,8 +234,7 @@ public class FakePlayer {
         SWIMMING((byte) 0x10),
         INVISIBLE((byte) 0x20),
         GLOWING((byte) 0x40),
-        ELYTRA_FLY((byte) 0x80),
-        ;
+        ELYTRA_FLY((byte) 0x80);
 
         private final byte id;
 
@@ -245,8 +261,7 @@ public class FakePlayer {
         SWIMMING(3),
         SPIN_ATTACK(4),
         SNEAKING(5),
-        DYING(6),
-        ;
+        DYING(6);
 
         private final int id;
 

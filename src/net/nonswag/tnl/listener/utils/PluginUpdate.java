@@ -57,7 +57,7 @@ public class PluginUpdate {
             }
             connection.disconnect();
         } catch (Exception e) {
-            Logger.error.println(e, false);
+            Logger.error.println(e);
         }
     }
 
@@ -70,10 +70,10 @@ public class PluginUpdate {
             try {
                 FileDownloader.downloadFile("https://www.thenextlvl.net/plugins/" + getPlugin() + ".jar", new File("plugins/").getAbsolutePath());
             } catch (Exception e) {
-                Logger.error.println(e, true);
+                Logger.error.println(e);
             }
         } else {
-            Logger.info.println("The plugin '" + getPlugin() + "' is up to date");
+            Logger.info.println("§aThe plugin §8'§6" + getPlugin() + "§8'§a is up to date");
         }
     }
 

@@ -1,22 +1,24 @@
 package net.nonswag.tnl.listener.api.chat;
 
+import javax.annotation.Nonnull;
+
 public class Component {
 
     public enum HoverEvent {
-
         CUSTOM_TEXT("show_text"),
         ITEM_OR_BLOCK("show_item"),
         PLAYER_MOB_OR_ENTITY("show_entity"),
         ACHIEVEMENT("achievement"),
-        STATISTIC("statistic"),
-        ;
+        STATISTIC("statistic");
 
+        @Nonnull
         private final String event;
 
-        HoverEvent(String event) {
+        HoverEvent(@Nonnull String event) {
             this.event = event;
         }
 
+        @Nonnull
         public String getEvent() {
             return event;
         }
@@ -30,7 +32,6 @@ public class Component {
     }
 
     public enum KeyBind {
-
         WALK_FORWARD("key.forward"),
         WALK_BACKWARD("key.back"),
         STRAFE_LEFT("key.left"),
@@ -62,15 +63,16 @@ public class Component {
         TAKE_SCREENSHOT("key.screenshot"),
         TOGGLE_CINEMATIC_CAMERA("key.smoothCamera"),
         TOGGLE_FULLSCREEN("key.fullscreen"),
-        TOGGLE_PERSPECTIVE("key.togglePerspective"),
-        ;
+        TOGGLE_PERSPECTIVE("key.togglePerspective");
 
+        @Nonnull
         private final String tag;
 
-        KeyBind(String tag) {
+        KeyBind(@Nonnull String tag) {
             this.tag = tag;
         }
 
+        @Nonnull
         public String getTag() {
             return tag;
         }
@@ -83,20 +85,20 @@ public class Component {
         }
     }
     public enum ClickEvent {
-
         RUN_COMMAND("run_command"),
         SUGGEST_COMMAND("suggest_command"),
         SUGGEST_TEXT("insertion"),
         OPEN_URL("open_url"),
-        COPY_A_TEXT_TO_CLIPBOARD("copy_to_clipboard"),
-        ;
+        COPY_A_TEXT_TO_CLIPBOARD("copy_to_clipboard");
 
+        @Nonnull
         private final String event;
 
-        ClickEvent(String event) {
+        ClickEvent(@Nonnull String event) {
             this.event = event;
         }
 
+        @Nonnull
         public String getEvent() {
             return event;
         }
@@ -107,30 +109,5 @@ public class Component {
                     "event='" + event + '\'' +
                     '}';
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
     }
 }

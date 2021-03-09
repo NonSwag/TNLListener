@@ -2,7 +2,6 @@ package net.nonswag.tnl.listener.eventhandler;
 
 import net.minecraft.server.v1_15_R1.Packet;
 import net.minecraft.server.v1_15_R1.PacketPlayOutChat;
-import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.utils.PacketUtil;
@@ -97,11 +96,9 @@ public class PlayerPacketEvent extends Event implements Cancellable {
             for (String field : getPacketFields()) {
                 strings.add("§8(§7field§8: §6" + field + " §8-> '§6" + getPacketField(field) + "§8')");
             }
-            getPlayer().disconnect(TNLListener.getInstance().getPrefix() + "\n§cFailed to write Packet" +
-                    "\n§4" + getPacketName() + "\n\n" + String.join("\n", strings).replace("null", "-/-"));
+            getPlayer().disconnect("%prefix%\n§cFailed to write Packet\n§4" + getPacketName() + "\n\n" + String.join("\n", strings).replace("null", "-/-"));
         } else {
-            getPlayer().disconnect(TNLListener.getInstance().getPrefix() + "\n§cFailed to write Packet" +
-                    "\n§4" + getPacketName());
+            getPlayer().disconnect("%prefix%\n§cFailed to write Packet\n§4" + getPacketName());
         }
     }
 

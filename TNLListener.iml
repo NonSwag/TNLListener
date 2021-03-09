@@ -36,5 +36,8 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="Tuinity 1.15.2" level="project" />
+    <orderEntry type="library" name="com.google.code.gson:gson:2.8.6" level="project" />
+    <orderEntry type="library" name="spigot-1.7.2" level="project" />
+    <orderEntry type="library" name="TNLEventAPI" level="project" />
   </component>
 </module>

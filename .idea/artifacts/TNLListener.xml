@@ -3,8 +3,9 @@
     <output-path>$USER_HOME$/Desktop/Coding/PluginProjects/Plugins</output-path>
     <root id="archive" name="TNLListener.jar">
       <element id="module-output" name="TNLListener" />
-      <element id="file-copy" path="$PROJECT_DIR$/velocity-plugin.json" />
       <element id="file-copy" path="$PROJECT_DIR$/plugin.yml" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.6/gson-2.8.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Desktop/Coding/APIs/TNLEventAPI.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

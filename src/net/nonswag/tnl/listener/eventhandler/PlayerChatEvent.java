@@ -6,17 +6,23 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class PlayerChatEvent extends Event implements Cancellable {
 
-    private static final HandlerList handlers = new HandlerList();
+    @Nonnull
+    private static final HandlerList handlerList = new HandlerList();
+    @Nonnull
     private final TNLPlayer player;
+    @Nonnull
     private String message;
+    @Nullable
     private String format = null;
     private boolean cancelled = false;
 
-    public PlayerChatEvent(TNLPlayer player, String message) {
+    public PlayerChatEvent(@Nonnull TNLPlayer player, @Nonnull String message) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.message = message;
@@ -24,30 +30,36 @@ public class PlayerChatEvent extends Event implements Cancellable {
 
     public boolean isCommand() { return getMessage().startsWith("/"); }
 
+    @Nullable
     public String getFormat() {
         return format;
     }
 
-    public void setFormat(String format) {
+    public void setFormat(@Nullable String format) {
         this.format = format;
     }
 
-    public void setMessage(String message) {
+    public void setMessage(@Nonnull String message) {
         this.message = message;
     }
 
+    @Nonnull
     public TNLPlayer getPlayer() {
         return player;
     }
 
+    @Nonnull
     public String getMessage() {
         return message;
     }
 
     @Override
-    public HandlerList getHandlers() { return handlers; }
+    public HandlerList getHandlers() { return handlerList; }
 
-    public static HandlerList getHandlerList() { return handlers; }
+    @Nonnull
+    public static HandlerList getHandlerList() {
+        return handlerList;
+    }
 
     @Override
     public boolean isCancelled() { return cancelled; }

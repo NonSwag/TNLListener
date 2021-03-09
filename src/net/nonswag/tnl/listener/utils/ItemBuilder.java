@@ -5,6 +5,7 @@ import net.nonswag.tnl.listener.api.logger.Logger;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.block.banner.Pattern;
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -14,10 +15,7 @@ import org.bukkit.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class ItemBuilder {
 
@@ -130,6 +128,22 @@ public class ItemBuilder {
             ((LeatherArmorMeta) getItemMeta()).setColor(color);
         }
         return this;
+    }
+
+    @Nonnull
+    public ItemBuilder addBannerPattern(@Nonnull Pattern pattern) {
+        if (getItemMeta() instanceof BannerMeta) {
+            ((BannerMeta) getItemMeta()).addPattern(pattern);
+        }
+        return this;
+    }
+
+    @Nonnull
+    public List<Pattern> getBannerPatterns() {
+        if (getItemMeta() instanceof BannerMeta) {
+            ((BannerMeta) getItemMeta()).getPatterns();
+        }
+        return new ArrayList<>();
     }
 
     @Nonnull

@@ -9,10 +9,13 @@ import java.util.Objects;
 
 public class ChatComponent {
 
-    @Nonnull private static final List<ChatComponent> messages = new ArrayList<>();
+    @Nonnull
+    private static final List<ChatComponent> messages = new ArrayList<>();
 
-    @Nonnull private final LanguageKey languageKey;
-    @Nonnull private String text = "";
+    @Nonnull
+    private final LanguageKey languageKey;
+    @Nonnull
+    private String text = "";
 
     public ChatComponent(@Nonnull LanguageKey languageKey, @Nonnull String text) {
         this.languageKey = languageKey;

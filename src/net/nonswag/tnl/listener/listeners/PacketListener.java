@@ -4,6 +4,10 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.TNLMain;
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.message.MessageKey;
+import net.nonswag.tnl.listener.api.message.Placeholder;
+import net.nonswag.tnl.listener.api.player.TNLPlayer;
+import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.eventhandler.*;
 import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
@@ -12,7 +16,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Waterlogged;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -22,7 +25,7 @@ public class PacketListener implements Listener {
     public void onPacket(PlayerPacketEvent event) {
         if (event.isIncoming()) {
             if (event.getPacket() instanceof PacketPlayInChat) {
-                if (TNLListener.getInstance().isBetterChat()) {
+                if (Settings.BETTER_CHAT.getValue()) {
                     String message = ((PacketPlayInChat) event.getPacket()).b();
                     if (message == null || message.length() <= 0 || message.replace(" ", "").equals("")) {
                         event.setCancelled(true);
@@ -34,13 +37,13 @@ public class PacketListener implements Listener {
                         Bukkit.getPluginManager().callEvent(chatEvent);
                         event.setCancelled(chatEvent.isCancelled());
                         if (!chatEvent.isCancelled() && !event.isCancelled()) {
-                            if (!chatEvent.isCommand() || TNLListener.getInstance().isUseCommandLineAsChat()) {
+                            if (!chatEvent.isCommand()) {
                                 event.setCancelled(true);
-                                for (Player all : Bukkit.getOnlinePlayers()) {
+                                for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
                                     if (chatEvent.getFormat() == null) {
-                                        all.sendMessage(chatEvent.getPlayer().getName() + " §8» §r" + chatEvent.getMessage());
+                                        all.sendMessage(MessageKey.CHAT_FORMAT, new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("message", message));
                                     } else {
-                                        all.sendMessage(chatEvent.getFormat());
+                                        all.sendMessage(chatEvent.getFormat(), new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("message", message));
                                     }
                                 }
                             }
@@ -72,7 +75,7 @@ public class PacketListener implements Listener {
                         || damageType.equals(PlayerDamageBlockEvent.BlockDamageType.START_DESTROY_BLOCK)
                         || damageType.equals(PlayerDamageBlockEvent.BlockDamageType.ABORT_DESTROY_BLOCK)) {
                     BlockPosition position = ((PacketPlayInBlockDig) event.getPacket()).b();
-                    Location location = TNLListener.getInstance().wrap(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ());
+                    Location location = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ());
                     PlayerDamageBlockEvent blockEvent = new PlayerDamageBlockEvent(event.getPlayer(), location.getBlock(), damageType);
                     Bukkit.getPluginManager().callEvent(blockEvent);
                     event.setCancelled(blockEvent.isCancelled());
@@ -122,7 +125,7 @@ public class PacketListener implements Listener {
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
                 BlockPosition position = ((PacketPlayInUseItem) event.getPacket()).c().getBlockPosition();
-                org.bukkit.block.Block block = TNLListener.getInstance().wrap(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
+                org.bukkit.block.Block block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
                 final EnumDirection direction = ((PacketPlayInUseItem) event.getPacket()).c().getDirection();
                 try {
                     block = block.getRelative(BlockFace.valueOf(direction.name()));
@@ -152,12 +155,12 @@ public class PacketListener implements Listener {
             if (event.getPacket() instanceof PacketPlayOutSpawnEntity) {
                 Object k = event.getPacketField("k");
                 if (k != null) {
-                    if (TNLListener.getInstance().isBetterTNT()) {
+                    if (Settings.BETTER_TNT.getValue()) {
                         if (k.equals(EntityTypes.TNT)) {
                             event.setCancelled(true);
                         }
                     }
-                    if (TNLListener.getInstance().isBetterFallingBlocks()) {
+                    if (Settings.BETTER_FALLING_BLOCKS.getValue()) {
                         if (k.equals(EntityTypes.FALLING_BLOCK)) {
                             event.setCancelled(true);
                         }
@@ -167,7 +170,7 @@ public class PacketListener implements Listener {
                 Object a = event.getPacketField("a");
                 if (a != null) {
                     TextComponent textComponent = new TextComponent(a.toString());
-                    if (TNLListener.getInstance().isBetterPermissions()) {
+                    if (Settings.BETTER_PERMISSIONS.getValue()) {
                         if (textComponent.getText().equalsIgnoreCase("TextComponent{text='', " +
                                 "siblings=[TextComponent{text='I'm sorry, " +
                                 "but you do not have permission to perform this command. " +
@@ -176,7 +179,8 @@ public class PacketListener implements Listener {
                                 "underlined=null, obfuscated=null, clickEvent=null, hoverEvent=null, insertion=null}}], " +
                                 "style=Style{hasParent=false, color=null, bold=null, italic=null, underlined=null, " +
                                 "obfuscated=null, clickEvent=null, hoverEvent=null, insertion=null}}")) {
-                            event.setPacketField("a", new ChatMessage(TNLListener.getInstance().getPermissionMessage()));
+                            event.setCancelled(true);
+                            event.getPlayer().sendMessage(MessageKey.NO_PERMISSION, new Placeholder("permission", "unknown"));
                         }
                     }
                 }

@@ -1,21 +1,27 @@
 package net.nonswag.tnl.listener.api.logger;
 
+import net.nonswag.tnl.listener.api.message.ChatComponent;
+import net.nonswag.tnl.listener.api.message.Message;
 import net.nonswag.tnl.listener.api.message.Placeholder;
-import net.nonswag.tnl.listener.api.object.List;
 import net.nonswag.tnl.listener.api.object.Set;
+import net.nonswag.tnl.listener.api.settings.Settings;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.*;
 
 public class Logger {
 
-    @Nonnull public static final Logger info = new Logger("§8[§1%time% §8|§1 %logger% §8| §1%thread%§8]§r", "Info");
-    @Nonnull public static final Logger warn = new Logger("§8[§e%time% §8|§e %logger% §8| §e%thread%§8]§r", "Warn");
-    @Nonnull public static final Logger debug = new Logger("§8[§6%time% §8|§6 %logger% §8| §6%thread%§8]§r", "Debug");
-    @Nonnull public static final Logger error = new Logger("§8[§4%time% §8|§4 %logger% §8| §4%thread%§8]§r", "Error");
+    @Nonnull
+    public static final Logger info = new Logger("info", Message.LOG_INFO.getText());
+    @Nonnull
+    public static final Logger warn = new Logger("warn", Message.LOG_WARN.getText());
+    @Nonnull
+    public static final Logger debug = new Logger("debug", Message.LOG_DEBUG.getText());
+    @Nonnull
+    public static final Logger error = new Logger("error", Message.LOG_ERROR.getText());
 
     static {
         FileOutputStream outputStream = new FileOutputStream(FileDescriptor.out);
@@ -28,25 +34,14 @@ public class Logger {
         System.setIn(new BufferedInputStream(inputStream));
     }
 
-    @Nonnull protected final String prefix;
-    @Nonnull protected final String name;
-
-    protected Logger(@Nonnull String prefix, @Nonnull String name) {
-        for (Color color : Color.values()) {
-            if (prefix.contains("<" + color.name().toLowerCase() + ">")) {
-                prefix = prefix.replace("<" + color.name().toLowerCase() + ">", color.getAnsi());
-            }
-            if (prefix.contains(color.getCode())) {
-                prefix = prefix.replace(color.getCode(), color.getAnsi());
-            }
-        }
-        this.prefix = prefix;
-        this.name = name;
-    }
-
     @Nonnull
-    protected String getPrefix() {
-        return prefix;
+    protected final String name;
+    @Nonnull
+    protected final String prefix;
+
+    protected Logger(@Nonnull String name, @Nonnull String prefix) {
+        this.name = name;
+        this.prefix = Color.replace(prefix);
     }
 
     @Nonnull
@@ -54,41 +49,63 @@ public class Logger {
         return name;
     }
 
+    @Nonnull
+    protected String getPrefix() {
+        return prefix;
+    }
+
     public void printf(@Nonnull Object value, @Nonnull Placeholder... placeholders) {
         println(Placeholder.replace(value, placeholders));
     }
 
     public void printf(@Nonnull List<Set<Object, Placeholder[]>> values) {
-        for (Set<Object, Placeholder[]> set : values.getObjects()) {
-            printf(set.getKey(), set.getValue());
+        for (Set<Object, Placeholder[]> set : values) {
+            if (set.getValue() != null) {
+                printf(set.getKey(), set.getValue());
+            } else {
+                println(set.getKey());
+            }
         }
     }
 
     public void println(@Nonnull Object... values) {
+        if (!Settings.DEBUG.getValue() && getName().equals(Logger.debug.getName())) {
+            return;
+        }
         for (@Nullable Object value : values) {
             if (value != null) {
                 if (value instanceof Throwable) {
                     ((Throwable) value).printStackTrace();
                 } else {
                     String string = value.toString() + "§r";
-                    if (((getPrefix().contains("<") && prefix.contains(">")) || prefix.contains("§"))
-                            || ((string.contains("<") && string.contains(">")) || string.contains("§"))) {
-                        for (Color color : Color.values()) {
-                            if (string.contains("<" + color.name().toLowerCase() + ">")) {
-                                string = string.replace("<" + color.name().toLowerCase() + ">", color.getAnsi());
-                            }
-                            if (string.contains(color.getCode())) {
-                                string = string.replace(color.getCode(), color.getAnsi());
-                            }
-                        }
-                    }
                     if (getPrefix().isEmpty()) {
-                        System.out.println(string);
+                        System.out.println(Color.replace(ChatComponent.getText(string)));
                     } else {
-                        System.out.println(Placeholder.replace(prefix, new Placeholder("logger", getName()), new Placeholder("thread", Thread.currentThread().getName()), new Placeholder("time", new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()))) + " " + string);
+                        System.out.println(Color.replace(ChatComponent.getText(prefix, new Placeholder("thread", Thread.currentThread().getName()), new Placeholder("time", new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()))) + " " + ChatComponent.getText(string)));
                     }
                 }
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Logger{" +
+                "name='" + name + '\'' +
+                ", prefix='" + prefix + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Logger logger = (Logger) o;
+        return name.equals(logger.name) && prefix.equals(logger.prefix);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, prefix);
     }
 }

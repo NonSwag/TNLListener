@@ -28,15 +28,15 @@ public class PacketAdapter {
             if (player.getNetworkManager() == null || !player.isOnline()) {
                 if (player.getPlayerConnection() == null) {
                     Logger.error.println("Failed to inject " + player.getName(), "The player connection can't be null");
-                    player.disconnect(TNLListener.getInstance().getPrefix() + "\n" +
+                    player.disconnect("%prefix%\n" +
                             "§cThere are some unaccepted values in your connection");
                 } else if (!player.isOnline()) {
                     Logger.error.println("Failed to inject " + player.getName(), "The player can't be offline");
-                    player.disconnect(TNLListener.getInstance().getPrefix() + "\n" +
+                    player.disconnect("%prefix%\n" +
                             "§cYou are online but your connection is offline?!");
                 } else {
                     Logger.error.println("Failed to inject " + player, "Reached an unreachable statement?!");
-                    player.disconnect(TNLListener.getInstance().getPrefix() + "\n§cReached an unreachable statement?!");
+                    player.disconnect("%prefix%\n§cReached an unreachable statement?!");
                 }
                 return;
             }

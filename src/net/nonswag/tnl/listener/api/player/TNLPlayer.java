@@ -3,25 +3,21 @@ package net.nonswag.tnl.listener.api.player;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import net.minecraft.server.v1_15_R1.*;
-import net.nonswag.tnl.listener.TNLMain;
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.TNLMain;
 import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.api.message.*;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.title.Title;
-import net.nonswag.tnl.listener.enumerations.ProtocolVersion;
 import net.nonswag.tnl.listener.eventhandler.InventoryLoadedEvent;
 import net.nonswag.tnl.listener.eventhandler.InventorySafeEvent;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
-import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.*;
-import org.bukkit.advancement.Advancement;
-import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
@@ -30,8 +26,6 @@ import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.conversations.Conversation;
-import org.bukkit.conversations.ConversationAbandonedEvent;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
@@ -86,11 +80,11 @@ import java.util.*;
  *
  **/
 
-public class TNLPlayer {
+public class TNLPlayer implements TNLPlayerImpl {
 
     @Nonnull private final Player bukkitPlayer;
-    @Nonnull private final Scoreboard tnlOptionPacketScoreboard = new Scoreboard();
-    @Nonnull private final ScoreboardTeam tnlOptionPacketTeam = new ScoreboardTeam(getTnlOptionPacketScoreboard(), "TNLOptionPacket");
+    @Nonnull private final Scoreboard optionScoreboard = new Scoreboard();
+    @Nonnull private final ScoreboardTeam optionTeam = new ScoreboardTeam(getOptionScoreboard(), "TNLOptionPacket");
     @Nonnull private final HashMap<String, Object> virtualStorage = new HashMap<>();
     @Nonnull private final PermissionManager permissionManager;
 
@@ -166,145 +160,97 @@ public class TNLPlayer {
         return player;
     }
 
+    @Override
+    @Nonnull
     public HashMap<String, Object> getVirtualStorage() {
         return virtualStorage;
     }
 
-    public Scoreboard getTnlOptionPacketScoreboard() {
-        return tnlOptionPacketScoreboard;
+    @Override
+    @Nonnull
+    public Scoreboard getOptionScoreboard() {
+        return optionScoreboard;
     }
 
-    public ScoreboardTeam getTnlOptionPacketTeam() {
-        return tnlOptionPacketTeam;
+    @Override
+    @Nonnull
+    public ScoreboardTeam getOptionTeam() {
+        return optionTeam;
     }
 
+    @Override
+    @Nonnull
     public PlayerConnection getPlayerConnection() {
         return getEntityPlayer().playerConnection;
     }
 
+    @Override
+    @Nonnull
     public NetworkManager getNetworkManager() {
         return getPlayerConnection().networkManager;
     }
 
+    @Override
+    @Nonnull
     public Channel getChannel() {
         return getNetworkManager().channel;
     }
 
+    @Override
+    @Nonnull
     public ChannelPipeline getPipeline() {
         return getChannel().pipeline();
     }
 
+    @Override
     public int getPing() {
         return getEntityPlayer().ping;
     }
 
+    @Override
     @Nonnull
     public PermissionManager getPermissionManager() {
         return permissionManager;
     }
 
+    @Override
     public boolean isOnline() {
         return getBukkitPlayer().isOnline();
     }
 
+    @Override
     public boolean isBanned() {
         return getBukkitPlayer().isBanned();
     }
 
+    @Override
     public boolean isWhitelisted() {
         return getBukkitPlayer().isWhitelisted();
     }
 
-    public void setWhitelisted(boolean b) {
-        getBukkitPlayer().setWhitelisted(b);
+    @Override
+    public void setWhitelisted(boolean whitelisted) {
+        getBukkitPlayer().setWhitelisted(whitelisted);
     }
 
+    @Override
     @Nonnull
     public Player getBukkitPlayer() {
         return bukkitPlayer;
     }
 
+    @Override
     public long getFirstPlayed() {
         return getBukkitPlayer().getFirstPlayed();
     }
 
+    @Override
     public boolean hasPlayedBefore() {
         return getBukkitPlayer().hasPlayedBefore();
     }
 
-    public void incrementStatistic(Statistic statistic) throws IllegalArgumentException {
-        getBukkitPlayer().incrementStatistic(statistic);
-    }
-
-    public void decrementStatistic(Statistic statistic) throws IllegalArgumentException {
-        getBukkitPlayer().decrementStatistic(statistic);
-    }
-
-    public void incrementStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-        getBukkitPlayer().incrementStatistic(statistic, i);
-    }
-
-    public void decrementStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-        getBukkitPlayer().decrementStatistic(statistic, i);
-    }
-
-    public void setStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-        getBukkitPlayer().setStatistic(statistic, i);
-    }
-
-    public int getStatistic(Statistic statistic) throws IllegalArgumentException {
-        return getBukkitPlayer().getStatistic(statistic);
-    }
-
-    public void incrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-        getBukkitPlayer().incrementStatistic(statistic, material);
-    }
-
-    public void decrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-        getBukkitPlayer().decrementStatistic(statistic, material);
-    }
-
-    public int getStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-        return getBukkitPlayer().getStatistic(statistic, material);
-    }
-
-    public void incrementStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-        getBukkitPlayer().incrementStatistic(statistic, material, i);
-    }
-
-    public void decrementStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-        getBukkitPlayer().decrementStatistic(statistic, material, i);
-    }
-
-    public void setStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-        getBukkitPlayer().setStatistic(statistic, material, i);
-    }
-
-    public void incrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-        getBukkitPlayer().incrementStatistic(statistic, entityType);
-    }
-
-    public void decrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-        getBukkitPlayer().decrementStatistic(statistic, entityType);
-    }
-
-    public int getStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-        return getBukkitPlayer().getStatistic(statistic, entityType);
-    }
-
-    public void incrementStatistic(Statistic statistic, EntityType entityType, int i) throws IllegalArgumentException {
-        getBukkitPlayer().incrementStatistic(statistic, entityType, i);
-    }
-
-    public void decrementStatistic(Statistic statistic, EntityType entityType, int i) {
-        getBukkitPlayer().decrementStatistic(statistic, entityType, i);
-    }
-
-    public void setStatistic(Statistic statistic, EntityType entityType, int i) {
-        getBukkitPlayer().setStatistic(statistic, entityType, i);
-    }
-
-    public void sendPacket(Packet<?> packet) {
+    @Override
+    public void sendPacket(@Nonnull Packet<PacketListenerPlayOut> packet) {
         if (Bukkit.isPrimaryThread()) {
             getPlayerConnection().sendPacket(packet);
         } else {
@@ -312,24 +258,72 @@ public class TNLPlayer {
         }
     }
 
-    public void sendPackets(Packet<?>... packets) {
-        for (Packet<?> packet : packets) {
+    @Override
+    @SafeVarargs
+    public final void sendPackets(@Nonnull Packet<PacketListenerPlayOut>... packets) {
+        for (Packet<PacketListenerPlayOut> packet : packets) {
             sendPacket(packet);
         }
     }
 
+    @Override
     public double getMaxHealth() {
         return getEntityPlayer().getMaxHealth();
     }
 
-    public void sendMessage(String s) {
-        getBukkitPlayer().sendMessage(s);
+    @Override
+    public void sendMessage(@Nonnull ChatComponent component) {
+        sendMessage(component.getText());
     }
 
+    @Override
+    public void sendMessage(@Nonnull ChatComponent component, @Nonnull Placeholder... placeholders) {
+        sendMessage(component.getText(placeholders));
+    }
+
+    @Override
+    public void sendMessage(@Nonnull String message, @Nonnull Placeholder... placeholders) {
+        getBukkitPlayer().sendMessage(ChatComponent.getText(message, placeholders));
+    }
+
+    @Override
+    public void sendMessage(@Nonnull MessageKey messageKey, @Nonnull Placeholder... placeholders) {
+        Language language = Language.ROOT;
+        if (!messageKey.isSystemMessage()) {
+            language = Language.fromLocale(getBukkitPlayer().getLocale());
+        }
+        LanguageKey languageKey = new LanguageKey(language, messageKey);
+        ChatComponent component = Message.valueOf(languageKey);
+        if (component != null) {
+            getBukkitPlayer().sendMessage(component.getText(placeholders));
+        } else {
+            Logger.error.println("§cUnknown component§8: §4" + languageKey.getMessageKey().getKey() + " §8(§4" + languageKey.getLanguage().getName() + "§8)");
+            sendMessage("%prefix% §cUnknown component§8: §4" + languageKey.getMessageKey() + " §8(§4" + languageKey.getLanguage().getName() + "§8)");
+        }
+    }
+
+    @Override
     public void disconnect() {
-        disconnect(TNLListener.getInstance().getPrefix() + "\n§cDisconnected");
+        disconnect(MessageKey.KICKED + "\n§cDisconnected");
     }
 
+    @Override
+    public void disconnect(@Nonnull MessageKey messageKey, @Nonnull Placeholder... placeholders) {
+        Language language = Language.ROOT;
+        if (!messageKey.isSystemMessage()) {
+            language = Language.fromLocale(getBukkitPlayer().getLocale());
+        }
+        LanguageKey languageKey = new LanguageKey(language, messageKey);
+        ChatComponent component = Message.valueOf(languageKey);
+        if (component != null) {
+            disconnect(component.getText(placeholders));
+        } else {
+            Logger.error.println("§cUnknown component§8: §4" + languageKey.toString());
+            disconnect("§cUnknown component§8: §4" + languageKey.toString());
+        }
+    }
+
+    @Override
     public void disconnect(@Nonnull String kickMessage) {
         if (Bukkit.isPrimaryThread()) {
             if (!getPlayerConnection().processedDisconnect) {
@@ -344,167 +338,196 @@ public class TNLPlayer {
         }
     }
 
+    @Override
     public String getWorldAlias() {
         return getWorldAlias(getWorld());
     }
 
-    public void setRules(ScoreboardTeamBase.EnumNameTagVisibility rule, ScoreboardTeamBase.EnumTeamPush rule1) {
-        getTnlOptionPacketScoreboard().addPlayerToTeam(getBukkitPlayer().getName(), getTnlOptionPacketTeam());
-        if (rule != null) {
-            getTnlOptionPacketTeam().setNameTagVisibility(rule);
-        }
-        if (rule1 != null) {
-            getTnlOptionPacketTeam().setCollisionRule(rule1);
-        }
-        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam(getTnlOptionPacketTeam(), 0);
+    @Override
+    public void setNameTagVisibility(@Nonnull ScoreboardTeamBase.EnumNameTagVisibility visibility) {
+        getOptionScoreboard().addPlayerToTeam(getBukkitPlayer().getName(), getOptionTeam());
+        getOptionTeam().setNameTagVisibility(visibility);
+        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam(getOptionTeam(), 0);
         sendPacket(packet);
     }
 
-    private static HashMap<World, String> getWorldAliasHashMap() {
-        return TNLListener.getInstance().getWorldAliasHashMap();
+    @Override
+    public void setCollision(@Nonnull ScoreboardTeamBase.EnumTeamPush collision) {
+        getOptionScoreboard().addPlayerToTeam(getBukkitPlayer().getName(), getOptionTeam());
+        getOptionTeam().setCollisionRule(collision);
+        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam(getOptionTeam(), 0);
+        sendPacket(packet);
     }
 
-    public static String getWorldAlias(World world) {
-        return getWorldAliasHashMap().getOrDefault(world, world.getName());
+    @Nonnull
+    public static String getWorldAlias(@Nonnull World world) {
+        return TNLListener.getInstance().getWorldAliasHashMap().getOrDefault(world, world.getName());
     }
 
-    public static void setWorldAlias(World world, String alias) {
-        getWorldAliasHashMap().put(world, alias);
+    public static void setWorldAlias(@Nonnull World world, @Nonnull String alias) {
+        TNLListener.getInstance().getWorldAliasHashMap().put(world, alias);
     }
 
+    @Override
+    @Nonnull
     public String getName() {
         return getBukkitPlayer().getName();
     }
 
+    @Override
+    @Nonnull
     public PlayerInventory getInventory() {
         return getBukkitPlayer().getInventory();
     }
 
+    @Override
+    @Nonnull
     public Inventory getEnderChest() {
         return getBukkitPlayer().getEnderChest();
     }
 
+    @Override
+    @Nonnull
     public MainHand getMainHand() {
         return getBukkitPlayer().getMainHand();
     }
 
-    public boolean setWindowProperty(InventoryView.Property property, int i) {
+    @Override
+    public boolean setWindowProperty(@Nonnull InventoryView.Property property, int i) {
         return getBukkitPlayer().setWindowProperty(property, i);
     }
 
+    @Override
+    @Nullable
     public InventoryView getOpenInventory() {
         return getBukkitPlayer().getOpenInventory();
     }
 
-    public InventoryView openInventory(Inventory inventory) {
+    @Override
+    @Nullable
+    public InventoryView openInventory(@Nonnull Inventory inventory) {
         return getBukkitPlayer().openInventory(inventory);
     }
 
-    public InventoryView openWorkbench(Location location, boolean b) {
+    @Override
+    @Nullable
+    public InventoryView openWorkbench(@Nonnull Location location, boolean b) {
         return getBukkitPlayer().openWorkbench(location, b);
     }
 
-    public InventoryView openEnchanting(Location location, boolean b) {
+    @Override
+    @Nullable
+    public InventoryView openEnchanting(@Nonnull Location location, boolean b) {
         return getBukkitPlayer().openEnchanting(location, b);
     }
 
-    public void openInventory(InventoryView inventoryView) {
+    @Override
+    public void openInventory(@Nonnull InventoryView inventoryView) {
         getBukkitPlayer().openInventory(inventoryView);
     }
 
-    public InventoryView openMerchant(Villager villager, boolean b) {
+    @Override
+    @Nullable
+    public InventoryView openMerchant(@Nonnull Villager villager, boolean b) {
         return getBukkitPlayer().openMerchant(villager, b);
     }
 
-    public InventoryView openMerchant(Merchant merchant, boolean b) {
+    @Override
+    @Nullable
+    public InventoryView openMerchant(@Nonnull Merchant merchant, boolean b) {
         return getBukkitPlayer().openMerchant(merchant, b);
     }
 
+    @Override
     public void closeInventory() {
         getBukkitPlayer().closeInventory();
     }
 
-    public void setItemOnCursor(ItemStack itemStack) {
+    @Override
+    public void setItemOnCursor(@Nonnull ItemStack itemStack) {
         getBukkitPlayer().setItemOnCursor(itemStack);
     }
 
-    public int getCooldown(Material material) {
+    @Override
+    public int getCooldown(@Nonnull Material material) {
         return getBukkitPlayer().getCooldown(material);
     }
 
-    public void setCooldown(Material material, int i) {
+    @Override
+    public void setCooldown(@Nonnull Material material, int i) {
         getBukkitPlayer().setCooldown(material, i);
     }
 
+    @Override
     public int getSleepTicks() {
         return getBukkitPlayer().getSleepTicks();
     }
 
+    @Override
+    @Nullable
     public Location getBedSpawnLocation() {
         return getBukkitPlayer().getBedSpawnLocation();
     }
 
-    public void setBedSpawnLocation(Location location) {
+    @Override
+    public void setBedSpawnLocation(@Nonnull Location location) {
         getBukkitPlayer().setBedSpawnLocation(location);
     }
 
-    public void setBedSpawnLocation(Location location, boolean b) {
+    @Override
+    public void setBedSpawnLocation(@Nonnull Location location, boolean b) {
         getBukkitPlayer().setBedSpawnLocation(location, b);
     }
 
-    public boolean sleep(Location location, boolean b) {
+    @Override
+    public boolean sleep(@Nonnull Location location, boolean b) {
         return getBukkitPlayer().sleep(location, b);
     }
 
+    @Override
     public void wakeup(boolean b) {
         getBukkitPlayer().wakeup(b);
     }
 
+    @Override
+    @Nonnull
     public Location getBedLocation() {
         return getBukkitPlayer().getBedLocation();
     }
 
+    @Override
+    @Nonnull
     public GameMode getGameMode() {
         return getBukkitPlayer().getGameMode();
     }
 
-    public void setGameMode(GameMode gameMode) {
+    @Override
+    public void setGameMode(@Nonnull GameMode gameMode) {
         getBukkitPlayer().setGameMode(gameMode);
     }
 
+    @Override
     public boolean isBlocking() {
         return getBukkitPlayer().isBlocking();
     }
 
+    @Override
     public boolean isHandRaised() {
         return getBukkitPlayer().isHandRaised();
     }
 
+    @Override
     public int getExpToLevel() {
         return getBukkitPlayer().getExpToLevel();
     }
 
+    @Override
     public float getAttackCooldown() {
         return getBukkitPlayer().getAttackCooldown();
     }
 
-    public boolean discoverRecipe(NamespacedKey namespacedKey) {
-        return getBukkitPlayer().discoverRecipe(namespacedKey);
-    }
-
-    public int discoverRecipes(Collection<NamespacedKey> collection) {
-        return getBukkitPlayer().discoverRecipes(collection);
-    }
-
-    public boolean undiscoverRecipe(NamespacedKey namespacedKey) {
-        return getBukkitPlayer().undiscoverRecipe(namespacedKey);
-    }
-
-    public int undiscoverRecipes(Collection<NamespacedKey> collection) {
-        return getBukkitPlayer().undiscoverRecipes(collection);
-    }
-
-    public void saveInventory(String id) {
+    @Override
+    public void saveInventory(@Nonnull String id) {
         mkdirInventories();
         File file = new File("plugins/TNLListener/" + getBukkitPlayer().getUniqueId() + ".yml");
         try {
@@ -525,6 +548,7 @@ public class TNLPlayer {
         }
     }
 
+    @Override
     public void hideTabListName(@Nonnull TNLPlayer[] players) {
         for (TNLPlayer all : players) {
             if (!all.equals(this)) {
@@ -533,13 +557,15 @@ public class TNLPlayer {
         }
     }
 
-    public void disguise(net.minecraft.server.v1_15_R1.EntityLiving entity, List<TNLPlayer> receivers) {
+    @Override
+    public void disguise(@Nonnull net.minecraft.server.v1_15_R1.EntityLiving entity, @Nonnull List<TNLPlayer> receivers) {
         for (TNLPlayer receiver : receivers) {
             disguise(entity, receiver);
         }
     }
 
-    public void disguise(net.minecraft.server.v1_15_R1.EntityLiving entity, TNLPlayer receiver) {
+    @Override
+    public void disguise(@Nonnull net.minecraft.server.v1_15_R1.EntityLiving entity, @Nonnull TNLPlayer receiver) {
         if (!this.equals(receiver)) {
             receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
             entity.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
@@ -549,26 +575,33 @@ public class TNLPlayer {
         }
     }
 
-    public void disguise(net.minecraft.server.v1_15_R1.EntityLiving entity) {
+    @Override
+    public void disguise(@Nonnull net.minecraft.server.v1_15_R1.EntityLiving entity) {
         disguise(entity, TNLListener.getInstance().getOnlinePlayers());
     }
 
+    @Nonnull
     private static final HashMap<UUID, List<String>> bossBars = new HashMap<>();
+    @Nonnull
     private static final HashMap<UUID, BossBar> bossHashMap = new HashMap<>();
 
+    @Nonnull
     private static HashMap<UUID, BossBar> getBossHashMap() {
         return bossHashMap;
     }
 
+    @Nonnull
     public static HashMap<UUID, List<String>> getBossBars() {
         return bossBars;
     }
 
-    public static List<String> getBossBars(UUID uniqueId) {
+    @Nonnull
+    public static List<String> getBossBars(@Nonnull UUID uniqueId) {
         return bossBars.getOrDefault(uniqueId, new ArrayList<>());
     }
 
-    public void sendBossBar(BossBar bossBar) {
+    @Override
+    public void sendBossBar(@Nonnull BossBar bossBar) {
         if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
             List<String> bars = getBossBars(getUniqueId());
             bars.add(bossBar.getId());
@@ -578,7 +611,8 @@ public class TNLPlayer {
         updateBossBar(bossBar);
     }
 
-    public void updateBossBar(BossBar bossBar) {
+    @Override
+    public void updateBossBar(@Nonnull BossBar bossBar) {
         if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
             List<String> bars = getBossBars(getUniqueId());
             bars.add(bossBar.getId());
@@ -590,7 +624,8 @@ public class TNLPlayer {
         sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_STYLE, bossBar.getBossBar().getHandle()));
     }
 
-    public void hideBossBar(BossBar bossBar) {
+    @Override
+    public void hideBossBar(@Nonnull BossBar bossBar) {
         sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.REMOVE, bossBar.getBossBar().getHandle()));
         List<String> bars = getBossBars(getUniqueId());
         bars.remove(bossBar.getId());
@@ -598,7 +633,8 @@ public class TNLPlayer {
         BossBar.removeBossBar(bossBar.getId());
     }
 
-    public void sendBossBar(BossBar bossBar, long millis) {
+    @Override
+    public void sendBossBar(@Nonnull BossBar bossBar, long millis) {
         if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null) {
             hideBossBar(getBossHashMap().get(getBukkitPlayer().getUniqueId()));
         }
@@ -607,7 +643,7 @@ public class TNLPlayer {
         new Thread(() -> {
             try {
                 Thread.sleep(millis);
-            } catch (Throwable ignored) {
+            } catch (Exception ignored) {
             }
             if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null
                     && getBossHashMap().get(getBukkitPlayer().getUniqueId()).equals(bossBar)) {
@@ -616,7 +652,8 @@ public class TNLPlayer {
         }).start();
     }
 
-    public void sendTitle(Title title) {
+    @Override
+    public void sendTitle(@Nonnull Title title) {
         getBukkitPlayer().sendTitle(title.getTitle(),
                 title.getSubtitle(),
                 title.getTimeIn(),
@@ -624,7 +661,8 @@ public class TNLPlayer {
                 title.getTimeOut());
     }
 
-    public void sendTitle(Title.Animation animation) {
+    @Override
+    public void sendTitle(@Nonnull Title.Animation animation) {
         new Thread(() -> {
             try {
                 String[] split = animation.getTitle().getTitle().split("");
@@ -649,37 +687,44 @@ public class TNLPlayer {
         }).start();
     }
 
-    public void sendActionBar(ActionBar actionBar) {
+    @Override
+    public void sendActionBar(@Nonnull ActionBar actionBar) {
         sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + actionBar.getText() + "\"}"), ChatMessageType.a((byte) 2)));
     }
 
+    @Override
+    @Nonnull
     public CraftPlayer getCraftPlayer() {
         return ((CraftPlayer) getBukkitPlayer());
     }
 
+    @Override
+    @Nonnull
     public EntityPlayer getEntityPlayer() {
         return getCraftPlayer().getHandle();
     }
 
-    public void bungeeConnect(net.nonswag.tnl.listener.api.server.Server server) {
+    @Override
+    public void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server) {
         try {
             if (server.isOnline()) {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
                 dataOutputStream.writeUTF("Connect");
                 dataOutputStream.writeUTF(server.getName());
-                getBukkitPlayer().sendPluginMessage(TNLMain.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
-                getBukkitPlayer().sendMessage(TNLListener.getInstance().getPrefix() + " §aConnecting you to server §6" + server.getName());
+                sendPluginMessage(TNLMain.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
+                sendMessage("%prefix% §aConnecting you to server §6" + server.getName());
             } else {
-                getBukkitPlayer().sendMessage(TNLListener.getInstance().getPrefix() + " §cThe server §4" + server.getName() + "§c is Offline");
+                sendMessage("%prefix% §cThe server §4" + server.getName() + "§c is Offline");
             }
         } catch (Exception e) {
             Logger.error.println(e);
-            getBukkitPlayer().sendMessage(TNLListener.getInstance().getPrefix() + " §cFailed to connect you to server §4" + server.getName());
+            sendMessage("%prefix% §cFailed to connect you to server §4" + server.getName());
         }
     }
 
-    public void loadInventory(String id) {
+    @Override
+    public void loadInventory(@Nonnull String id) {
         File file = new File("plugins/TNLListener/" + getBukkitPlayer().getUniqueId() + ".yml");
         try {
             if (file.exists()) {
@@ -705,7 +750,8 @@ public class TNLPlayer {
         }
     }
 
-    private void mkdirInventories() {
+    @Override
+    public void mkdirInventories() {
         File file = new File("plugins/TNLListener/");
         if (!file.exists()) {
             if (file.mkdirs()) {
@@ -718,759 +764,818 @@ public class TNLPlayer {
         }
     }
 
+    @Override
+    @Nonnull
     public String getDisplayName() {
         return getBukkitPlayer().getDisplayName();
     }
 
-    public void setDisplayName(String s) {
+    @Override
+    public void setDisplayName(@Nonnull String s) {
         getBukkitPlayer().setDisplayName(s);
     }
 
+    @Override
+    @Nonnull
     public String getPlayerListName() {
         return getBukkitPlayer().getPlayerListName();
     }
 
-    public void setPlayerListName(String s) {
+    @Override
+    public void setPlayerListName(@Nonnull String s) {
         getBukkitPlayer().setPlayerListName(s);
     }
 
+    @Override
+    @Nullable
     public String getPlayerListHeader() {
         return getBukkitPlayer().getPlayerListHeader();
     }
 
+    @Override
+    @Nullable
     public String getPlayerListFooter() {
         return getBukkitPlayer().getPlayerListFooter();
     }
 
-    public void setPlayerListHeader(String s) {
+    @Override
+    public void setPlayerListHeader(@Nonnull String s) {
         getBukkitPlayer().setPlayerListHeader(s);
     }
 
-    public void setPlayerListFooter(String s) {
+    @Override
+    public void setPlayerListFooter(@Nonnull String s) {
         getBukkitPlayer().setPlayerListFooter(s);
     }
 
-    public void setPlayerListHeaderFooter(String s, String s1) {
+    @Override
+    public void setPlayerListHeaderFooter(@Nonnull String s, @Nonnull String s1) {
         getBukkitPlayer().setPlayerListHeaderFooter(s, s1);
     }
 
-    public void setCompassTarget(Location location) {
+    @Override
+    public void setCompassTarget(@Nonnull Location location) {
         getBukkitPlayer().setCompassTarget(location);
     }
 
+    @Override
+    @Nonnull
     public Location getCompassTarget() {
         return getBukkitPlayer().getCompassTarget();
     }
 
+    @Override
+    @Nullable
     public InetSocketAddress getAddress() {
         return getBukkitPlayer().getAddress();
     }
 
-    public boolean isConversing() {
-        return getBukkitPlayer().isConversing();
-    }
-
-    public void acceptConversationInput(String s) {
-        getBukkitPlayer().acceptConversationInput(s);
-    }
-
-    public boolean beginConversation(Conversation conversation) {
-        return getBukkitPlayer().beginConversation(conversation);
-    }
-
-    public void abandonConversation(Conversation conversation) {
-        getBukkitPlayer().abandonConversation(conversation);
-    }
-
-    public void abandonConversation(Conversation conversation, ConversationAbandonedEvent conversationAbandonedEvent) {
-        getBukkitPlayer().abandonConversation(conversation, conversationAbandonedEvent);
-    }
-
-    public void sendRawMessage(String s) {
-        getBukkitPlayer().sendRawMessage(s);
-    }
-
-    public void sendRawMessage(String s, ChatMessageType chatMessageType) {
-        sendPacket(new PacketPlayOutChat(new ChatMessage(s, chatMessageType)));
-    }
-
-    public void kickPlayer(String s) {
-        getBukkitPlayer().kickPlayer(s);
-    }
-
-    public void chat(String s) {
+    @Override
+    public void chat(@Nonnull String s) {
         getBukkitPlayer().chat(s);
     }
 
-    public boolean performCommand(String s) {
+    @Override
+    public boolean performCommand(@Nonnull String s) {
         return getBukkitPlayer().performCommand(s);
     }
 
+    @Override
     public boolean isSneaking() {
         return getBukkitPlayer().isSneaking();
     }
 
+    @Override
     public void setSneaking(boolean b) {
         getBukkitPlayer().setSneaking(b);
     }
 
+    @Override
     public boolean isSprinting() {
         return getBukkitPlayer().isSprinting();
     }
 
+    @Override
     public void setSprinting(boolean b) {
         getBukkitPlayer().setSprinting(b);
     }
 
+    @Override
     public void saveData() {
         getBukkitPlayer().saveData();
     }
 
+    @Override
     public void loadData() {
         getBukkitPlayer().loadData();
     }
 
+    @Override
     public void setSleepingIgnored(boolean b) {
         getBukkitPlayer().setSleepingIgnored(b);
     }
 
+    @Override
     public boolean isSleepingIgnored() {
         return getBukkitPlayer().isSleepingIgnored();
     }
 
-    public void playNote(Location location, Instrument instrument, Note note) {
+    @Override
+    public void playNote(@Nonnull Location location, @Nonnull Instrument instrument, @Nonnull Note note) {
         getBukkitPlayer().playNote(location, instrument, note);
     }
 
-    public void playSound(Location location, Sound sound, float v, float v1) {
+    @Override
+    public void playSound(@Nonnull Location location, @Nonnull Sound sound, float v, float v1) {
         getBukkitPlayer().playSound(location, sound, v, v1);
     }
 
-    public void playSound(Location location, String s, float v, float v1) {
+    @Override
+    public void playSound(@Nonnull Location location, @Nonnull String s, float v, float v1) {
         getBukkitPlayer().playSound(location, s, v, v1);
     }
 
-    public void playSound(Location location, Sound sound, SoundCategory soundCategory, float v, float v1) {
+    @Override
+    public void playSound(@Nonnull Location location, @Nonnull Sound sound, @Nonnull SoundCategory soundCategory, float v, float v1) {
         getBukkitPlayer().playSound(location, sound, soundCategory, v, v1);
     }
 
-    public void playSound(Location location, String s, SoundCategory soundCategory, float v, float v1) {
+    @Override
+    public void playSound(@Nonnull Location location, @Nonnull String s, @Nonnull SoundCategory soundCategory, float v, float v1) {
         getBukkitPlayer().playSound(location, s, soundCategory, v, v1);
     }
 
-    public void stopSound(Sound sound) {
+    @Override
+    public void stopSound(@Nonnull Sound sound) {
         getBukkitPlayer().stopSound(sound);
     }
 
-    public void stopSound(String s) {
+    @Override
+    public void stopSound(@Nonnull String s) {
         getBukkitPlayer().stopSound(s);
     }
 
-    public void stopSound(Sound sound, SoundCategory soundCategory) {
+    @Override
+    public void stopSound(@Nonnull Sound sound, @Nonnull SoundCategory soundCategory) {
         getBukkitPlayer().stopSound(sound, soundCategory);
     }
 
-    public void stopSound(String s, SoundCategory soundCategory) {
+    @Override
+    public void stopSound(@Nonnull String s, @Nonnull SoundCategory soundCategory) {
         getBukkitPlayer().stopSound(s, soundCategory);
     }
 
-    public <T> void playEffect(Location location, Effect effect, T t) {
+    @Override
+    @Nonnull
+    public <T> void playEffect(@Nonnull Location location, @Nonnull Effect effect, @Nonnull T t) {
         getBukkitPlayer().playEffect(location, effect, t);
     }
 
-    public void sendBlockChange(Location location, BlockData blockData) {
+    @Override
+    public void sendBlockChange(@Nonnull Location location, @Nonnull BlockData blockData) {
         getBukkitPlayer().sendBlockChange(location, blockData);
     }
 
-    public void sendSignChange(Location location, String[] strings) throws IllegalArgumentException {
-        getBukkitPlayer().sendSignChange(location, strings);
-    }
-
-    public void sendSignChange(Location location, String[] strings, DyeColor dyeColor) throws IllegalArgumentException {
-        getBukkitPlayer().sendSignChange(location, strings, dyeColor);
-    }
-
-    public void sendMap(MapView mapView) {
+    @Override
+    public void sendMap(@Nonnull MapView mapView) {
         getBukkitPlayer().sendMap(mapView);
     }
 
+    @Override
     public void updateInventory() {
         getBukkitPlayer().updateInventory();
     }
 
+    @Override
     public void setPlayerTime(long l, boolean b) {
         getBukkitPlayer().setPlayerTime(l, b);
     }
 
+    @Override
     public long getPlayerTime() {
         return getBukkitPlayer().getPlayerTime();
     }
 
+    @Override
     public long getPlayerTimeOffset() {
         return getBukkitPlayer().getPlayerTimeOffset();
     }
 
+    @Override
     public boolean isPlayerTimeRelative() {
         return getBukkitPlayer().isPlayerTimeRelative();
     }
 
+    @Override
     public void resetPlayerTime() {
         getBukkitPlayer().resetPlayerTime();
     }
 
-    public void setPlayerWeather(WeatherType weatherType) {
+    @Override
+    public void setPlayerWeather(@Nonnull WeatherType weatherType) {
         getBukkitPlayer().setPlayerWeather(weatherType);
     }
 
+    @Override
+    @Nullable
     public WeatherType getPlayerWeather() {
         return getBukkitPlayer().getPlayerWeather();
     }
 
+    @Override
     public void resetPlayerWeather() {
         getBukkitPlayer().resetPlayerWeather();
     }
 
+    @Override
     public void giveExp(int i) {
         getBukkitPlayer().giveExp(i);
     }
 
+    @Override
     public void giveExpLevels(int i) {
         getBukkitPlayer().giveExpLevels(i);
     }
 
+    @Override
     public float getExp() {
         return getBukkitPlayer().getExp();
     }
 
+    @Override
     public void setExp(float v) {
         getBukkitPlayer().setExp(v);
     }
 
+    @Override
     public int getLevel() {
         return getBukkitPlayer().getLevel();
     }
 
+    @Override
     public void setLevel(int i) {
         getBukkitPlayer().setLevel(i);
     }
 
+    @Override
     public int getTotalExperience() {
         return getBukkitPlayer().getTotalExperience();
     }
 
+    @Override
     public void setTotalExperience(int i) {
         getBukkitPlayer().setTotalExperience(i);
     }
 
+    @Override
     public void sendExperienceChange(float v) {
         getBukkitPlayer().sendExperienceChange(v);
     }
 
+    @Override
     public void sendExperienceChange(float v, int i) {
         getBukkitPlayer().sendExperienceChange(v, i);
     }
 
+    @Override
     public float getExhaustion() {
         return getBukkitPlayer().getExhaustion();
     }
 
+    @Override
     public void setExhaustion(float v) {
         getBukkitPlayer().setExhaustion(v);
     }
 
+    @Override
     public float getSaturation() {
         return getBukkitPlayer().getSaturation();
     }
 
+    @Override
     public void setSaturation(float v) {
         getBukkitPlayer().setSaturation(v);
     }
 
+    @Override
     public int getFoodLevel() {
         return getBukkitPlayer().getFoodLevel();
     }
 
+    @Override
     public void setFoodLevel(int i) {
         getBukkitPlayer().setFoodLevel(i);
     }
 
+    @Override
     public boolean getAllowFlight() {
         return getBukkitPlayer().getAllowFlight();
     }
 
+    @Override
     public void setAllowFlight(boolean b) {
         getBukkitPlayer().setAllowFlight(b);
     }
 
+    @Override
     public void setArrowCount(int arrows) {
         getEntityPlayer().setArrowCount(arrows);
     }
 
+    @Override
     public void hidePlayer(@Nonnull TNLPlayer player) {
         this.sendPacket(new PacketPlayOutEntityDestroy(player.getEntityId()));
     }
 
+    @Override
     public void showPlayer(@Nonnull TNLPlayer player) {
         this.sendPacket(new PacketPlayOutSpawnEntityLiving(player.getEntityPlayer()));
     }
 
+    @Override
     public boolean isFlying() {
         return getBukkitPlayer().isFlying();
     }
 
+    @Override
     public void setFlying(boolean b) {
         getBukkitPlayer().setFlying(b);
     }
 
+    @Override
     public void setFlySpeed(float v) throws IllegalArgumentException {
         getBukkitPlayer().setFlySpeed(v);
     }
 
+    @Override
     public void setWalkSpeed(float v) throws IllegalArgumentException {
         getBukkitPlayer().setWalkSpeed(v);
     }
 
+    @Override
     public float getFlySpeed() {
         return getBukkitPlayer().getFlySpeed();
     }
 
+    @Override
     public float getWalkSpeed() {
         return getBukkitPlayer().getWalkSpeed();
     }
 
-    public void setResourcePack(String s, byte[] bytes) {
+    @Override
+    public void setResourcePack(@Nonnull String s, byte[] bytes) {
         getBukkitPlayer().setResourcePack(s, bytes);
     }
 
-    public boolean isHealthScaled() {
-        return getBukkitPlayer().isHealthScaled();
-    }
-
-    public void setHealthScaled(boolean b) {
-        getBukkitPlayer().setHealthScaled(b);
-    }
-
-    public void setHealthScale(double v) throws IllegalArgumentException {
-        getBukkitPlayer().setHealthScale(v);
-    }
-
+    @Override
     public double getHealthScale() {
         return getBukkitPlayer().getHealthScale();
     }
 
+    @Override
     @Nullable
     public Entity getSpectatorTarget() {
         return getBukkitPlayer().getSpectatorTarget();
     }
 
+    @Override
     public void setSpectatorTarget(@Nonnull Entity entity) {
         getBukkitPlayer().setSpectatorTarget(entity);
     }
 
+    @Override
     public void resetTitle() {
         sendTitle(Title.EMPTY);
     }
 
-    public void spawnParticle(Particle particle, Location location, int i) {
-        getBukkitPlayer().spawnParticle(particle, location, i);
-    }
-
-    public void spawnParticle(Particle particle, double v, double v1, double v2, int i) {
-        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i);
-    }
-
-    public <T> void spawnParticle(Particle particle, Location location, int i, T t) {
-        getBukkitPlayer().spawnParticle(particle, location, i, t);
-    }
-
-    public <T> void spawnParticle(Particle particle, double v, double v1, double v2, int i, T t) {
-        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i, t);
-    }
-
-    public void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2) {
-        getBukkitPlayer().spawnParticle(particle, location, i, v, v1, v2);
-    }
-
-    public void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5) {
-        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5);
-    }
-
-    public <T> void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2, T t) {
-        getBukkitPlayer().spawnParticle(particle, location, i, v, v1, v2, t);
-    }
-
-    public <T> void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5, T t) {
-        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, t);
-    }
-
-    public void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2, double v3) {
-        getBukkitPlayer().spawnParticle(particle, location, i, v, v1, v2, v3);
-    }
-
-    public void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5, double v6) {
-        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, v6);
-    }
-
-    public <T> void spawnParticle(Particle particle, Location location, int i, double v, double v1, double v2, double v3, T t) {
-        getBukkitPlayer().spawnParticle(particle, location, i, v, v1, v2, v3, t);
-    }
-
-    public <T> void spawnParticle(Particle particle, double v, double v1, double v2, int i, double v3, double v4, double v5, double v6, T t) {
-        getBukkitPlayer().spawnParticle(particle, v, v1, v2, i, v3, v4, v5, v6, t);
-    }
-
-    public AdvancementProgress getAdvancementProgress(Advancement advancement) {
-        return getBukkitPlayer().getAdvancementProgress(advancement);
-    }
-
+    @Override
     public int getClientViewDistance() {
         return getBukkitPlayer().getClientViewDistance();
     }
 
+    @Override
+    @Nonnull
     public String getLocale() {
         return getBukkitPlayer().getLocale();
     }
 
+    @Override
     public void updateCommands() {
         getBukkitPlayer().updateCommands();
     }
 
-    public void openBook(ItemStack itemStack) {
+    @Override
+    public void openBook(@Nonnull ItemStack itemStack) {
         getBukkitPlayer().openBook(itemStack);
     }
 
+    @Override
+    @Nonnull
     public Location getLocation() {
         return getBukkitPlayer().getLocation();
     }
 
-    public Location getLocation(Location location) {
+    @Override
+    @Nonnull
+    public Location getLocation(@Nonnull Location location) {
         return getBukkitPlayer().getLocation(location);
     }
 
+    @Override
+    @Nonnull
     public Location getTargetLocation(int i) {
         return getLocation().clone().add(getBukkitPlayer().getLocation().getDirection().multiply(i));
     }
 
-    public void setVelocity(Vector vector) {
+    @Override
+    public void setVelocity(@Nonnull Vector vector) {
         getBukkitPlayer().setVelocity(vector);
     }
 
+    @Override
+    @Nonnull
     public Vector getVelocity() {
         return getBukkitPlayer().getVelocity();
     }
 
+    @Override
     public double getHeight() {
         return getBukkitPlayer().getHeight();
     }
 
+    @Override
     public double getWidth() {
         return getBukkitPlayer().getWidth();
     }
 
+    @Override
+    @Nonnull
     public BoundingBox getBoundingBox() {
         return getBukkitPlayer().getBoundingBox();
     }
 
+    @Override
     public boolean isOnGround() {
         return getBukkitPlayer().isOnGround();
     }
 
+    @Override
+    @Nonnull
     public World getWorld() {
         return getBukkitPlayer().getWorld();
     }
 
+    @Override
+    @Nonnull
     public WorldServer getWorldServer() {
         return ((CraftWorld) getBukkitPlayer().getWorld()).getHandle();
     }
 
+    @Override
     public void setRotation(float v, float v1) {
         getBukkitPlayer().setRotation(v, v1);
     }
 
-    public boolean teleport(Location location) {
+    @Override
+    public boolean teleport(@Nonnull Location location) {
         return getBukkitPlayer().teleport(location);
     }
 
-    public boolean teleport(Location location, PlayerTeleportEvent.TeleportCause teleportCause) {
+    @Override
+    public boolean teleport(@Nonnull Location location, @Nonnull PlayerTeleportEvent.TeleportCause teleportCause) {
         return getBukkitPlayer().teleport(location, teleportCause);
     }
 
-    public boolean teleport(Entity entity) {
+    @Override
+    public boolean teleport(@Nonnull Entity entity) {
         return getBukkitPlayer().teleport(entity);
     }
 
-    public boolean teleport(Entity entity, PlayerTeleportEvent.TeleportCause teleportCause) {
+    @Override
+    public boolean teleport(@Nonnull Entity entity, @Nonnull PlayerTeleportEvent.TeleportCause teleportCause) {
         return getBukkitPlayer().teleport(entity, teleportCause);
     }
 
+    @Override
+    @Nonnull
     public List<Entity> getNearbyEntities(double v, double v1, double v2) {
         return getBukkitPlayer().getNearbyEntities(v, v1, v2);
     }
 
+    @Override
     public int getEntityId() {
         return getBukkitPlayer().getEntityId();
     }
 
+    @Override
     public int getFireTicks() {
         return getBukkitPlayer().getFireTicks();
     }
 
+    @Override
     public int getMaxFireTicks() {
         return getBukkitPlayer().getMaxFireTicks();
     }
 
+    @Override
     public void setFireTicks(int i) {
         getBukkitPlayer().setFireTicks(i);
     }
 
-    public void remove() {
-        getBukkitPlayer().remove();
-    }
-
+    @Override
     public boolean isDead() {
         return getBukkitPlayer().isDead();
     }
 
-    public boolean isValid() {
-        return getBukkitPlayer().isValid();
-    }
-
-    public Server getServer() {
-        return getBukkitPlayer().getServer();
-    }
-
+    @Override
+    @Nonnull
     public List<Entity> getPassengers() {
         return getBukkitPlayer().getPassengers();
     }
 
-    public boolean addPassenger(Entity entity) {
+    @Override
+    public boolean addPassenger(@Nonnull Entity entity) {
         return getBukkitPlayer().addPassenger(entity);
     }
 
-    public boolean removePassenger(Entity entity) {
+    @Override
+    public boolean removePassenger(@Nonnull Entity entity) {
         return getBukkitPlayer().removePassenger(entity);
     }
 
-    public boolean isEmpty() {
-        return getBukkitPlayer().isEmpty();
-    }
-
+    @Override
     public boolean eject() {
         return getBukkitPlayer().eject();
     }
 
+    @Override
     public float getFallDistance() {
         return getBukkitPlayer().getFallDistance();
     }
 
+    @Override
     public void setFallDistance(float v) {
         getBukkitPlayer().setFallDistance(v);
     }
 
-    public void setLastDamageCause(EntityDamageEvent entityDamageEvent) {
+    @Override
+    public void setLastDamageCause(@Nonnull EntityDamageEvent entityDamageEvent) {
         getBukkitPlayer().setLastDamageCause(entityDamageEvent);
     }
 
+    @Override
+    @Nullable
     public EntityDamageEvent getLastDamageCause() {
         return getBukkitPlayer().getLastDamageCause();
     }
 
+    @Override
+    @Nonnull
     public UUID getUniqueId() {
         return getBukkitPlayer().getUniqueId();
     }
 
+    @Override
     public int getTicksLived() {
         return getBukkitPlayer().getTicksLived();
     }
 
+    @Override
     public void setTicksLived(int i) {
         getBukkitPlayer().setTicksLived(i);
     }
 
-    public void playEffect(EntityEffect entityEffect) {
+    @Override
+    public void playEffect(@Nonnull EntityEffect entityEffect) {
         getBukkitPlayer().playEffect(entityEffect);
     }
 
-    public EntityType getType() {
-        return getBukkitPlayer().getType();
-    }
-
+    @Override
     public boolean isInsideVehicle() {
         return getBukkitPlayer().isInsideVehicle();
     }
 
+    @Override
     public boolean leaveVehicle() {
         return getBukkitPlayer().leaveVehicle();
     }
 
+    @Override
+    @Nullable
     public Entity getVehicle() {
         return getBukkitPlayer().getVehicle();
     }
 
-    public ProtocolVersion getVersion() {
-        return VersionCache.getVersion(this);
-    }
-
+    @Override
     public void setCustomNameVisible(boolean b) {
         getBukkitPlayer().setCustomNameVisible(b);
     }
 
+    @Override
     public boolean isCustomNameVisible() {
         return getBukkitPlayer().isCustomNameVisible();
     }
 
+    @Override
     public void setGlowing(boolean b) {
         getBukkitPlayer().setGlowing(b);
     }
 
+    @Override
+    public void setGlowing(boolean b, @Nonnull TNLPlayer... players) {
+        boolean glowing = getEntityPlayer().glowing;
+        getEntityPlayer().glowing = b;
+        for (TNLPlayer all : players) {
+            sendPacket(new PacketPlayOutEntityMetadata(getEntityId(), getEntityPlayer().getDataWatcher(), true));
+        }
+        getEntityPlayer().glowing = glowing;
+    }
+
+    @Override
     public boolean isGlowing() {
         return getBukkitPlayer().isGlowing();
     }
 
+    @Override
     public void setInvulnerable(boolean b) {
         getBukkitPlayer().setInvulnerable(b);
     }
 
+    @Override
     public boolean isInvulnerable() {
         return getBukkitPlayer().isInvulnerable();
     }
 
-    public boolean isSilent() {
-        return getBukkitPlayer().isSilent();
-    }
-
-    public void setSilent(boolean b) {
-        getBukkitPlayer().setSilent(b);
-    }
-
+    @Override
     public boolean hasGravity() {
         return getBukkitPlayer().hasGravity();
     }
 
+    @Override
     public void setGravity(boolean b) {
         getBukkitPlayer().setGravity(b);
     }
 
+    @Override
     public int getPortalCooldown() {
         return getBukkitPlayer().getPortalCooldown();
     }
 
+    @Override
     public void setPortalCooldown(int i) {
         getBukkitPlayer().setPortalCooldown(i);
     }
 
+    @Override
+    @Nonnull
     public Set<String> getScoreboardTags() {
         return getBukkitPlayer().getScoreboardTags();
     }
 
-    public boolean addScoreboardTag(String s) {
+    @Override
+    public boolean addScoreboardTag(@Nonnull String s) {
         return getBukkitPlayer().addScoreboardTag(s);
     }
 
-    public boolean removeScoreboardTag(String s) {
+    @Override
+    public boolean removeScoreboardTag(@Nonnull String s) {
         return getBukkitPlayer().removeScoreboardTag(s);
     }
 
+    @Override
+    @Nonnull
     public PistonMoveReaction getPistonMoveReaction() {
         return getBukkitPlayer().getPistonMoveReaction();
     }
 
+    @Override
+    @Nonnull
     public BlockFace getFacing() {
         return getBukkitPlayer().getFacing();
     }
 
+    @Override
+    @Nonnull
     public Pose getPose() {
         return getBukkitPlayer().getPose();
     }
 
+    @Override
+    @Nonnull
     public BackFlip backflip() {
         return new BackFlip(this);
     }
 
-    public Map<String, Object> serialize() {
-        return getBukkitPlayer().serialize();
-    }
-
+    @Override
     public double getEyeHeight() {
         return getBukkitPlayer().getEyeHeight();
     }
 
+    @Override
     public double getEyeHeight(boolean b) {
         return getBukkitPlayer().getEyeHeight(b);
     }
 
+    @Override
+    @Nonnull
     public Location getEyeLocation() {
         return getBukkitPlayer().getEyeLocation();
     }
 
-    public List<Block> getLineOfSight(Set<Material> set, int i) {
+    @Override
+    @Nonnull
+    public List<Block> getLineOfSight(@Nonnull Set<Material> set, int i) {
         return getBukkitPlayer().getLineOfSight(set, i);
     }
 
-    public Block getTargetBlock(Set<Material> set, int i) {
+    @Override
+    @Nonnull
+    public Block getTargetBlock(@Nonnull Set<Material> set, int i) {
         return getBukkitPlayer().getTargetBlock(set, i);
     }
 
-    public List<Block> getLastTwoTargetBlocks(Set<Material> set, int i) {
+    @Override
+    @Nonnull
+    public List<Block> getLastTwoTargetBlocks(@Nonnull Set<Material> set, int i) {
         return getBukkitPlayer().getLastTwoTargetBlocks(set, i);
     }
 
+    @Override
+    @Nullable
     public Block getTargetBlockExact(int i) {
         return getBukkitPlayer().getTargetBlockExact(i);
     }
 
-    public Block getTargetBlockExact(int i, FluidCollisionMode fluidCollisionMode) {
+    @Override
+    @Nullable
+    public Block getTargetBlockExact(int i, @Nonnull FluidCollisionMode fluidCollisionMode) {
         return getBukkitPlayer().getTargetBlockExact(i, fluidCollisionMode);
     }
 
+    @Override
+    @Nullable
     public RayTraceResult rayTraceBlocks(double v) {
         return getBukkitPlayer().rayTraceBlocks(v);
     }
 
-    public RayTraceResult rayTraceBlocks(double v, FluidCollisionMode fluidCollisionMode) {
+    @Override
+    @Nullable
+    public RayTraceResult rayTraceBlocks(double v, @Nonnull FluidCollisionMode fluidCollisionMode) {
         return getBukkitPlayer().rayTraceBlocks(v, fluidCollisionMode);
     }
 
+    @Override
     public int getRemainingAir() {
         return getBukkitPlayer().getRemainingAir();
     }
 
+    @Override
     public void setRemainingAir(int i) {
         getBukkitPlayer().setRemainingAir(i);
     }
 
+    @Override
     public int getMaximumAir() {
         return getBukkitPlayer().getMaximumAir();
     }
 
+    @Override
     public void setMaximumAir(int i) {
         getBukkitPlayer().setMaximumNoDamageTicks(i);
     }
 
+    @Override
     public int getMaximumNoDamageTicks() {
         return getBukkitPlayer().getMaximumNoDamageTicks();
     }
 
+    @Override
     public void setMaximumNoDamageTicks(int i) {
         getBukkitPlayer().setMaximumNoDamageTicks(i);
     }
 
+    @Override
     public double getLastDamage() {
         return getBukkitPlayer().getLastDamage();
     }
 
+    @Override
     public void setLastDamage(double v) {
         getBukkitPlayer().setLastDamage(v);
     }
 
+    @Override
     public int getNoDamageTicks() {
         return getBukkitPlayer().getNoDamageTicks();
     }
 
+    @Override
     public void setNoDamageTicks(int i) {
         getBukkitPlayer().setNoDamageTicks(i);
     }
 
+    @Override
+    @Nullable
     public TNLPlayer getKiller() {
         if (getBukkitPlayer().getKiller() != null) {
             return TNLPlayer.cast(getBukkitPlayer().getKiller());
@@ -1478,200 +1583,237 @@ public class TNLPlayer {
         return null;
     }
 
-    public boolean addPotionEffect(PotionEffect potionEffect) {
+    @Override
+    public boolean addPotionEffect(@Nonnull PotionEffect potionEffect) {
         return getBukkitPlayer().addPotionEffect(potionEffect);
     }
 
-    public boolean addPotionEffects(Collection<PotionEffect> collection) {
+    @Override
+    public boolean addPotionEffects(@Nonnull Collection<PotionEffect> collection) {
         return getBukkitPlayer().addPotionEffects(collection);
     }
 
-    public boolean hasPotionEffect(PotionEffectType potionEffectType) {
+    @Override
+    public boolean hasPotionEffect(@Nonnull PotionEffectType potionEffectType) {
         return getBukkitPlayer().hasPotionEffect(potionEffectType);
     }
 
-    public PotionEffect getPotionEffect(PotionEffectType potionEffectType) {
+    @Override
+    @Nullable
+    public PotionEffect getPotionEffect(@Nonnull PotionEffectType potionEffectType) {
         return getBukkitPlayer().getPotionEffect(potionEffectType);
     }
 
-    public void removePotionEffect(PotionEffectType potionEffectType) {
+    @Override
+    public void removePotionEffect(@Nonnull PotionEffectType potionEffectType) {
         getBukkitPlayer().removePotionEffect(potionEffectType);
     }
 
+    @Override
+    @Nonnull
     public Collection<PotionEffect> getActivePotionEffects() {
         return getBukkitPlayer().getActivePotionEffects();
     }
 
-    public boolean hasLineOfSight(Entity entity) {
+    @Override
+    public boolean hasLineOfSight(@Nonnull Entity entity) {
         return getBukkitPlayer().hasLineOfSight(entity);
     }
 
+    @Override
     public boolean getRemoveWhenFarAway() {
         return getBukkitPlayer().getRemoveWhenFarAway();
     }
 
+    @Override
     public void setRemoveWhenFarAway(boolean b) {
         getBukkitPlayer().setRemoveWhenFarAway(b);
     }
 
+    @Override
+    @Nullable
     public EntityEquipment getEquipment() {
         return getBukkitPlayer().getEquipment();
     }
 
+    @Override
     public void setCanPickupItems(boolean b) {
         getBukkitPlayer().setCanPickupItems(b);
     }
 
+    @Override
     public boolean getCanPickupItems() {
         return getBukkitPlayer().getCanPickupItems();
     }
 
+    @Override
     public boolean isLeashed() {
         return getBukkitPlayer().isLeashed();
     }
 
+    @Override
+    @Nullable
     public Entity getLeashHolder() throws IllegalStateException {
         return getBukkitPlayer().getLeashHolder();
     }
 
-    public boolean setLeashHolder(Entity entity) {
+    @Override
+    public boolean setLeashHolder(@Nonnull Entity entity) {
         return getBukkitPlayer().setLeashHolder(entity);
     }
 
+    @Override
     public boolean isGliding() {
         return getBukkitPlayer().isGliding();
     }
 
+    @Override
     public void setGliding(boolean b) {
         getBukkitPlayer().setGliding(b);
     }
 
+    @Override
     public boolean isSwimming() {
         return getBukkitPlayer().isSwimming();
     }
 
+    @Override
     public void setSwimming(boolean b) {
         getBukkitPlayer().setSwimming(b);
     }
 
+    @Override
     public boolean isRiptiding() {
         return getBukkitPlayer().isRiptiding();
     }
 
+    @Override
     public boolean isSleeping() {
         return getBukkitPlayer().isSleeping();
     }
 
-    public void setAI(boolean b) {
-        getBukkitPlayer().setAI(b);
-    }
-
-    public boolean hasAI() {
-        return getBukkitPlayer().hasAI();
-    }
-
-    public void attack(Entity entity) {
+    @Override
+    public void attack(@Nonnull Entity entity) {
         getBukkitPlayer().attack(entity);
     }
 
+    @Override
     public void swingMainHand() {
         getBukkitPlayer().swingMainHand();
     }
 
+    @Override
     public void swingOffHand() {
         getBukkitPlayer().swingOffHand();
     }
 
+    @Override
     public void setCollidable(boolean b) {
         getBukkitPlayer().setCollidable(b);
     }
 
+    @Override
     public boolean isCollidable() {
         return getBukkitPlayer().isCollidable();
     }
 
-    public <T> T getMemory(MemoryKey<T> memoryKey) {
+    @Override
+    @Nullable
+    public <T> T getMemory(@Nonnull MemoryKey<T> memoryKey) {
         return getBukkitPlayer().getMemory(memoryKey);
     }
 
-    public <T> void setMemory(MemoryKey<T> memoryKey, T t) {
+    @Override
+    @Nullable
+    public <T> void setMemory(@Nonnull MemoryKey<T> memoryKey, @Nonnull T t) {
         getBukkitPlayer().setMemory(memoryKey, t);
     }
 
-    public AttributeInstance getAttribute(Attribute attribute) {
+    @Override
+    @Nullable
+    public AttributeInstance getAttribute(@Nonnull Attribute attribute) {
         return getBukkitPlayer().getAttribute(attribute);
     }
 
+    @Override
     public void damage(double v) {
         getBukkitPlayer().damage(v);
     }
 
-    public void damage(double v, Entity entity) {
+    @Override
+    public void damage(double v, @Nullable Entity entity) {
         getBukkitPlayer().damage(v, entity);
     }
 
+    @Override
     public double getHealth() {
         return getBukkitPlayer().getHealth();
     }
 
+    @Override
     public void setHealth(double v) {
         getBukkitPlayer().setHealth(v);
     }
 
+    @Override
     public double getAbsorptionAmount() {
         return getBukkitPlayer().getAbsorptionAmount();
     }
 
+    @Override
     public void setAbsorptionAmount(double v) {
         getBukkitPlayer().setAbsorptionAmount(v);
     }
 
+    @Override
+    @Nullable
     public String getCustomName() {
         return getBukkitPlayer().getCustomName();
     }
 
-    public void setCustomName(String s) {
+    @Override
+    public void setCustomName(@Nonnull String s) {
         getBukkitPlayer().setCustomName(s);
     }
 
-    public void setMetadata(String s, MetadataValue metadataValue) {
+    @Override
+    public void setMetadata(@Nonnull String s, @Nonnull MetadataValue metadataValue) {
         getBukkitPlayer().setMetadata(s, metadataValue);
     }
 
-    public List<MetadataValue> getMetadata(String s) {
+    @Override
+    @Nonnull
+    public List<MetadataValue> getMetadata(@Nonnull String s) {
         return getBukkitPlayer().getMetadata(s);
     }
 
-    public boolean hasMetadata(String s) {
+    @Override
+    public boolean hasMetadata(@Nonnull String s) {
         return getBukkitPlayer().hasMetadata(s);
     }
 
-    public void removeMetadata(String s, Plugin plugin) {
+    @Override
+    public void removeMetadata(@Nonnull String s, @Nonnull Plugin plugin) {
         getBukkitPlayer().removeMetadata(s, plugin);
     }
 
-    public void sendPluginMessage(Plugin plugin, String s, byte[] bytes) {
+    @Override
+    public void sendPluginMessage(@Nonnull Plugin plugin, @Nonnull String s, byte[] bytes) {
         getBukkitPlayer().sendPluginMessage(plugin, s, bytes);
     }
 
+    @Override
+    @Nonnull
     public Set<String> getListeningPluginChannels() {
         return getBukkitPlayer().getListeningPluginChannels();
-    }
-
-    public <T extends Projectile> T launchProjectile(Class<? extends T> aClass) {
-        return getBukkitPlayer().launchProjectile(aClass);
-    }
-
-    public <T extends Projectile> T launchProjectile(Class<? extends T> aClass, Vector vector) {
-        return getBukkitPlayer().launchProjectile(aClass, vector);
     }
 
     @Override
     public String toString() {
         return "TNLPlayer{" +
                 "bukkitPlayer=" + bukkitPlayer +
-                ", tnlOptionPacketScoreboard=" + tnlOptionPacketScoreboard +
-                ", tnlOptionPacketTeam=" + tnlOptionPacketTeam +
+                ", optionScoreboard=" + optionScoreboard +
+                ", optionTeam=" + optionTeam +
                 ", virtualStorage=" + virtualStorage +
                 ", permissionManager=" + permissionManager +
                 '}';
@@ -1682,11 +1824,11 @@ public class TNLPlayer {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TNLPlayer player = (TNLPlayer) o;
-        return bukkitPlayer.equals(player.bukkitPlayer) && tnlOptionPacketScoreboard.equals(player.tnlOptionPacketScoreboard) && tnlOptionPacketTeam.equals(player.tnlOptionPacketTeam) && virtualStorage.equals(player.virtualStorage) && permissionManager.equals(player.permissionManager);
+        return bukkitPlayer.equals(player.bukkitPlayer) && optionScoreboard.equals(player.optionScoreboard) && optionTeam.equals(player.optionTeam) && virtualStorage.equals(player.virtualStorage) && permissionManager.equals(player.permissionManager);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(bukkitPlayer, tnlOptionPacketScoreboard, tnlOptionPacketTeam, virtualStorage, permissionManager);
+        return Objects.hash(bukkitPlayer, optionScoreboard, optionTeam, virtualStorage, permissionManager);
     }
 }

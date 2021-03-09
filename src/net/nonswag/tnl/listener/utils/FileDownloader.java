@@ -35,18 +35,18 @@ public class FileDownloader {
                 FileOutputStream outputStream = new FileOutputStream(saveFilePath);
                 int bytesRead;
                 byte[] buffer = new byte[4096];
-                Logger.info.println("Starting download of file '" + fileName + "'");
+                Logger.info.println("§aStarting download of file §8'§6" + fileName + "§8'");
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     outputStream.write(buffer, 0, bytesRead);
                 }
                 outputStream.close();
                 inputStream.close();
-                Logger.info.println("Successfully downloaded file '" + fileName + "'");
+                Logger.info.println("§aSuccessfully downloaded file §8'§6" + fileName + "§8'");
             } else {
-                Logger.error.println("No file was found");
+                Logger.error.println("§cNo file was found");
             }
         } else {
-            Logger.error.println("No file was found. Server replied HTTP code: " + responseCode);
+            Logger.error.println("§cNo file was found§8.§c Server replied HTTP code§8: §4" + responseCode);
         }
         connection.disconnect();
     }

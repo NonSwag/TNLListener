@@ -1,10 +1,12 @@
 package net.nonswag.tnl.listener.listeners;
 
-import net.nonswag.tnl.listener.TNLMain;
 import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.TNLMain;
+import net.nonswag.tnl.listener.api.message.ChatComponent;
+import net.nonswag.tnl.listener.api.message.Message;
+import net.nonswag.tnl.listener.api.object.Objects;
+import net.nonswag.tnl.listener.api.settings.Settings;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerKickEvent;
@@ -13,30 +15,17 @@ public class KickListener implements Listener {
 
     @EventHandler
     public void onKick(PlayerKickEvent event) {
-        try {
-            if (event.getReason().equals("disconnect.spam")) {
-                if (TNLListener.getInstance().isPunishSpamming()) {
-                    event.setReason(TNLListener.getInstance().getKickMessageSpamming());
-                } else {
-                    event.setCancelled(true);
-                }
+        if (event.getReason().equals("disconnect.spam")) {
+            if (Objects.getOrDefault(Settings.PUNISH_SPAMMING.getValue(), true)) {
+                event.setReason(Message.KICKED_SPAMMING.getText());
+            } else {
+                event.setCancelled(true);
             }
-            event.setLeaveMessage("");
-            if (!event.isCancelled() && TNLListener.getInstance().isCustomKickMessage() && !TNLListener.getInstance().getJoinMessage().equalsIgnoreCase("")) {
-                for (Player all : Bukkit.getOnlinePlayers()) {
-                    if (!all.equals(event.getPlayer())) {
-                        all.sendMessage(TNLListener.getInstance().getPrefix() + " " + TNLListener.getInstance().getKickMessage().replace("%player%", event.getPlayer().getName()).replace("%reason%", event.getReason()));
-                    } else {
-                        all.sendMessage(TNLListener.getInstance().getPrefix() + " " + TNLListener.getInstance().getQuitMessage().replace("%player%", TNLListener.getInstance().getPlayerDirect().replace("%player%", event.getPlayer().getDisplayName())).replace("%reason%", event.getReason()));
-                    }
-                }
-            }
-            String reason = event.getReason();
-            if (!reason.startsWith(TNLListener.getInstance().getPrefix() + "")) {
-                event.setReason(TNLListener.getInstance().getPrefix() + "\n§c" + event.getReason());
-            }
-        } catch (Exception e) {
-            Logger.error.println(e);
+        }
+        event.setLeaveMessage("");
+        String reason = event.getReason();
+        if (!reason.startsWith(Message.PREFIX.getText()) || !reason.toLowerCase().startsWith("%prefix%")) {
+            event.setReason(ChatComponent.getText("%prefix%\n§c" + event.getReason()));
         }
         Bukkit.getScheduler().runTaskAsynchronously(TNLMain.getInstance(), () -> TNLListener.getInstance().updatePlayers());
     }

@@ -46,7 +46,7 @@ public enum Color {
 
     RESET("\033[0m", "§r"),
     BLACK("\033[0;30m", "§0"),
-    RED("\033[0;31m", "§c"),
+    RED("\033[0;91m", "§c"),
     LIME("\033[0;32m", "§2"),
     GREEN("\033[0;92m", "§a"),
     GOLD("\033[0;33m", "§6"),
@@ -55,7 +55,7 @@ public enum Color {
     DARK_CYAN("\033[0;96m", "§9"),
     DARK_GRAY("\033[0;90m", "§8"),
     GRAY("\033[0;37m", "§7"),
-    DARK_RED("\033[0;91m", "§4"),
+    DARK_RED("\033[0;31m", "§4"),
     YELLOW("\033[0;93m", "§e"),
     BLUE("\033[0;94m", "§1"),
     PURPLE("\033[0;95m", "§d"),
@@ -63,8 +63,10 @@ public enum Color {
     WHITE("\033[0;97m", "§f"),
     ;
 
-    @Nonnull private final String ansi;
-    @Nonnull private final String code;
+    @Nonnull
+    private final String ansi;
+    @Nonnull
+    private final String code;
 
     Color(@Nonnull String ansi, @Nonnull String code) {
         this.ansi = ansi;
@@ -84,5 +86,20 @@ public enum Color {
     @Override
     public String toString() {
         return getAnsi();
+    }
+
+    @Nonnull
+    public static String replace(@Nonnull String string) {
+        if ((string.contains("<") && string.contains(">")) || string.contains("§")) {
+            for (Color color : Color.values()) {
+                if (string.contains("<" + color.name().toLowerCase() + ">")) {
+                    string = string.replace("<" + color.name().toLowerCase() + ">", color.getAnsi());
+                }
+                if (string.contains(color.getCode())) {
+                    string = string.replace(color.getCode(), color.getAnsi());
+                }
+            }
+        }
+        return string;
     }
 }

@@ -1,16 +1,11 @@
 package net.nonswag.tnl.listener.api.file;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import net.nonswag.tnl.listener.api.logger.Logger;
-import net.nonswag.tnl.listener.api.object.Objects;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.*;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This Version of the Configuration API uses Googles Json (Gson)
@@ -30,7 +25,7 @@ public class JsonConfig implements Config {
     }
 
     public JsonConfig(@Nonnull String path, @Nonnull String file) {
-        this(new File((path + "/" + file)));
+        this(new File(new File(path), file));
     }
 
     public JsonConfig(@Nonnull File file) {
@@ -38,8 +33,8 @@ public class JsonConfig implements Config {
         JsonElement jsonElement = new JsonObject();
         try {
             JsonFile.create(getFile());
-            jsonElement = new JsonParser().parse(new FileReader(getFile()));
-            if (!(jsonElement instanceof JsonObject)) {
+            jsonElement = new JsonParser().parse(new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), StandardCharsets.UTF_8)));
+            if (jsonElement instanceof JsonNull || jsonElement instanceof JsonPrimitive) {
                 jsonElement = new JsonObject();
             }
         } catch (Exception ignored) {
@@ -47,7 +42,7 @@ public class JsonConfig implements Config {
         this.jsonElement = jsonElement;
         save();
         if (!isValid()) {
-            Logger.error.println("The file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
+            System.err.println("The file '" + file.getAbsolutePath() + "' is invalid");
         }
     }
 
@@ -66,198 +61,13 @@ public class JsonConfig implements Config {
     }
 
     @Override
-    public void set(@Nonnull String key, @Nonnull Number value) {
-        getJsonElement().getAsJsonObject().addProperty(key, value);
-    }
-
-    @Override
-    public void set(@Nonnull String key, @Nonnull String value) {
-        getJsonElement().getAsJsonObject().addProperty(key, value);
-    }
-
-    @Override
-    public void set(@Nonnull String key, @Nonnull Boolean value) {
-        getJsonElement().getAsJsonObject().addProperty(key, value);
-    }
-
-    @Override
-    public void set(@Nonnull String key, @Nonnull Character value) {
-        getJsonElement().getAsJsonObject().addProperty(key, value);
-    }
-
-    @Override
-    public void setIfAbsent(@Nonnull String key, @Nonnull Number value) {
-        if (!getJsonElement().getAsJsonObject().has(key)) {
-            set(key, value);
-        }
-    }
-
-    @Override
-    public void setIfAbsent(@Nonnull String key, @Nonnull String value) {
-        if (!getJsonElement().getAsJsonObject().has(key)) {
-            set(key, value);
-        }
-    }
-
-    @Override
-    public void setIfAbsent(@Nonnull String key, @Nonnull Boolean value) {
-        if (!getJsonElement().getAsJsonObject().has(key)) {
-            set(key, value);
-        }
-    }
-
-    @Override
-    public void setIfAbsent(@Nonnull String key, @Nonnull Character value) {
-        if (!getJsonElement().getAsJsonObject().has(key)) {
-            set(key, value);
-        }
-    }
-
-    @Override
-    public void remove(@Nonnull String key) {
-        getJsonElement().getAsJsonObject().remove(key);
-    }
-
-    @Nonnull
-    @Override
-    public HashMap<String, JsonElement> getValues() {
-        Set<Map.Entry<String, JsonElement>> keySet = getJsonElement().getAsJsonObject().entrySet();
-        HashMap<String, JsonElement> values = new HashMap<>();
-        for (Map.Entry<String, JsonElement> key : keySet) {
-            values.put(key.getKey(), key.getValue());
-        }
-        return values;
-    }
-
-    @Nullable
-    @Override
-    public JsonElement getValue(@Nonnull String key) {
-        if (getJsonElement().isJsonObject()) {
-            return getJsonElement().getAsJsonObject().get(key);
-        } else {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public String getString(@Nonnull String key) {
-        try {
-            return new Objects<>(getValue(key)).nonnull().getAsString();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public List<String> getStringList(@Nonnull String key) {
-        try {
-            return Arrays.asList(new Objects<>(getString(key)).nonnull().split(", "));
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public Integer getInteger(@Nonnull String key) {
-        try {
-            return new Objects<>(getValue(key)).nonnull().getAsInt();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public Double getDouble(@Nonnull String key) {
-        try {
-            return new Objects<>(getValue(key)).nonnull().getAsDouble();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public Float getFloat(@Nonnull String key) {
-        try {
-            return new Objects<>(getValue(key)).nonnull().getAsFloat();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public Short getShort(@Nonnull String key) {
-        try {
-            return new Objects<>(getValue(key)).nonnull().getAsShort();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public Byte getByte(@Nonnull String key) {
-        try {
-            return new Objects<>(getValue(key)).nonnull().getAsByte();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public Long getLong(@Nonnull String key) {
-        try {
-            return new Objects<>(getValue(key)).nonnull().getAsLong();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public Character getCharacter(@Nonnull String key) {
-        try {
-            return new Objects<>(getString(key)).nonnull().charAt(0);
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public char[] getCharacters(@Nonnull String key) {
-        try {
-            return new Objects<>(getString(key)).nonnull().toCharArray();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public Boolean getBoolean(@Nonnull String key) {
-        try {
-            return new Objects<>(getValue(key)).nonnull().getAsBoolean();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    @Override
     public void save() {
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(getFile()));
-            String string = new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(getJsonElement().toString()));
-            writer.write(string);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(getFile()), StandardCharsets.UTF_8));
+            writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(getJsonElement().toString())));
             writer.close();
-        } catch (IOException e) {
-            Logger.error.println(e);
+        } catch (Throwable e) {
+            Logger.error.println("Failed to save file '" + getFile().getAbsolutePath() + "'", e);
         }
     }
 }

@@ -1,21 +1,24 @@
-package net.nonswag.tnl.listener.enumerations;
+package net.nonswag.tnl.listener.api.network;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class InternetProtocolAddress {
 
+    @Nonnull
     private final String hostname;
     private final int port;
 
-    public InternetProtocolAddress(String hostname, int port) {
+    public InternetProtocolAddress(@Nonnull String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
     }
 
-    public InternetProtocolAddress(String string) {
+    public InternetProtocolAddress(@Nonnull String string) {
         this(string.split(":")[0], Integer.parseInt(string.split(":")[1]));
     }
 
+    @Nonnull
     public String getHostname() {
         return hostname;
     }
@@ -24,6 +27,7 @@ public class InternetProtocolAddress {
         return port;
     }
 
+    @Nonnull
     public String getAsString() {
         return getHostname() + ":" + getPort();
     }

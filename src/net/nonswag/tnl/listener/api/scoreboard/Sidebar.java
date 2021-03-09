@@ -7,8 +7,10 @@ import javax.annotation.Nonnull;
 
 public class Sidebar {
 
-    @Nonnull private static final Scoreboard scoreboard = new Scoreboard();
-    @Nonnull private static final ScoreboardObjective scoreboardObjective = scoreboard.registerObjective("TNLSidebar", IScoreboardCriteria.DUMMY, new ChatMessage(""), IScoreboardCriteria.EnumScoreboardHealthDisplay.INTEGER);
+    @Nonnull
+    private static final Scoreboard scoreboard = new Scoreboard();
+    @Nonnull
+    private static final ScoreboardObjective scoreboardObjective = scoreboard.registerObjective("TNLSidebar", IScoreboardCriteria.DUMMY, new ChatMessage(""), IScoreboardCriteria.EnumScoreboardHealthDisplay.INTEGER);
 
     @Nonnull
     public static Scoreboard getScoreboard() {

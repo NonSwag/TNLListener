@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Collection;
@@ -19,10 +20,13 @@ import java.util.Objects;
 
 public class Server {
 
-    @Nonnull private static final HashMap<String, Server> servers = new HashMap<>();
+    @Nonnull
+    private static final HashMap<String, Server> servers = new HashMap<>();
 
-    @Nonnull private final String name;
-    @Nonnull private final InetSocketAddress inetSocketAddress;
+    @Nonnull
+    private final String name;
+    @Nonnull
+    private final InetSocketAddress inetSocketAddress;
 
     private boolean online = false;
     private int playerCount = 0;
@@ -97,27 +101,11 @@ public class Server {
                 socket.connect(getInetSocketAddress(), 1500);
                 setOnline(true);
                 try {
-                    DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-                    DataInputStream input = new DataInputStream(socket.getInputStream());
-                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                    DataOutputStream handshake = new DataOutputStream(buffer);
-                    handshake.writeByte(0x00);
-                    PacketSerializer.writeVarInt(handshake, 754);
-                    PacketSerializer.writeString(handshake, getInetSocketAddress().getHostName());
-                    handshake.writeShort(getInetSocketAddress().getPort());
-                    PacketSerializer.writeVarInt(handshake, 1);
-                    byte[] handshakeMessage = buffer.toByteArray();
-                    PacketSerializer.writeVarInt(output, handshakeMessage.length);
-                    output.write(handshakeMessage);
-                    output.writeByte(0x01);
-                    output.writeByte(0x00);
-                    byte[] in = new byte[PacketSerializer.readVarInt(input)];
-                    input.readFully(in);
-                    JsonElement object = new JsonParser().parse(new String(in).substring(3));
-                    JsonObject players = object.getAsJsonObject().get("players").getAsJsonObject();
+                    JsonElement jsonElement = sendHandshake(socket);
+                    JsonObject players = jsonElement.getAsJsonObject().get("players").getAsJsonObject();
                     setMaxPlayerCount(players.get("max").getAsInt());
                     setPlayerCount(players.get("online").getAsInt());
-                } catch (Exception e) {
+                } catch (IOException e) {
                     Logger.error.println(e);
                 }
             } catch (Exception ignored) {
@@ -125,7 +113,28 @@ public class Server {
                 setPlayerCount(0);
                 setMaxPlayerCount(0);
             }
-        }).start();
+        }, "update thread").start();
+    }
+
+    @Nonnull
+    private JsonElement sendHandshake(@Nonnull Socket socket) throws IOException {
+        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+        DataInputStream input = new DataInputStream(socket.getInputStream());
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        DataOutputStream handshake = new DataOutputStream(buffer);
+        handshake.writeByte(0x00);
+        PacketSerializer.writeVarInt(handshake, 754);
+        PacketSerializer.writeString(handshake, getInetSocketAddress().getHostName());
+        handshake.writeShort(getInetSocketAddress().getPort());
+        PacketSerializer.writeVarInt(handshake, 1);
+        byte[] handshakeMessage = buffer.toByteArray();
+        PacketSerializer.writeVarInt(output, handshakeMessage.length);
+        output.write(handshakeMessage);
+        output.writeByte(0x01);
+        output.writeByte(0x00);
+        byte[] in = new byte[PacketSerializer.readVarInt(input)];
+        input.readFully(in);
+        return new JsonParser().parse(new String(in).substring(3));
     }
 
     @Nullable

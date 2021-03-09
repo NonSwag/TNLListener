@@ -2,6 +2,7 @@ package net.nonswag.tnl.listener.api.file;
 
 import com.sun.istack.internal.Nullable;
 import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.api.object.Objects;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -143,7 +144,7 @@ public class Configuration {
 
     @Deprecated
     public Object getOrDefault(@Nonnull Object var, @Nonnull Object defaultValue) {
-        return new net.nonswag.tnl.listener.api.object.Objects<>(getValue(var)).getOrDefault(defaultValue);
+        return Objects.getOrDefault(getValue(var), defaultValue);
     }
 
     @Deprecated

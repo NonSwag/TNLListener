@@ -18,11 +18,7 @@ public class Title {
     private int timeIn;
     private int timeOut;
 
-    public Title(@Nonnull Object title,
-                 @Nonnull Object subtitle,
-                 int timeStay,
-                 int timeIn,
-                 int timeOut) {
+    public Title(@Nonnull Object title, @Nonnull Object subtitle, int timeStay, int timeIn, int timeOut) {
         this.title = title.toString();
         this.subtitle = subtitle.toString();
         this.timeStay = timeStay;
@@ -30,8 +26,7 @@ public class Title {
         this.timeOut = timeOut;
     }
 
-    public Title(@Nonnull Object title,
-                 @Nonnull Object subtitle) {
+    public Title(@Nonnull Object title, @Nonnull Object subtitle) {
         this(title, subtitle, 70, 0, 10);
     }
 
@@ -179,9 +174,7 @@ public class Title {
         @Nonnull
         private final ChatColor extraColor;
 
-        public Design(@Nonnull ChatColor primaryColor,
-               @Nonnull ChatColor secondaryColor,
-               @Nonnull ChatColor extraColor) {
+        public Design(@Nonnull ChatColor primaryColor, @Nonnull ChatColor secondaryColor, @Nonnull ChatColor extraColor) {
             this.primaryColor = primaryColor;
             this.secondaryColor = secondaryColor;
             this.extraColor = extraColor;
