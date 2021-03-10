@@ -2,7 +2,7 @@ package net.nonswag.tnl.listener.listeners;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_15_R1.*;
-import net.nonswag.tnl.listener.TNLMain;
+import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
@@ -141,7 +141,7 @@ public class PacketListener implements Listener {
                 Bukkit.getPluginManager().callEvent(interactEvent);
                 event.setCancelled(interactEvent.isCancelled());
                 if (interactEvent.isCancelled()) {
-                    Bukkit.getScheduler().runTask(TNLMain.getInstance(), () -> {
+                    Bukkit.getScheduler().runTask(Loader.getInstance(), () -> {
                         interactEvent.getBlock().getState().update();
                         for (BlockFace blockFace : BlockFace.values()) {
                             Block b = interactEvent.getBlock().getRelative(blockFace).getLocation().getBlock();

@@ -7,7 +7,7 @@ public interface Permissions {
 
     void setPermission(@Nonnull String permission, boolean allowed);
 
-    void addPermission(@Nonnull Permission... permissions);
+    void addPermission(@Nonnull String... permissions);
 
     void removePermission(@Nonnull String... permissions);
 

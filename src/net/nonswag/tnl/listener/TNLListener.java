@@ -33,8 +33,8 @@ public class TNLListener {
     }
 
     protected void enable() {
-        CommandManager commandManager = new CommandManager(TNLMain.getInstance());
-        EventManager eventManager = new EventManager(TNLMain.getInstance());
+        CommandManager commandManager = new CommandManager(Loader.getInstance());
+        EventManager eventManager = new EventManager(Loader.getInstance());
         new Thread(() -> {
             for (JsonElement server : Settings.SERVERS.getValue()) {
                 if (Settings.getConfig().getJsonElement().getAsJsonObject().has("server-" + server.getAsString())) {
@@ -61,8 +61,8 @@ public class TNLListener {
             }
             Settings.getConfig().save();
         }, "server-loader").start();
-        Bukkit.getMessenger().registerOutgoingPluginChannel(TNLMain.getInstance(), "BungeeCord");
-        new PluginUpdate(TNLMain.getInstance()).downloadUpdate();
+        Bukkit.getMessenger().registerOutgoingPluginChannel(Loader.getInstance(), "BungeeCord");
+        new PluginUpdate(Loader.getInstance()).downloadUpdate();
         try {
             eventManager.registerListener(new PacketListener());
             eventManager.registerListener(new JoinListener());

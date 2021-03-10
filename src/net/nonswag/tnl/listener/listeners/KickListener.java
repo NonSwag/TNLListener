@@ -1,7 +1,7 @@
 package net.nonswag.tnl.listener.listeners;
 
 import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.TNLMain;
+import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.api.message.ChatComponent;
 import net.nonswag.tnl.listener.api.message.Message;
 import net.nonswag.tnl.listener.api.object.Objects;
@@ -27,6 +27,6 @@ public class KickListener implements Listener {
         if (!reason.startsWith(Message.PREFIX.getText()) || !reason.toLowerCase().startsWith("%prefix%")) {
             event.setReason(ChatComponent.getText("%prefix%\n§c" + event.getReason()));
         }
-        Bukkit.getScheduler().runTaskAsynchronously(TNLMain.getInstance(), () -> TNLListener.getInstance().updatePlayers());
+        Bukkit.getScheduler().runTaskAsynchronously(Loader.getInstance(), () -> TNLListener.getInstance().updatePlayers());
     }
 }

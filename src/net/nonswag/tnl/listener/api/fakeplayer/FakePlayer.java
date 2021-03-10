@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_15_R1.*;
-import net.nonswag.tnl.listener.TNLMain;
+import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
@@ -120,7 +120,7 @@ public class FakePlayer {
         for (EnumItemSlot slot : EnumItemSlot.values()) {
             receiver.sendPacket(new PacketPlayOutEntityEquipment(getPlayer().getId(), slot, getPlayer().getEquipment(slot)));
         }
-        Bukkit.getScheduler().runTaskLater(TNLMain.getInstance(), () -> hideTablistName(receiver), 10);
+        Bukkit.getScheduler().runTaskLater(Loader.getInstance(), () -> hideTablistName(receiver), 10);
     }
 
     public void playAnimate(@Nonnull TNLPlayer receiver, @Nonnull Animation animation) {

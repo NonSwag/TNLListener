@@ -1,7 +1,7 @@
 package net.nonswag.tnl.listener.listeners;
 
 import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.TNLMain;
+import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
@@ -26,6 +26,6 @@ public class QuitListener implements Listener {
         } catch (Exception e) {
             Logger.error.println(e);
         }
-        Bukkit.getScheduler().runTaskAsynchronously(TNLMain.getInstance(), TNLListener.getInstance()::updatePlayers);
+        Bukkit.getScheduler().runTaskAsynchronously(Loader.getInstance(), TNLListener.getInstance()::updatePlayers);
     }
 }

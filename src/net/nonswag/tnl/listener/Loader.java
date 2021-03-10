@@ -6,11 +6,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
 
-public class TNLMain extends JavaPlugin {
+public class Loader extends JavaPlugin {
 
-    private static TNLMain instance = null;
+    private static Loader instance = null;
 
-    public TNLMain() {
+    public Loader() {
         setInstance(this);
     }
 
@@ -32,11 +32,11 @@ public class TNLMain extends JavaPlugin {
         TNLListener.getInstance().enable();
     }
 
-    public static void setInstance(@Nonnull TNLMain instance) {
-        TNLMain.instance = instance;
+    public static void setInstance(@Nonnull Loader instance) {
+        Loader.instance = instance;
     }
 
-    public static TNLMain getInstance() {
+    public static Loader getInstance() {
         return instance;
     }
 }
