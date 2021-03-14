@@ -32,7 +32,7 @@ public class Loader extends JavaPlugin {
         TNLListener.getInstance().enable();
     }
 
-    public static void setInstance(@Nonnull Loader instance) {
+    private static void setInstance(@Nonnull Loader instance) {
         Loader.instance = instance;
     }
 
