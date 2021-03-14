@@ -7,7 +7,7 @@ import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.api.logger.Logger;
-import net.nonswag.tnl.listener.api.player.TNLPlayer;
+import net.nonswag.tnl.listener.api.player.v1_15_R1.NMSPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
@@ -28,7 +28,7 @@ public class FakePlayer {
     @Nonnull
     private final Location location;
     @Nonnull
-    private final TNLPlayer[] receivers;
+    private final NMSPlayer[] receivers;
     @Nonnull
     private final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
     @Nonnull
@@ -40,7 +40,7 @@ public class FakePlayer {
     @Nonnull
     private String[] skinValues = {"", ""};
 
-    public FakePlayer(@Nonnull String name, @Nonnull Location location, @Nonnull TNLPlayer... receivers) {
+    public FakePlayer(@Nonnull String name, @Nonnull Location location, @Nonnull NMSPlayer... receivers) {
         this.name = name;
         this.location = location;
         this.receivers = receivers;
@@ -61,7 +61,7 @@ public class FakePlayer {
     }
 
     @Nonnull
-    public TNLPlayer[] getReceivers() {
+    public NMSPlayer[] getReceivers() {
         return receivers;
     }
 
@@ -105,12 +105,12 @@ public class FakePlayer {
     }
 
     public void spawn() {
-        for (TNLPlayer receiver : getReceivers()) {
+        for (NMSPlayer receiver : getReceivers()) {
             spawn(receiver);
         }
     }
 
-    public void spawn(@Nonnull TNLPlayer receiver) {
+    public void spawn(@Nonnull NMSPlayer receiver) {
         getPlayer().getDataWatcher().set(DataWatcherRegistry.a.a(16), (byte) 127);
         getPlayer().ping = 32;
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, getPlayer()));
@@ -123,33 +123,33 @@ public class FakePlayer {
         Bukkit.getScheduler().runTaskLater(Loader.getInstance(), () -> hideTablistName(receiver), 10);
     }
 
-    public void playAnimate(@Nonnull TNLPlayer receiver, @Nonnull Animation animation) {
+    public void playAnimate(@Nonnull NMSPlayer receiver, @Nonnull Animation animation) {
         receiver.sendPacket(new PacketPlayOutAnimation(getPlayer(), animation.getId()));
     }
 
-    public void playStatus(@Nonnull TNLPlayer receiver, @Nonnull Status status) {
+    public void playStatus(@Nonnull NMSPlayer receiver, @Nonnull Status status) {
         receiver.sendPacket(new PacketPlayOutEntityStatus(getPlayer(), status.getId()));
     }
 
-    public void setVelocity(@Nonnull TNLPlayer receiver, @Nonnull Vector vector) {
+    public void setVelocity(@Nonnull NMSPlayer receiver, @Nonnull Vector vector) {
         receiver.sendPacket(new PacketPlayOutEntityVelocity(getPlayer().getId(), new Vec3D(vector.getX(), vector.getY(), vector.getZ())));
     }
 
-    public void hideTablistName(@Nonnull TNLPlayer receiver) {
+    public void hideTablistName(@Nonnull NMSPlayer receiver) {
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, getPlayer()));
     }
 
-    public void showTablistName(@Nonnull TNLPlayer receiver) {
+    public void showTablistName(@Nonnull NMSPlayer receiver) {
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, getPlayer()));
     }
 
     public void deSpawn() {
-        for (TNLPlayer receiver : getReceivers()) {
+        for (NMSPlayer receiver : getReceivers()) {
             deSpawn(receiver);
         }
     }
 
-    public void deSpawn(@Nonnull TNLPlayer receiver) {
+    public void deSpawn(@Nonnull NMSPlayer receiver) {
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, getPlayer()));
         receiver.sendPacket(new PacketPlayOutEntityDestroy(getPlayer().getId()));
     }

@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.eventhandler;
+package net.nonswag.tnl.listener.events;
 
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
@@ -15,20 +15,22 @@ public class PlayerChatEvent extends Event implements Cancellable {
     @Nonnull
     private static final HandlerList handlerList = new HandlerList();
     @Nonnull
-    private final TNLPlayer player;
+    private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
     @Nonnull
     private String message;
     @Nullable
     private String format = null;
     private boolean cancelled = false;
 
-    public PlayerChatEvent(@Nonnull TNLPlayer player, @Nonnull String message) {
+    public PlayerChatEvent(@Nonnull TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, @Nonnull String message) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.message = message;
     }
 
-    public boolean isCommand() { return getMessage().startsWith("/"); }
+    public boolean isCommand() {
+        return getMessage().startsWith("/");
+    }
 
     @Nullable
     public String getFormat() {
@@ -44,7 +46,7 @@ public class PlayerChatEvent extends Event implements Cancellable {
     }
 
     @Nonnull
-    public TNLPlayer getPlayer() {
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
         return player;
     }
 
@@ -54,7 +56,9 @@ public class PlayerChatEvent extends Event implements Cancellable {
     }
 
     @Override
-    public HandlerList getHandlers() { return handlerList; }
+    public HandlerList getHandlers() {
+        return handlerList;
+    }
 
     @Nonnull
     public static HandlerList getHandlerList() {
@@ -62,10 +66,14 @@ public class PlayerChatEvent extends Event implements Cancellable {
     }
 
     @Override
-    public boolean isCancelled() { return cancelled; }
+    public boolean isCancelled() {
+        return cancelled;
+    }
 
     @Override
-    public void setCancelled(boolean cancelled) { this.cancelled = cancelled; }
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
 
     @Override
     public String toString() {

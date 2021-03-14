@@ -4,25 +4,28 @@ import net.minecraft.server.v1_15_R1.ChatMessage;
 import net.nonswag.tnl.listener.api.chat.Message;
 import org.bukkit.Bukkit;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class BackFlip {
 
-    private final TNLPlayer player;
+    @Nonnull
+    private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
 
-    public BackFlip(TNLPlayer player) {
+    public BackFlip(@Nonnull TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player) {
         this.player = player;
     }
 
-    public TNLPlayer getPlayer() {
+    @Nonnull
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
         return player;
     }
 
-    public void sendJsonMessage(Message message) {
+    public void sendJsonMessage(@Nonnull Message message) {
         sendJsonMessage(message.getChatMessage());
     }
 
-    public void sendJsonMessage(ChatMessage message) {
+    public void sendJsonMessage(@Nonnull ChatMessage message) {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + getPlayer().getName() + " " + message.getText());
     }
 

@@ -7,29 +7,48 @@ import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.api.settings.Settings;
-import net.nonswag.tnl.listener.listeners.*;
+import net.nonswag.tnl.listener.api.version.ServerVersion;
+import net.nonswag.tnl.listener.listeners.InteractListener;
+import net.nonswag.tnl.listener.listeners.JoinListener;
+import net.nonswag.tnl.listener.listeners.KickListener;
+import net.nonswag.tnl.listener.listeners.QuitListener;
 import net.nonswag.tnl.listener.utils.PluginUpdate;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class TNLListener {
 
-    @Nonnull
     private static final TNLListener instance = new TNLListener();
 
     @Nonnull
     private final HashMap<World, String> worldAliasHashMap = new HashMap<>();
     @Nonnull
-    private final HashMap<Player, TNLPlayer> playerHashMap = new HashMap<>();
+    private final HashMap<Player, TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> playerHashMap = new HashMap<>();
+    @Nonnull
+    private final ServerVersion version;
 
-    protected TNLListener() {
+    TNLListener() {
+        ServerVersion version = ServerVersion.UNKNOWN;
+        for (ServerVersion serverVersion : ServerVersion.values()) {
+            if (!serverVersion.equals(ServerVersion.UNKNOWN)) {
+                if (Bukkit.getVersion().toLowerCase().contains(serverVersion.getVersion().toLowerCase())) {
+                    version = serverVersion;
+                    break;
+                }
+            }
+        }
+        this.version = version;
     }
 
     protected void enable() {
@@ -64,23 +83,24 @@ public class TNLListener {
         Bukkit.getMessenger().registerOutgoingPluginChannel(Loader.getInstance(), "BungeeCord");
         new PluginUpdate(Loader.getInstance()).downloadUpdate();
         try {
-            eventManager.registerListener(new PacketListener());
+            if (getVersion().equals(ServerVersion.v1_15_2)) {
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15_R1.PacketListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15_R1.CommandListener());
+                eventManager.registerListener(new InteractListener());
+            } else if (getVersion().equals(ServerVersion.v1_7_2)) {
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7_R1.PacketListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7_R1.CommandListener());
+            }
             eventManager.registerListener(new JoinListener());
-            eventManager.registerListener(new InteractListener());
             eventManager.registerListener(new KickListener());
             eventManager.registerListener(new QuitListener());
-            eventManager.registerListener(new CommandListener());
         } catch (Throwable t) {
             Logger.error.println("§cFailed to register listener", t);
         }
     }
 
-    public void updatePlayers() {
-        getPlayerHashMap().keySet().removeIf(next -> !next.isOnline());
-    }
-
     @Nonnull
-    public List<TNLPlayer> getOnlinePlayers() {
+    public List<TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> getOnlinePlayers() {
         return new ArrayList<>(getPlayerHashMap().values());
     }
 
@@ -90,13 +110,49 @@ public class TNLListener {
     }
 
     @Nonnull
-    public HashMap<Player, TNLPlayer> getPlayerHashMap() {
+    public HashMap<Player, TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> getPlayerHashMap() {
         return playerHashMap;
     }
 
     @Nonnull
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer(@Nonnull Player player) {
+        return getPlayerHashMap().get(player);
+    }
+
+    @Nullable
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer(@Nonnull CommandSender player) {
+        if (player instanceof Player) {
+            return getPlayerHashMap().get(player);
+        }
+        return null;
+    }
+
+    @Nullable
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer(@Nullable Entity player) {
+        if (player instanceof Player) {
+            return getPlayerHashMap().get(player);
+        } else {
+            return null;
+        }
+    }
+
+    @Nullable
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer(@Nonnull String player) {
+        return getPlayerHashMap().get(Bukkit.getPlayer(player));
+    }
+
+    @Nullable
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer(@Nonnull UUID player) {
+        return getPlayerHashMap().get(Bukkit.getPlayer(player));
+    }
+
     public static TNLListener getInstance() {
         return instance;
+    }
+
+    @Nonnull
+    public ServerVersion getVersion() {
+        return version;
     }
 
     public void deleteOldLogs() {

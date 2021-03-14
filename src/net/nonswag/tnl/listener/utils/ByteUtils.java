@@ -8,7 +8,7 @@ import net.minecraft.server.v1_15_R1.MinecraftKey;
 import net.minecraft.server.v1_15_R1.PacketDataSerializer;
 import net.minecraft.server.v1_15_R1.PacketPlayOutCustomPayload;
 import net.nonswag.tnl.listener.api.logger.Logger;
-import net.nonswag.tnl.listener.api.player.TNLPlayer;
+import net.nonswag.tnl.listener.api.player.v1_15_R1.NMSPlayer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ByteUtils {
 
-    public static void writePacket(@Nonnull TNLPlayer player, @Nonnull String keyPrefix, @Nonnull String keySuffix, @Nonnull String messageContent) {
+    public static void writePacket(@Nonnull NMSPlayer player, @Nonnull String keyPrefix, @Nonnull String keySuffix, @Nonnull String messageContent) {
         try {
             byte[] bytes = getBytes(keySuffix, messageContent);
             if (bytes != null) {

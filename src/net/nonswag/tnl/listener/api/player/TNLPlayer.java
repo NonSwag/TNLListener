@@ -1,57 +1,31 @@
 package net.nonswag.tnl.listener.api.player;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelPipeline;
-import net.minecraft.server.v1_15_R1.*;
-import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
-import net.nonswag.tnl.listener.api.logger.Logger;
-import net.nonswag.tnl.listener.api.message.*;
+import net.nonswag.tnl.listener.api.message.ChatComponent;
+import net.nonswag.tnl.listener.api.message.Language;
+import net.nonswag.tnl.listener.api.message.MessageKey;
+import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
-import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.title.Title;
-import net.nonswag.tnl.listener.eventhandler.InventoryLoadedEvent;
-import net.nonswag.tnl.listener.eventhandler.InventorySafeEvent;
-import org.bukkit.Material;
-import org.bukkit.SoundCategory;
-import org.bukkit.World;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.*;
-import org.bukkit.entity.memory.MemoryKey;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.*;
 import org.bukkit.map.MapView;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.BoundingBox;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
 import java.net.InetSocketAddress;
-import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 /**
@@ -59,1776 +33,583 @@ import java.util.*;
  *
  * @see TNLPlayer#backflip()
  * @see TNLPlayer#bungeeConnect(net.nonswag.tnl.listener.api.server.Server)
- * @see TNLPlayer#cast(Entity)
- * @see TNLPlayer#cast(Object)
- * @see TNLPlayer#cast(Player)
- * @see TNLPlayer#cast(String)
- * @see TNLPlayer#cast(TNLPlayer)
- * @see TNLPlayer#cast(CommandSender)
- * @see TNLPlayer#cast(CraftPlayer)
- * @see TNLPlayer#cast(HumanEntity)
- * @see TNLPlayer#cast(LivingEntity)
  * @see TNLPlayer#getVirtualStorage()
  * @see TNLPlayer#updateBossBar(BossBar)
  * @see TNLPlayer#hideBossBar(BossBar)
  * @see TNLPlayer#sendBossBar(BossBar)
  * @see TNLPlayer#sendBossBar(BossBar, long)
- * @see TNLPlayer#getBossBars(UUID)
  * @see TNLPlayer#resetTitle()
  * @see TNLPlayer#sendTitle(Title)
  * @see TNLPlayer#sendTitle(Title.Animation)
  *
  **/
 
-public class TNLPlayer implements TNLPlayerImpl {
-
-    @Nonnull private final Player bukkitPlayer;
-    @Nonnull private final Scoreboard optionScoreboard = new Scoreboard();
-    @Nonnull private final ScoreboardTeam optionTeam = new ScoreboardTeam(getOptionScoreboard(), "TNLOptionPacket");
-    @Nonnull private final HashMap<String, Object> virtualStorage = new HashMap<>();
-    @Nonnull private final PermissionManager permissionManager;
-
-    protected TNLPlayer(@Nonnull Player bukkitPlayer) {
-        this.bukkitPlayer = bukkitPlayer;
-        this.permissionManager = new PermissionManager(this);
-    }
-
-    @Nonnull
-    public static TNLPlayer cast(@Nonnull Player player) {
-        if (!TNLListener.getInstance().getPlayerHashMap().containsKey(player)) {
-            TNLListener.getInstance().getPlayerHashMap().put(player, new TNLPlayer(player));
-        }
-        return TNLListener.getInstance().getPlayerHashMap().get(player);
-    }
-
-    @Nonnull
-    public static TNLPlayer cast(@Nonnull CraftPlayer craftPlayer) {
-        return cast((Player) craftPlayer);
-    }
+public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility> {
 
     @Nullable
-    public static TNLPlayer cast(@Nullable CommandSender sender) {
-        if (sender instanceof Player) {
-            return cast((Player) sender);
-        }
-        return null;
-    }
+    Entity getVehicle();
+
+    @Nonnull
+    Set<String> getScoreboardTags();
+
+    @Nonnull
+    PistonMoveReaction getPistonMoveReaction();
+
+    @Nonnull
+    BlockFace getFacing();
+
+    @Nonnull
+    BackFlip backflip();
+
+    @Nonnull
+    Location getEyeLocation();
+
+    @Nonnull
+    List<org.bukkit.block.Block> getLineOfSight(@Nonnull Set<Material> set, int i);
+
+    @Nonnull
+    WeatherType getPlayerWeather();
+
+    @Nonnull
+    org.bukkit.block.Block getTargetBlock(@Nonnull Set<Material> set, int i);
+
+    @Nonnull
+    List<org.bukkit.block.Block> getLastTwoTargetBlocks(@Nonnull Set<Material> set, int i);
 
     @Nullable
-    public static TNLPlayer cast(@Nullable HumanEntity humanEntity) {
-        if (humanEntity instanceof Player) {
-            return cast((Player) humanEntity);
-        }
-        return null;
-    }
+    org.bukkit.block.Block getTargetBlockExact(int i);
 
     @Nullable
-    public static TNLPlayer cast(@Nullable Entity entity) {
-        if (entity instanceof Player) {
-            return cast((Player) entity);
-        }
-        return null;
-    }
+    TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility> getKiller();
 
     @Nullable
-    public static TNLPlayer cast(@Nullable LivingEntity livingEntity) {
-        if (livingEntity instanceof Player) {
-            return cast((Player) livingEntity);
-        }
-        return null;
-    }
+    PotionEffect getPotionEffect(@Nonnull PotionEffectType potionEffectType);
+
+    @Nonnull
+    Collection<PotionEffect> getActivePotionEffects();
 
     @Nullable
-    public static TNLPlayer cast(@Nonnull String string) {
-        Player player = Bukkit.getPlayer(string);
-        if (player != null) {
-            return cast(player);
-        }
-        return null;
-    }
+    EntityEquipment getEquipment();
 
     @Nullable
-    public static TNLPlayer cast(@Nullable Object object) {
-        if (object instanceof Player) {
-            return cast(((Player) object));
-        }
-        return null;
-    }
+    Entity getLeashHolder() throws IllegalStateException;
 
     @Nullable
-    public static TNLPlayer cast(@Nullable TNLPlayer player) {
-        return player;
-    }
-
-    @Override
-    @Nonnull
-    public HashMap<String, Object> getVirtualStorage() {
-        return virtualStorage;
-    }
-
-    @Override
-    @Nonnull
-    public Scoreboard getOptionScoreboard() {
-        return optionScoreboard;
-    }
-
-    @Override
-    @Nonnull
-    public ScoreboardTeam getOptionTeam() {
-        return optionTeam;
-    }
-
-    @Override
-    @Nonnull
-    public PlayerConnection getPlayerConnection() {
-        return getEntityPlayer().playerConnection;
-    }
-
-    @Override
-    @Nonnull
-    public NetworkManager getNetworkManager() {
-        return getPlayerConnection().networkManager;
-    }
-
-    @Override
-    @Nonnull
-    public Channel getChannel() {
-        return getNetworkManager().channel;
-    }
-
-    @Override
-    @Nonnull
-    public ChannelPipeline getPipeline() {
-        return getChannel().pipeline();
-    }
-
-    @Override
-    public int getPing() {
-        return getEntityPlayer().ping;
-    }
-
-    @Override
-    @Nonnull
-    public PermissionManager getPermissionManager() {
-        return permissionManager;
-    }
-
-    @Override
-    public boolean isOnline() {
-        return getBukkitPlayer().isOnline();
-    }
-
-    @Override
-    public boolean isBanned() {
-        return getBukkitPlayer().isBanned();
-    }
-
-    @Override
-    public boolean isWhitelisted() {
-        return getBukkitPlayer().isWhitelisted();
-    }
-
-    @Override
-    public void setWhitelisted(boolean whitelisted) {
-        getBukkitPlayer().setWhitelisted(whitelisted);
-    }
-
-    @Override
-    @Nonnull
-    public Player getBukkitPlayer() {
-        return bukkitPlayer;
-    }
-
-    @Override
-    public long getFirstPlayed() {
-        return getBukkitPlayer().getFirstPlayed();
-    }
-
-    @Override
-    public boolean hasPlayedBefore() {
-        return getBukkitPlayer().hasPlayedBefore();
-    }
-
-    @Override
-    public void sendPacket(@Nonnull Packet<PacketListenerPlayOut> packet) {
-        if (Bukkit.isPrimaryThread()) {
-            getPlayerConnection().sendPacket(packet);
-        } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().sendPacket(packet));
-        }
-    }
-
-    @Override
-    @SafeVarargs
-    public final void sendPackets(@Nonnull Packet<PacketListenerPlayOut>... packets) {
-        for (Packet<PacketListenerPlayOut> packet : packets) {
-            sendPacket(packet);
-        }
-    }
-
-    @Override
-    public double getMaxHealth() {
-        return getEntityPlayer().getMaxHealth();
-    }
-
-    @Override
-    public void sendMessage(@Nonnull ChatComponent component) {
-        sendMessage(component.getText());
-    }
-
-    @Override
-    public void sendMessage(@Nonnull ChatComponent component, @Nonnull Placeholder... placeholders) {
-        sendMessage(component.getText(placeholders));
-    }
-
-    @Override
-    public void sendMessage(@Nonnull String message, @Nonnull Placeholder... placeholders) {
-        getBukkitPlayer().sendMessage(ChatComponent.getText(message, placeholders));
-    }
-
-    @Override
-    public void sendMessage(@Nonnull MessageKey messageKey, @Nonnull Placeholder... placeholders) {
-        Language language = Language.ROOT;
-        if (!messageKey.isSystemMessage()) {
-            language = Language.fromLocale(getBukkitPlayer().getLocale());
-        }
-        LanguageKey languageKey = new LanguageKey(language, messageKey);
-        ChatComponent component = Message.valueOf(languageKey);
-        if (component != null) {
-            getBukkitPlayer().sendMessage(component.getText(placeholders));
-        } else {
-            Logger.error.println("§cUnknown component§8: §4" + languageKey.getMessageKey().getKey() + " §8(§4" + languageKey.getLanguage().getName() + "§8)");
-            sendMessage("%prefix% §cUnknown component§8: §4" + languageKey.getMessageKey() + " §8(§4" + languageKey.getLanguage().getName() + "§8)");
-        }
-    }
-
-    @Override
-    public void disconnect() {
-        disconnect(MessageKey.KICKED + "\n§cDisconnected");
-    }
-
-    @Override
-    public void disconnect(@Nonnull MessageKey messageKey, @Nonnull Placeholder... placeholders) {
-        Language language = Language.ROOT;
-        if (!messageKey.isSystemMessage()) {
-            language = Language.fromLocale(getBukkitPlayer().getLocale());
-        }
-        LanguageKey languageKey = new LanguageKey(language, messageKey);
-        ChatComponent component = Message.valueOf(languageKey);
-        if (component != null) {
-            disconnect(component.getText(placeholders));
-        } else {
-            Logger.error.println("§cUnknown component§8: §4" + languageKey.toString());
-            disconnect("§cUnknown component§8: §4" + languageKey.toString());
-        }
-    }
-
-    @Override
-    public void disconnect(@Nonnull String kickMessage) {
-        if (Bukkit.isPrimaryThread()) {
-            if (!getPlayerConnection().processedDisconnect) {
-                getPlayerConnection().disconnect(kickMessage);
-            }
-        } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> {
-                if (!getPlayerConnection().processedDisconnect) {
-                    getPlayerConnection().disconnect(kickMessage);
-                }
-            });
-        }
-    }
-
-    @Override
-    public String getWorldAlias() {
-        return getWorldAlias(getWorld());
-    }
-
-    @Override
-    public void setNameTagVisibility(@Nonnull ScoreboardTeamBase.EnumNameTagVisibility visibility) {
-        getOptionScoreboard().addPlayerToTeam(getBukkitPlayer().getName(), getOptionTeam());
-        getOptionTeam().setNameTagVisibility(visibility);
-        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam(getOptionTeam(), 0);
-        sendPacket(packet);
-    }
-
-    @Override
-    public void setCollision(@Nonnull ScoreboardTeamBase.EnumTeamPush collision) {
-        getOptionScoreboard().addPlayerToTeam(getBukkitPlayer().getName(), getOptionTeam());
-        getOptionTeam().setCollisionRule(collision);
-        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam(getOptionTeam(), 0);
-        sendPacket(packet);
-    }
+    String getCustomName();
 
     @Nonnull
-    public static String getWorldAlias(@Nonnull World world) {
-        return TNLListener.getInstance().getWorldAliasHashMap().getOrDefault(world, world.getName());
-    }
+    List<MetadataValue> getMetadata(@Nonnull String s);
 
-    public static void setWorldAlias(@Nonnull World world, @Nonnull String alias) {
-        TNLListener.getInstance().getWorldAliasHashMap().put(world, alias);
-    }
-
-    @Override
     @Nonnull
-    public String getName() {
-        return getBukkitPlayer().getName();
-    }
+    Set<String> getListeningPluginChannels();
 
-    @Override
     @Nonnull
-    public PlayerInventory getInventory() {
-        return getBukkitPlayer().getInventory();
-    }
+    Player getBukkitPlayer();
 
-    @Override
     @Nonnull
-    public Inventory getEnderChest() {
-        return getBukkitPlayer().getEnderChest();
-    }
+    PermissionManager getPermissionManager();
 
-    @Override
     @Nonnull
-    public MainHand getMainHand() {
-        return getBukkitPlayer().getMainHand();
-    }
+    String getName();
 
-    @Override
-    public boolean setWindowProperty(@Nonnull InventoryView.Property property, int i) {
-        return getBukkitPlayer().setWindowProperty(property, i);
-    }
+    @Nonnull
+    PlayerInventory getInventory();
 
-    @Override
+    @Nonnull
+    String getWorldAlias();
+
     @Nullable
-    public InventoryView getOpenInventory() {
-        return getBukkitPlayer().getOpenInventory();
-    }
+    InventoryView getOpenInventory();
 
-    @Override
     @Nullable
-    public InventoryView openInventory(@Nonnull Inventory inventory) {
-        return getBukkitPlayer().openInventory(inventory);
-    }
+    InventoryView openInventory(@Nonnull Inventory inventory);
 
-    @Override
     @Nullable
-    public InventoryView openWorkbench(@Nonnull Location location, boolean b) {
-        return getBukkitPlayer().openWorkbench(location, b);
-    }
+    InventoryView openWorkbench(@Nonnull Location location, boolean b);
 
-    @Override
     @Nullable
-    public InventoryView openEnchanting(@Nonnull Location location, boolean b) {
-        return getBukkitPlayer().openEnchanting(location, b);
-    }
+    InventoryView openEnchanting(@Nonnull Location location, boolean b);
 
-    @Override
-    public void openInventory(@Nonnull InventoryView inventoryView) {
-        getBukkitPlayer().openInventory(inventoryView);
-    }
-
-    @Override
     @Nullable
-    public InventoryView openMerchant(@Nonnull Villager villager, boolean b) {
-        return getBukkitPlayer().openMerchant(villager, b);
-    }
+    Entity getSpectatorTarget();
 
-    @Override
+    @Nonnull
+    Inventory getEnderChest();
+
+    @Nonnull
+    NetworkManager getNetworkManager();
+
+    @Nonnull
+    PlayerConnection getPlayerConnection();
+
+    @Nonnull
+    ScoreboardTeam getOptionTeam();
+
+    @Nonnull
+    Scoreboard getOptionScoreboard();
+
+    @Nonnull
+    HashMap<String, Object> getVirtualStorage();
+
+    @Nonnull
+    <T> void playEffect(@Nonnull Location location, @Nonnull Effect effect, @Nonnull T t);
+
+    @Nonnull
+    Language getLanguage();
+
+    @Nonnull
+    String getLocale();
+
+    @Nonnull
+    Location getLocation();
+
+    @Nonnull
+    Location getLocation(@Nonnull Location location);
+
+    @Nonnull
+    Location getTargetLocation(int i);
+
+    @Nonnull
+    Vector getVelocity();
+
+    @Nonnull
+    World getWorld();
+
+    @Nonnull
+    WorldServer getWorldServer();
+
+    @Nonnull
+    List<Entity> getNearbyEntities(double v, double v1, double v2);
+
+    @Nonnull
+    List<Entity> getPassengers();
+
     @Nullable
-    public InventoryView openMerchant(@Nonnull Merchant merchant, boolean b) {
-        return getBukkitPlayer().openMerchant(merchant, b);
-    }
+    EntityDamageEvent getLastDamageCause();
 
-    @Override
-    public void closeInventory() {
-        getBukkitPlayer().closeInventory();
-    }
+    @Nonnull
+    UUID getUniqueId();
 
-    @Override
-    public void setItemOnCursor(@Nonnull ItemStack itemStack) {
-        getBukkitPlayer().setItemOnCursor(itemStack);
-    }
+    @Nonnull
+    String getDisplayName();
 
-    @Override
-    public int getCooldown(@Nonnull Material material) {
-        return getBukkitPlayer().getCooldown(material);
-    }
+    @Nonnull
+    String getPlayerListName();
 
-    @Override
-    public void setCooldown(@Nonnull Material material, int i) {
-        getBukkitPlayer().setCooldown(material, i);
-    }
+    @Nonnull
+    CraftPlayer getCraftPlayer();
 
-    @Override
-    public int getSleepTicks() {
-        return getBukkitPlayer().getSleepTicks();
-    }
+    @Nonnull
+    EntityPlayer getEntityPlayer();
 
-    @Override
+    @Nonnull
+    Location getBedLocation();
+
+    @Nonnull
+    GameMode getGameMode();
+
     @Nullable
-    public Location getBedSpawnLocation() {
-        return getBukkitPlayer().getBedSpawnLocation();
-    }
+    Location getBedSpawnLocation();
 
-    @Override
-    public void setBedSpawnLocation(@Nonnull Location location) {
-        getBukkitPlayer().setBedSpawnLocation(location);
-    }
-
-    @Override
-    public void setBedSpawnLocation(@Nonnull Location location, boolean b) {
-        getBukkitPlayer().setBedSpawnLocation(location, b);
-    }
-
-    @Override
-    public boolean sleep(@Nonnull Location location, boolean b) {
-        return getBukkitPlayer().sleep(location, b);
-    }
-
-    @Override
-    public void wakeup(boolean b) {
-        getBukkitPlayer().wakeup(b);
-    }
-
-    @Override
-    @Nonnull
-    public Location getBedLocation() {
-        return getBukkitPlayer().getBedLocation();
-    }
-
-    @Override
-    @Nonnull
-    public GameMode getGameMode() {
-        return getBukkitPlayer().getGameMode();
-    }
-
-    @Override
-    public void setGameMode(@Nonnull GameMode gameMode) {
-        getBukkitPlayer().setGameMode(gameMode);
-    }
-
-    @Override
-    public boolean isBlocking() {
-        return getBukkitPlayer().isBlocking();
-    }
-
-    @Override
-    public boolean isHandRaised() {
-        return getBukkitPlayer().isHandRaised();
-    }
-
-    @Override
-    public int getExpToLevel() {
-        return getBukkitPlayer().getExpToLevel();
-    }
-
-    @Override
-    public float getAttackCooldown() {
-        return getBukkitPlayer().getAttackCooldown();
-    }
-
-    @Override
-    public void saveInventory(@Nonnull String id) {
-        mkdirInventories();
-        File file = new File("plugins/TNLListener/" + getBukkitPlayer().getUniqueId() + ".yml");
-        try {
-            if (!file.exists()) {
-                if (!file.createNewFile()) {
-                    Logger.error.println(new NoSuchFileException("Failed to create file"));
-                }
-            }
-            if (file.exists()) {
-                YamlConfiguration inventory = YamlConfiguration.loadConfiguration(file);
-                ItemStack[] contents = getBukkitPlayer().getInventory().getContents();
-                inventory.set(id, Arrays.asList(contents));
-                inventory.save(file);
-                Bukkit.getPluginManager().callEvent(new InventorySafeEvent(!Bukkit.isPrimaryThread(), this, id));
-            }
-        } catch (Exception e) {
-            Logger.error.println(e);
-        }
-    }
-
-    @Override
-    public void hideTabListName(@Nonnull TNLPlayer[] players) {
-        for (TNLPlayer all : players) {
-            if (!all.equals(this)) {
-                sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, all.getEntityPlayer()));
-            }
-        }
-    }
-
-    @Override
-    public void disguise(@Nonnull net.minecraft.server.v1_15_R1.EntityLiving entity, @Nonnull List<TNLPlayer> receivers) {
-        for (TNLPlayer receiver : receivers) {
-            disguise(entity, receiver);
-        }
-    }
-
-    @Override
-    public void disguise(@Nonnull net.minecraft.server.v1_15_R1.EntityLiving entity, @Nonnull TNLPlayer receiver) {
-        if (!this.equals(receiver)) {
-            receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
-            entity.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
-            entity.world = this.getWorldServer();
-            Reflection.setField(entity, net.minecraft.server.v1_15_R1.Entity.class, "id", this.getEntityId());
-            receiver.sendPacket(new PacketPlayOutSpawnEntityLiving(entity));
-        }
-    }
-
-    @Override
-    public void disguise(@Nonnull net.minecraft.server.v1_15_R1.EntityLiving entity) {
-        disguise(entity, TNLListener.getInstance().getOnlinePlayers());
-    }
-
-    @Nonnull
-    private static final HashMap<UUID, List<String>> bossBars = new HashMap<>();
-    @Nonnull
-    private static final HashMap<UUID, BossBar> bossHashMap = new HashMap<>();
-
-    @Nonnull
-    private static HashMap<UUID, BossBar> getBossHashMap() {
-        return bossHashMap;
-    }
-
-    @Nonnull
-    public static HashMap<UUID, List<String>> getBossBars() {
-        return bossBars;
-    }
-
-    @Nonnull
-    public static List<String> getBossBars(@Nonnull UUID uniqueId) {
-        return bossBars.getOrDefault(uniqueId, new ArrayList<>());
-    }
-
-    @Override
-    public void sendBossBar(@Nonnull BossBar bossBar) {
-        if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
-            List<String> bars = getBossBars(getUniqueId());
-            bars.add(bossBar.getId());
-            getBossBars().put(getUniqueId(), bars);
-        }
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.ADD, bossBar.getBossBar().getHandle()));
-        updateBossBar(bossBar);
-    }
-
-    @Override
-    public void updateBossBar(@Nonnull BossBar bossBar) {
-        if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
-            List<String> bars = getBossBars(getUniqueId());
-            bars.add(bossBar.getId());
-            getBossBars().put(getUniqueId(), bars);
-        }
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_NAME, bossBar.getBossBar().getHandle()));
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_PCT, bossBar.getBossBar().getHandle()));
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_PROPERTIES, bossBar.getBossBar().getHandle()));
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_STYLE, bossBar.getBossBar().getHandle()));
-    }
-
-    @Override
-    public void hideBossBar(@Nonnull BossBar bossBar) {
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.REMOVE, bossBar.getBossBar().getHandle()));
-        List<String> bars = getBossBars(getUniqueId());
-        bars.remove(bossBar.getId());
-        getBossBars().put(getUniqueId(), bars);
-        BossBar.removeBossBar(bossBar.getId());
-    }
-
-    @Override
-    public void sendBossBar(@Nonnull BossBar bossBar, long millis) {
-        if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null) {
-            hideBossBar(getBossHashMap().get(getBukkitPlayer().getUniqueId()));
-        }
-        getBossHashMap().put(getBukkitPlayer().getUniqueId(), bossBar);
-        sendBossBar(bossBar);
-        new Thread(() -> {
-            try {
-                Thread.sleep(millis);
-            } catch (Exception ignored) {
-            }
-            if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null
-                    && getBossHashMap().get(getBukkitPlayer().getUniqueId()).equals(bossBar)) {
-                hideBossBar(getBossHashMap().get(getBukkitPlayer().getUniqueId()));
-            }
-        }).start();
-    }
-
-    @Override
-    public void sendTitle(@Nonnull Title title) {
-        getBukkitPlayer().sendTitle(title.getTitle(),
-                title.getSubtitle(),
-                title.getTimeIn(),
-                title.getTimeStay(),
-                title.getTimeOut());
-    }
-
-    @Override
-    public void sendTitle(@Nonnull Title.Animation animation) {
-        new Thread(() -> {
-            try {
-                String[] split = animation.getTitle().getTitle().split("");
-                String spaces = "          ";
-                do {
-                    spaces = spaces.replaceFirst(" ", "");
-                    getBukkitPlayer().sendTitle((animation.getDesign().getSecondaryColor() +
-                                    "- " +
-                                    animation.getDesign().getPrimaryColor() +
-                                    String.join(spaces, split) +
-                                    animation.getDesign().getSecondaryColor() +
-                                    " -"),
-                            animation.getDesign().getExtraColor() + animation.getTitle().getSubtitle(),
-                            animation.getTitle().getTimeIn(),
-                            animation.getTitle().getTimeStay(),
-                            animation.getTitle().getTimeOut());
-                    Thread.sleep(50);
-                } while (!spaces.isEmpty());
-            } catch (Exception e) {
-                Logger.error.println(e);
-            }
-        }).start();
-    }
-
-    @Override
-    public void sendActionBar(@Nonnull ActionBar actionBar) {
-        sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + actionBar.getText() + "\"}"), ChatMessageType.a((byte) 2)));
-    }
-
-    @Override
-    @Nonnull
-    public CraftPlayer getCraftPlayer() {
-        return ((CraftPlayer) getBukkitPlayer());
-    }
-
-    @Override
-    @Nonnull
-    public EntityPlayer getEntityPlayer() {
-        return getCraftPlayer().getHandle();
-    }
-
-    @Override
-    public void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server) {
-        try {
-            if (server.isOnline()) {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-                dataOutputStream.writeUTF("Connect");
-                dataOutputStream.writeUTF(server.getName());
-                sendPluginMessage(Loader.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
-                sendMessage("%prefix% §aConnecting you to server §6" + server.getName());
-            } else {
-                sendMessage("%prefix% §cThe server §4" + server.getName() + "§c is Offline");
-            }
-        } catch (Exception e) {
-            Logger.error.println(e);
-            sendMessage("%prefix% §cFailed to connect you to server §4" + server.getName());
-        }
-    }
-
-    @Override
-    public void loadInventory(@Nonnull String id) {
-        File file = new File("plugins/TNLListener/" + getBukkitPlayer().getUniqueId() + ".yml");
-        try {
-            if (file.exists()) {
-                YamlConfiguration inventory = YamlConfiguration.loadConfiguration(file);
-                if (inventory.isSet(id)) {
-                    List<?> contents = inventory.getList(id);
-                    if (contents != null) {
-                        for (int i = 0; i < contents.size(); i++) {
-                            this.getInventory().setItem(i, ((ItemStack) contents.get(i)));
-                        }
-                    } else {
-                        this.getInventory().clear();
-                    }
-                } else {
-                    this.getInventory().clear();
-                }
-                Bukkit.getPluginManager().callEvent(new InventoryLoadedEvent(!Bukkit.isPrimaryThread(), this, id));
-            } else {
-                Logger.error.println("Unknown InventoryID '" + id + "' for player '" + getName() + "'");
-            }
-        } catch (Exception e) {
-            Logger.error.println(e);
-        }
-    }
-
-    @Override
-    public void mkdirInventories() {
-        File file = new File("plugins/TNLListener/");
-        if (!file.exists()) {
-            if (file.mkdirs()) {
-                Logger.info.println("Successfully created folder '" + file.getAbsolutePath() + "'");
-            } else {
-                Logger.error.println("Failed to create folder '" + file.getAbsolutePath() + "'",
-                        "Check if your software runs with the permission '777', 'root' or higher",
-                        "Cloud and any kind of Remote software may cause issues if the server loads from a template");
-            }
-        }
-    }
-
-    @Override
-    @Nonnull
-    public String getDisplayName() {
-        return getBukkitPlayer().getDisplayName();
-    }
-
-    @Override
-    public void setDisplayName(@Nonnull String s) {
-        getBukkitPlayer().setDisplayName(s);
-    }
-
-    @Override
-    @Nonnull
-    public String getPlayerListName() {
-        return getBukkitPlayer().getPlayerListName();
-    }
-
-    @Override
-    public void setPlayerListName(@Nonnull String s) {
-        getBukkitPlayer().setPlayerListName(s);
-    }
-
-    @Override
     @Nullable
-    public String getPlayerListHeader() {
-        return getBukkitPlayer().getPlayerListHeader();
-    }
+    String getPlayerListHeader();
 
-    @Override
     @Nullable
-    public String getPlayerListFooter() {
-        return getBukkitPlayer().getPlayerListFooter();
-    }
+    String getPlayerListFooter();
 
-    @Override
-    public void setPlayerListHeader(@Nonnull String s) {
-        getBukkitPlayer().setPlayerListHeader(s);
-    }
-
-    @Override
-    public void setPlayerListFooter(@Nonnull String s) {
-        getBukkitPlayer().setPlayerListFooter(s);
-    }
-
-    @Override
-    public void setPlayerListHeaderFooter(@Nonnull String s, @Nonnull String s1) {
-        getBukkitPlayer().setPlayerListHeaderFooter(s, s1);
-    }
-
-    @Override
-    public void setCompassTarget(@Nonnull Location location) {
-        getBukkitPlayer().setCompassTarget(location);
-    }
-
-    @Override
     @Nonnull
-    public Location getCompassTarget() {
-        return getBukkitPlayer().getCompassTarget();
-    }
+    Location getCompassTarget();
 
-    @Override
     @Nullable
-    public InetSocketAddress getAddress() {
-        return getBukkitPlayer().getAddress();
-    }
-
-    @Override
-    public void chat(@Nonnull String s) {
-        getBukkitPlayer().chat(s);
-    }
-
-    @Override
-    public boolean performCommand(@Nonnull String s) {
-        return getBukkitPlayer().performCommand(s);
-    }
-
-    @Override
-    public boolean isSneaking() {
-        return getBukkitPlayer().isSneaking();
-    }
-
-    @Override
-    public void setSneaking(boolean b) {
-        getBukkitPlayer().setSneaking(b);
-    }
-
-    @Override
-    public boolean isSprinting() {
-        return getBukkitPlayer().isSprinting();
-    }
-
-    @Override
-    public void setSprinting(boolean b) {
-        getBukkitPlayer().setSprinting(b);
-    }
-
-    @Override
-    public void saveData() {
-        getBukkitPlayer().saveData();
-    }
-
-    @Override
-    public void loadData() {
-        getBukkitPlayer().loadData();
-    }
-
-    @Override
-    public void setSleepingIgnored(boolean b) {
-        getBukkitPlayer().setSleepingIgnored(b);
-    }
-
-    @Override
-    public boolean isSleepingIgnored() {
-        return getBukkitPlayer().isSleepingIgnored();
-    }
-
-    @Override
-    public void playNote(@Nonnull Location location, @Nonnull Instrument instrument, @Nonnull Note note) {
-        getBukkitPlayer().playNote(location, instrument, note);
-    }
-
-    @Override
-    public void playSound(@Nonnull Location location, @Nonnull Sound sound, float v, float v1) {
-        getBukkitPlayer().playSound(location, sound, v, v1);
-    }
-
-    @Override
-    public void playSound(@Nonnull Location location, @Nonnull String s, float v, float v1) {
-        getBukkitPlayer().playSound(location, s, v, v1);
-    }
-
-    @Override
-    public void playSound(@Nonnull Location location, @Nonnull Sound sound, @Nonnull SoundCategory soundCategory, float v, float v1) {
-        getBukkitPlayer().playSound(location, sound, soundCategory, v, v1);
-    }
-
-    @Override
-    public void playSound(@Nonnull Location location, @Nonnull String s, @Nonnull SoundCategory soundCategory, float v, float v1) {
-        getBukkitPlayer().playSound(location, s, soundCategory, v, v1);
-    }
-
-    @Override
-    public void stopSound(@Nonnull Sound sound) {
-        getBukkitPlayer().stopSound(sound);
-    }
-
-    @Override
-    public void stopSound(@Nonnull String s) {
-        getBukkitPlayer().stopSound(s);
-    }
-
-    @Override
-    public void stopSound(@Nonnull Sound sound, @Nonnull SoundCategory soundCategory) {
-        getBukkitPlayer().stopSound(sound, soundCategory);
-    }
-
-    @Override
-    public void stopSound(@Nonnull String s, @Nonnull SoundCategory soundCategory) {
-        getBukkitPlayer().stopSound(s, soundCategory);
-    }
-
-    @Override
-    @Nonnull
-    public <T> void playEffect(@Nonnull Location location, @Nonnull Effect effect, @Nonnull T t) {
-        getBukkitPlayer().playEffect(location, effect, t);
-    }
-
-    @Override
-    public void sendBlockChange(@Nonnull Location location, @Nonnull BlockData blockData) {
-        getBukkitPlayer().sendBlockChange(location, blockData);
-    }
-
-    @Override
-    public void sendMap(@Nonnull MapView mapView) {
-        getBukkitPlayer().sendMap(mapView);
-    }
-
-    @Override
-    public void updateInventory() {
-        getBukkitPlayer().updateInventory();
-    }
-
-    @Override
-    public void setPlayerTime(long l, boolean b) {
-        getBukkitPlayer().setPlayerTime(l, b);
-    }
-
-    @Override
-    public long getPlayerTime() {
-        return getBukkitPlayer().getPlayerTime();
-    }
-
-    @Override
-    public long getPlayerTimeOffset() {
-        return getBukkitPlayer().getPlayerTimeOffset();
-    }
-
-    @Override
-    public boolean isPlayerTimeRelative() {
-        return getBukkitPlayer().isPlayerTimeRelative();
-    }
-
-    @Override
-    public void resetPlayerTime() {
-        getBukkitPlayer().resetPlayerTime();
-    }
-
-    @Override
-    public void setPlayerWeather(@Nonnull WeatherType weatherType) {
-        getBukkitPlayer().setPlayerWeather(weatherType);
-    }
-
-    @Override
-    @Nullable
-    public WeatherType getPlayerWeather() {
-        return getBukkitPlayer().getPlayerWeather();
-    }
-
-    @Override
-    public void resetPlayerWeather() {
-        getBukkitPlayer().resetPlayerWeather();
-    }
-
-    @Override
-    public void giveExp(int i) {
-        getBukkitPlayer().giveExp(i);
-    }
-
-    @Override
-    public void giveExpLevels(int i) {
-        getBukkitPlayer().giveExpLevels(i);
-    }
-
-    @Override
-    public float getExp() {
-        return getBukkitPlayer().getExp();
-    }
-
-    @Override
-    public void setExp(float v) {
-        getBukkitPlayer().setExp(v);
-    }
-
-    @Override
-    public int getLevel() {
-        return getBukkitPlayer().getLevel();
-    }
-
-    @Override
-    public void setLevel(int i) {
-        getBukkitPlayer().setLevel(i);
-    }
-
-    @Override
-    public int getTotalExperience() {
-        return getBukkitPlayer().getTotalExperience();
-    }
-
-    @Override
-    public void setTotalExperience(int i) {
-        getBukkitPlayer().setTotalExperience(i);
-    }
-
-    @Override
-    public void sendExperienceChange(float v) {
-        getBukkitPlayer().sendExperienceChange(v);
-    }
-
-    @Override
-    public void sendExperienceChange(float v, int i) {
-        getBukkitPlayer().sendExperienceChange(v, i);
-    }
-
-    @Override
-    public float getExhaustion() {
-        return getBukkitPlayer().getExhaustion();
-    }
-
-    @Override
-    public void setExhaustion(float v) {
-        getBukkitPlayer().setExhaustion(v);
-    }
-
-    @Override
-    public float getSaturation() {
-        return getBukkitPlayer().getSaturation();
-    }
-
-    @Override
-    public void setSaturation(float v) {
-        getBukkitPlayer().setSaturation(v);
-    }
-
-    @Override
-    public int getFoodLevel() {
-        return getBukkitPlayer().getFoodLevel();
-    }
-
-    @Override
-    public void setFoodLevel(int i) {
-        getBukkitPlayer().setFoodLevel(i);
-    }
-
-    @Override
-    public boolean getAllowFlight() {
-        return getBukkitPlayer().getAllowFlight();
-    }
-
-    @Override
-    public void setAllowFlight(boolean b) {
-        getBukkitPlayer().setAllowFlight(b);
-    }
-
-    @Override
-    public void setArrowCount(int arrows) {
-        getEntityPlayer().setArrowCount(arrows);
-    }
-
-    @Override
-    public void hidePlayer(@Nonnull TNLPlayer player) {
-        this.sendPacket(new PacketPlayOutEntityDestroy(player.getEntityId()));
-    }
-
-    @Override
-    public void showPlayer(@Nonnull TNLPlayer player) {
-        this.sendPacket(new PacketPlayOutSpawnEntityLiving(player.getEntityPlayer()));
-    }
-
-    @Override
-    public boolean isFlying() {
-        return getBukkitPlayer().isFlying();
-    }
-
-    @Override
-    public void setFlying(boolean b) {
-        getBukkitPlayer().setFlying(b);
-    }
-
-    @Override
-    public void setFlySpeed(float v) throws IllegalArgumentException {
-        getBukkitPlayer().setFlySpeed(v);
-    }
-
-    @Override
-    public void setWalkSpeed(float v) throws IllegalArgumentException {
-        getBukkitPlayer().setWalkSpeed(v);
-    }
-
-    @Override
-    public float getFlySpeed() {
-        return getBukkitPlayer().getFlySpeed();
-    }
-
-    @Override
-    public float getWalkSpeed() {
-        return getBukkitPlayer().getWalkSpeed();
-    }
-
-    @Override
-    public void setResourcePack(@Nonnull String s, byte[] bytes) {
-        getBukkitPlayer().setResourcePack(s, bytes);
-    }
-
-    @Override
-    public double getHealthScale() {
-        return getBukkitPlayer().getHealthScale();
-    }
-
-    @Override
-    @Nullable
-    public Entity getSpectatorTarget() {
-        return getBukkitPlayer().getSpectatorTarget();
-    }
-
-    @Override
-    public void setSpectatorTarget(@Nonnull Entity entity) {
-        getBukkitPlayer().setSpectatorTarget(entity);
-    }
-
-    @Override
-    public void resetTitle() {
-        sendTitle(Title.EMPTY);
-    }
-
-    @Override
-    public int getClientViewDistance() {
-        return getBukkitPlayer().getClientViewDistance();
-    }
-
-    @Override
-    @Nonnull
-    public String getLocale() {
-        return getBukkitPlayer().getLocale();
-    }
-
-    @Override
-    public void updateCommands() {
-        getBukkitPlayer().updateCommands();
-    }
-
-    @Override
-    public void openBook(@Nonnull ItemStack itemStack) {
-        getBukkitPlayer().openBook(itemStack);
-    }
-
-    @Override
-    @Nonnull
-    public Location getLocation() {
-        return getBukkitPlayer().getLocation();
-    }
-
-    @Override
-    @Nonnull
-    public Location getLocation(@Nonnull Location location) {
-        return getBukkitPlayer().getLocation(location);
-    }
-
-    @Override
-    @Nonnull
-    public Location getTargetLocation(int i) {
-        return getLocation().clone().add(getBukkitPlayer().getLocation().getDirection().multiply(i));
-    }
-
-    @Override
-    public void setVelocity(@Nonnull Vector vector) {
-        getBukkitPlayer().setVelocity(vector);
-    }
-
-    @Override
-    @Nonnull
-    public Vector getVelocity() {
-        return getBukkitPlayer().getVelocity();
-    }
-
-    @Override
-    public double getHeight() {
-        return getBukkitPlayer().getHeight();
-    }
-
-    @Override
-    public double getWidth() {
-        return getBukkitPlayer().getWidth();
-    }
-
-    @Override
-    @Nonnull
-    public BoundingBox getBoundingBox() {
-        return getBukkitPlayer().getBoundingBox();
-    }
-
-    @Override
-    public boolean isOnGround() {
-        return getBukkitPlayer().isOnGround();
-    }
-
-    @Override
-    @Nonnull
-    public World getWorld() {
-        return getBukkitPlayer().getWorld();
-    }
-
-    @Override
-    @Nonnull
-    public WorldServer getWorldServer() {
-        return ((CraftWorld) getBukkitPlayer().getWorld()).getHandle();
-    }
-
-    @Override
-    public void setRotation(float v, float v1) {
-        getBukkitPlayer().setRotation(v, v1);
-    }
-
-    @Override
-    public boolean teleport(@Nonnull Location location) {
-        return getBukkitPlayer().teleport(location);
-    }
-
-    @Override
-    public boolean teleport(@Nonnull Location location, @Nonnull PlayerTeleportEvent.TeleportCause teleportCause) {
-        return getBukkitPlayer().teleport(location, teleportCause);
-    }
-
-    @Override
-    public boolean teleport(@Nonnull Entity entity) {
-        return getBukkitPlayer().teleport(entity);
-    }
-
-    @Override
-    public boolean teleport(@Nonnull Entity entity, @Nonnull PlayerTeleportEvent.TeleportCause teleportCause) {
-        return getBukkitPlayer().teleport(entity, teleportCause);
-    }
-
-    @Override
-    @Nonnull
-    public List<Entity> getNearbyEntities(double v, double v1, double v2) {
-        return getBukkitPlayer().getNearbyEntities(v, v1, v2);
-    }
-
-    @Override
-    public int getEntityId() {
-        return getBukkitPlayer().getEntityId();
-    }
-
-    @Override
-    public int getFireTicks() {
-        return getBukkitPlayer().getFireTicks();
-    }
-
-    @Override
-    public int getMaxFireTicks() {
-        return getBukkitPlayer().getMaxFireTicks();
-    }
-
-    @Override
-    public void setFireTicks(int i) {
-        getBukkitPlayer().setFireTicks(i);
-    }
-
-    @Override
-    public boolean isDead() {
-        return getBukkitPlayer().isDead();
-    }
-
-    @Override
-    @Nonnull
-    public List<Entity> getPassengers() {
-        return getBukkitPlayer().getPassengers();
-    }
-
-    @Override
-    public boolean addPassenger(@Nonnull Entity entity) {
-        return getBukkitPlayer().addPassenger(entity);
-    }
-
-    @Override
-    public boolean removePassenger(@Nonnull Entity entity) {
-        return getBukkitPlayer().removePassenger(entity);
-    }
-
-    @Override
-    public boolean eject() {
-        return getBukkitPlayer().eject();
-    }
-
-    @Override
-    public float getFallDistance() {
-        return getBukkitPlayer().getFallDistance();
-    }
-
-    @Override
-    public void setFallDistance(float v) {
-        getBukkitPlayer().setFallDistance(v);
-    }
-
-    @Override
-    public void setLastDamageCause(@Nonnull EntityDamageEvent entityDamageEvent) {
-        getBukkitPlayer().setLastDamageCause(entityDamageEvent);
-    }
-
-    @Override
-    @Nullable
-    public EntityDamageEvent getLastDamageCause() {
-        return getBukkitPlayer().getLastDamageCause();
-    }
-
-    @Override
-    @Nonnull
-    public UUID getUniqueId() {
-        return getBukkitPlayer().getUniqueId();
-    }
-
-    @Override
-    public int getTicksLived() {
-        return getBukkitPlayer().getTicksLived();
-    }
-
-    @Override
-    public void setTicksLived(int i) {
-        getBukkitPlayer().setTicksLived(i);
-    }
-
-    @Override
-    public void playEffect(@Nonnull EntityEffect entityEffect) {
-        getBukkitPlayer().playEffect(entityEffect);
-    }
-
-    @Override
-    public boolean isInsideVehicle() {
-        return getBukkitPlayer().isInsideVehicle();
-    }
-
-    @Override
-    public boolean leaveVehicle() {
-        return getBukkitPlayer().leaveVehicle();
-    }
-
-    @Override
-    @Nullable
-    public Entity getVehicle() {
-        return getBukkitPlayer().getVehicle();
-    }
-
-    @Override
-    public void setCustomNameVisible(boolean b) {
-        getBukkitPlayer().setCustomNameVisible(b);
-    }
-
-    @Override
-    public boolean isCustomNameVisible() {
-        return getBukkitPlayer().isCustomNameVisible();
-    }
-
-    @Override
-    public void setGlowing(boolean b) {
-        getBukkitPlayer().setGlowing(b);
-    }
-
-    @Override
-    public void setGlowing(boolean b, @Nonnull TNLPlayer... players) {
-        boolean glowing = getEntityPlayer().glowing;
-        getEntityPlayer().glowing = b;
-        for (TNLPlayer all : players) {
-            sendPacket(new PacketPlayOutEntityMetadata(getEntityId(), getEntityPlayer().getDataWatcher(), true));
-        }
-        getEntityPlayer().glowing = glowing;
-    }
-
-    @Override
-    public boolean isGlowing() {
-        return getBukkitPlayer().isGlowing();
-    }
-
-    @Override
-    public void setInvulnerable(boolean b) {
-        getBukkitPlayer().setInvulnerable(b);
-    }
-
-    @Override
-    public boolean isInvulnerable() {
-        return getBukkitPlayer().isInvulnerable();
-    }
-
-    @Override
-    public boolean hasGravity() {
-        return getBukkitPlayer().hasGravity();
-    }
-
-    @Override
-    public void setGravity(boolean b) {
-        getBukkitPlayer().setGravity(b);
-    }
-
-    @Override
-    public int getPortalCooldown() {
-        return getBukkitPlayer().getPortalCooldown();
-    }
-
-    @Override
-    public void setPortalCooldown(int i) {
-        getBukkitPlayer().setPortalCooldown(i);
-    }
-
-    @Override
-    @Nonnull
-    public Set<String> getScoreboardTags() {
-        return getBukkitPlayer().getScoreboardTags();
-    }
-
-    @Override
-    public boolean addScoreboardTag(@Nonnull String s) {
-        return getBukkitPlayer().addScoreboardTag(s);
-    }
-
-    @Override
-    public boolean removeScoreboardTag(@Nonnull String s) {
-        return getBukkitPlayer().removeScoreboardTag(s);
-    }
-
-    @Override
-    @Nonnull
-    public PistonMoveReaction getPistonMoveReaction() {
-        return getBukkitPlayer().getPistonMoveReaction();
-    }
-
-    @Override
-    @Nonnull
-    public BlockFace getFacing() {
-        return getBukkitPlayer().getFacing();
-    }
-
-    @Override
-    @Nonnull
-    public Pose getPose() {
-        return getBukkitPlayer().getPose();
-    }
-
-    @Override
-    @Nonnull
-    public BackFlip backflip() {
-        return new BackFlip(this);
-    }
-
-    @Override
-    public double getEyeHeight() {
-        return getBukkitPlayer().getEyeHeight();
-    }
-
-    @Override
-    public double getEyeHeight(boolean b) {
-        return getBukkitPlayer().getEyeHeight(b);
-    }
-
-    @Override
-    @Nonnull
-    public Location getEyeLocation() {
-        return getBukkitPlayer().getEyeLocation();
-    }
-
-    @Override
-    @Nonnull
-    public List<Block> getLineOfSight(@Nonnull Set<Material> set, int i) {
-        return getBukkitPlayer().getLineOfSight(set, i);
-    }
-
-    @Override
-    @Nonnull
-    public Block getTargetBlock(@Nonnull Set<Material> set, int i) {
-        return getBukkitPlayer().getTargetBlock(set, i);
-    }
-
-    @Override
-    @Nonnull
-    public List<Block> getLastTwoTargetBlocks(@Nonnull Set<Material> set, int i) {
-        return getBukkitPlayer().getLastTwoTargetBlocks(set, i);
-    }
-
-    @Override
-    @Nullable
-    public Block getTargetBlockExact(int i) {
-        return getBukkitPlayer().getTargetBlockExact(i);
-    }
-
-    @Override
-    @Nullable
-    public Block getTargetBlockExact(int i, @Nonnull FluidCollisionMode fluidCollisionMode) {
-        return getBukkitPlayer().getTargetBlockExact(i, fluidCollisionMode);
-    }
-
-    @Override
-    @Nullable
-    public RayTraceResult rayTraceBlocks(double v) {
-        return getBukkitPlayer().rayTraceBlocks(v);
-    }
-
-    @Override
-    @Nullable
-    public RayTraceResult rayTraceBlocks(double v, @Nonnull FluidCollisionMode fluidCollisionMode) {
-        return getBukkitPlayer().rayTraceBlocks(v, fluidCollisionMode);
-    }
-
-    @Override
-    public int getRemainingAir() {
-        return getBukkitPlayer().getRemainingAir();
-    }
-
-    @Override
-    public void setRemainingAir(int i) {
-        getBukkitPlayer().setRemainingAir(i);
-    }
-
-    @Override
-    public int getMaximumAir() {
-        return getBukkitPlayer().getMaximumAir();
-    }
-
-    @Override
-    public void setMaximumAir(int i) {
-        getBukkitPlayer().setMaximumNoDamageTicks(i);
-    }
-
-    @Override
-    public int getMaximumNoDamageTicks() {
-        return getBukkitPlayer().getMaximumNoDamageTicks();
-    }
-
-    @Override
-    public void setMaximumNoDamageTicks(int i) {
-        getBukkitPlayer().setMaximumNoDamageTicks(i);
-    }
-
-    @Override
-    public double getLastDamage() {
-        return getBukkitPlayer().getLastDamage();
-    }
-
-    @Override
-    public void setLastDamage(double v) {
-        getBukkitPlayer().setLastDamage(v);
-    }
-
-    @Override
-    public int getNoDamageTicks() {
-        return getBukkitPlayer().getNoDamageTicks();
-    }
-
-    @Override
-    public void setNoDamageTicks(int i) {
-        getBukkitPlayer().setNoDamageTicks(i);
-    }
-
-    @Override
-    @Nullable
-    public TNLPlayer getKiller() {
-        if (getBukkitPlayer().getKiller() != null) {
-            return TNLPlayer.cast(getBukkitPlayer().getKiller());
-        }
-        return null;
-    }
-
-    @Override
-    public boolean addPotionEffect(@Nonnull PotionEffect potionEffect) {
-        return getBukkitPlayer().addPotionEffect(potionEffect);
-    }
-
-    @Override
-    public boolean addPotionEffects(@Nonnull Collection<PotionEffect> collection) {
-        return getBukkitPlayer().addPotionEffects(collection);
-    }
-
-    @Override
-    public boolean hasPotionEffect(@Nonnull PotionEffectType potionEffectType) {
-        return getBukkitPlayer().hasPotionEffect(potionEffectType);
-    }
-
-    @Override
-    @Nullable
-    public PotionEffect getPotionEffect(@Nonnull PotionEffectType potionEffectType) {
-        return getBukkitPlayer().getPotionEffect(potionEffectType);
-    }
-
-    @Override
-    public void removePotionEffect(@Nonnull PotionEffectType potionEffectType) {
-        getBukkitPlayer().removePotionEffect(potionEffectType);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<PotionEffect> getActivePotionEffects() {
-        return getBukkitPlayer().getActivePotionEffects();
-    }
-
-    @Override
-    public boolean hasLineOfSight(@Nonnull Entity entity) {
-        return getBukkitPlayer().hasLineOfSight(entity);
-    }
-
-    @Override
-    public boolean getRemoveWhenFarAway() {
-        return getBukkitPlayer().getRemoveWhenFarAway();
-    }
-
-    @Override
-    public void setRemoveWhenFarAway(boolean b) {
-        getBukkitPlayer().setRemoveWhenFarAway(b);
-    }
-
-    @Override
-    @Nullable
-    public EntityEquipment getEquipment() {
-        return getBukkitPlayer().getEquipment();
-    }
-
-    @Override
-    public void setCanPickupItems(boolean b) {
-        getBukkitPlayer().setCanPickupItems(b);
-    }
-
-    @Override
-    public boolean getCanPickupItems() {
-        return getBukkitPlayer().getCanPickupItems();
-    }
-
-    @Override
-    public boolean isLeashed() {
-        return getBukkitPlayer().isLeashed();
-    }
-
-    @Override
-    @Nullable
-    public Entity getLeashHolder() throws IllegalStateException {
-        return getBukkitPlayer().getLeashHolder();
-    }
-
-    @Override
-    public boolean setLeashHolder(@Nonnull Entity entity) {
-        return getBukkitPlayer().setLeashHolder(entity);
-    }
-
-    @Override
-    public boolean isGliding() {
-        return getBukkitPlayer().isGliding();
-    }
-
-    @Override
-    public void setGliding(boolean b) {
-        getBukkitPlayer().setGliding(b);
-    }
-
-    @Override
-    public boolean isSwimming() {
-        return getBukkitPlayer().isSwimming();
-    }
-
-    @Override
-    public void setSwimming(boolean b) {
-        getBukkitPlayer().setSwimming(b);
-    }
-
-    @Override
-    public boolean isRiptiding() {
-        return getBukkitPlayer().isRiptiding();
-    }
-
-    @Override
-    public boolean isSleeping() {
-        return getBukkitPlayer().isSleeping();
-    }
-
-    @Override
-    public void attack(@Nonnull Entity entity) {
-        getBukkitPlayer().attack(entity);
-    }
-
-    @Override
-    public void swingMainHand() {
-        getBukkitPlayer().swingMainHand();
-    }
-
-    @Override
-    public void swingOffHand() {
-        getBukkitPlayer().swingOffHand();
-    }
-
-    @Override
-    public void setCollidable(boolean b) {
-        getBukkitPlayer().setCollidable(b);
-    }
-
-    @Override
-    public boolean isCollidable() {
-        return getBukkitPlayer().isCollidable();
-    }
-
-    @Override
-    @Nullable
-    public <T> T getMemory(@Nonnull MemoryKey<T> memoryKey) {
-        return getBukkitPlayer().getMemory(memoryKey);
-    }
-
-    @Override
-    @Nullable
-    public <T> void setMemory(@Nonnull MemoryKey<T> memoryKey, @Nonnull T t) {
-        getBukkitPlayer().setMemory(memoryKey, t);
-    }
-
-    @Override
-    @Nullable
-    public AttributeInstance getAttribute(@Nonnull Attribute attribute) {
-        return getBukkitPlayer().getAttribute(attribute);
-    }
-
-    @Override
-    public void damage(double v) {
-        getBukkitPlayer().damage(v);
-    }
-
-    @Override
-    public void damage(double v, @Nullable Entity entity) {
-        getBukkitPlayer().damage(v, entity);
-    }
-
-    @Override
-    public double getHealth() {
-        return getBukkitPlayer().getHealth();
-    }
-
-    @Override
-    public void setHealth(double v) {
-        getBukkitPlayer().setHealth(v);
-    }
-
-    @Override
-    public double getAbsorptionAmount() {
-        return getBukkitPlayer().getAbsorptionAmount();
-    }
-
-    @Override
-    public void setAbsorptionAmount(double v) {
-        getBukkitPlayer().setAbsorptionAmount(v);
-    }
-
-    @Override
-    @Nullable
-    public String getCustomName() {
-        return getBukkitPlayer().getCustomName();
-    }
-
-    @Override
-    public void setCustomName(@Nonnull String s) {
-        getBukkitPlayer().setCustomName(s);
-    }
-
-    @Override
-    public void setMetadata(@Nonnull String s, @Nonnull MetadataValue metadataValue) {
-        getBukkitPlayer().setMetadata(s, metadataValue);
-    }
-
-    @Override
-    @Nonnull
-    public List<MetadataValue> getMetadata(@Nonnull String s) {
-        return getBukkitPlayer().getMetadata(s);
-    }
-
-    @Override
-    public boolean hasMetadata(@Nonnull String s) {
-        return getBukkitPlayer().hasMetadata(s);
-    }
-
-    @Override
-    public void removeMetadata(@Nonnull String s, @Nonnull Plugin plugin) {
-        getBukkitPlayer().removeMetadata(s, plugin);
-    }
-
-    @Override
-    public void sendPluginMessage(@Nonnull Plugin plugin, @Nonnull String s, byte[] bytes) {
-        getBukkitPlayer().sendPluginMessage(plugin, s, bytes);
-    }
-
-    @Override
-    @Nonnull
-    public Set<String> getListeningPluginChannels() {
-        return getBukkitPlayer().getListeningPluginChannels();
-    }
-
-    @Override
-    public String toString() {
-        return "TNLPlayer{" +
-                "bukkitPlayer=" + bukkitPlayer +
-                ", optionScoreboard=" + optionScoreboard +
-                ", optionTeam=" + optionTeam +
-                ", virtualStorage=" + virtualStorage +
-                ", permissionManager=" + permissionManager +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TNLPlayer player = (TNLPlayer) o;
-        return bukkitPlayer.equals(player.bukkitPlayer) && optionScoreboard.equals(player.optionScoreboard) && optionTeam.equals(player.optionTeam) && virtualStorage.equals(player.virtualStorage) && permissionManager.equals(player.permissionManager);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(bukkitPlayer, optionScoreboard, optionTeam, virtualStorage, permissionManager);
-    }
+    InetSocketAddress getAddress();
+
+    int getPing();
+
+    boolean isOnline();
+
+    boolean isBanned();
+
+    boolean isWhitelisted();
+
+    void setWhitelisted(boolean whitelisted);
+
+    long getFirstPlayed();
+
+    boolean hasPlayedBefore();
+
+    void sendPacket(@Nonnull Packet packet);
+
+    void sendPackets(@Nonnull Packet... packets);
+
+    double getMaxHealth();
+
+    void sendMessage(@Nonnull ChatComponent component);
+
+    void sendMessage(@Nonnull ChatComponent component, @Nonnull Placeholder... placeholders);
+
+    void sendMessage(@Nonnull String message, @Nonnull Placeholder... placeholders);
+
+    void sendMessage(@Nonnull MessageKey messageKey, @Nonnull Placeholder... placeholders);
+
+    void disconnect();
+
+    void disconnect(@Nonnull MessageKey messageKey, @Nonnull Placeholder... placeholders);
+
+    void disconnect(@Nonnull MessageKey messageKey, @Nonnull String append, @Nonnull Placeholder... placeholders);
+
+    void disconnect(@Nonnull String kickMessage);
+
+    void setNameTagVisibility(@Nonnull EnumNameTagVisibility visibility);
+
+    void setCollision(@Nonnull EnumTeamPush collision);
+
+    boolean setWindowProperty(@Nonnull InventoryView.Property property, int i);
+
+    void openInventory(@Nonnull InventoryView inventoryView);
+
+    void closeInventory();
+
+    void setItemOnCursor(@Nonnull ItemStack itemStack);
+
+    int getCooldown(@Nonnull Material material);
+
+    void setCooldown(@Nonnull Material material, int i);
+
+    int getSleepTicks();
+
+    void setDisplayName(@Nonnull String s);
+
+    void setBedSpawnLocation(@Nonnull Location location);
+
+    void setBedSpawnLocation(@Nonnull Location location, boolean b);
+
+    boolean sleep(@Nonnull Location location, boolean b);
+
+    void wakeup(boolean b);
+
+    void setGameMode(@Nonnull GameMode gameMode);
+
+    boolean isBlocking();
+
+    boolean isHandRaised();
+
+    int getExpToLevel();
+
+    float getAttackCooldown();
+
+    void saveInventory(@Nonnull String id);
+
+    void hideTabListName(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility>[] players);
+
+    void disguise(@Nonnull EntityLiving entity, @Nonnull List<TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility>> receivers);
+
+    void disguise(@Nonnull EntityLiving entity, @Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility> receiver);
+
+    void disguise(@Nonnull EntityLiving entity);
+
+    void sendBossBar(@Nonnull BossBar bossBar);
+
+    void updateBossBar(@Nonnull BossBar bossBar);
+
+    void hideBossBar(@Nonnull BossBar bossBar);
+
+    void sendBossBar(@Nonnull BossBar bossBar, long millis);
+
+    void sendTitle(@Nonnull Title title);
+
+    void sendTitle(@Nonnull Title.Animation animation);
+
+    void sendActionBar(@Nonnull ActionBar actionBar);
+
+    void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server);
+
+    void loadInventory(@Nonnull String id);
+
+    void mkdirInventories();
+
+    void setPlayerListName(@Nonnull String s);
+
+    void setPlayerListHeader(@Nonnull String s);
+
+    void setPlayerListFooter(@Nonnull String s);
+
+    void setPlayerListHeaderFooter(@Nonnull String s, @Nonnull String s1);
+
+    void setCompassTarget(@Nonnull Location location);
+
+    void chat(@Nonnull String s);
+
+    boolean performCommand(@Nonnull String s);
+
+    boolean isSneaking();
+
+    void setSneaking(boolean b);
+
+    boolean isSprinting();
+
+    void setSprinting(boolean b);
+
+    void saveData();
+
+    void loadData();
+
+    void setSleepingIgnored(boolean b);
+
+    boolean isSleepingIgnored();
+
+    void sendMap(@Nonnull MapView mapView);
+
+    void updateInventory();
+
+    void setPlayerTime(long l, boolean b);
+
+    long getPlayerTime();
+
+    long getPlayerTimeOffset();
+
+    boolean isPlayerTimeRelative();
+
+    void resetPlayerTime();
+
+    void setPlayerWeather(@Nonnull WeatherType weatherType);
+
+    void resetPlayerWeather();
+
+    void giveExp(int i);
+
+    void giveExpLevels(int i);
+
+    float getExp();
+
+    void setExp(float v);
+
+    int getLevel();
+
+    void setLevel(int i);
+
+    int getTotalExperience();
+
+    void setTotalExperience(int i);
+
+    void sendExperienceChange(float v);
+
+    void sendExperienceChange(float v, int i);
+
+    float getExhaustion();
+
+    void setExhaustion(float v);
+
+    float getSaturation();
+
+    void setSaturation(float v);
+
+    int getFoodLevel();
+
+    void setFoodLevel(int i);
+
+    boolean getAllowFlight();
+
+    void setAllowFlight(boolean b);
+
+    void setArrowCount(int arrows);
+
+    void hidePlayer(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility> player);
+
+    void showPlayer(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility> player);
+
+    boolean isFlying();
+
+    void setFlying(boolean b);
+
+    void setFlySpeed(float v) throws IllegalArgumentException;
+
+    void setWalkSpeed(float v) throws IllegalArgumentException;
+
+    float getFlySpeed();
+
+    float getWalkSpeed();
+
+    void setResourcePack(@Nonnull String s, byte[] bytes);
+
+    double getHealthScale();
+
+    void setSpectatorTarget(@Nonnull Entity entity);
+
+    void resetTitle();
+
+    int getClientViewDistance();
+
+    void updateCommands();
+
+    void openBook(@Nonnull ItemStack itemStack);
+
+    void setVelocity(@Nonnull Vector vector);
+
+    double getHeight();
+
+    double getWidth();
+
+    boolean isOnGround();
+
+    void setRotation(float v, float v1);
+
+    boolean teleport(@Nonnull Location location);
+
+    boolean teleport(@Nonnull Location location, @Nonnull PlayerTeleportEvent.TeleportCause teleportCause);
+
+    boolean teleport(@Nonnull Entity entity);
+
+    boolean teleport(@Nonnull Entity entity, @Nonnull PlayerTeleportEvent.TeleportCause teleportCause);
+
+    int getEntityId();
+
+    int getFireTicks();
+
+    int getMaxFireTicks();
+
+    void setFireTicks(int i);
+
+    boolean isDead();
+
+    boolean addPassenger(@Nonnull Entity entity);
+
+    boolean removePassenger(@Nonnull Entity entity);
+
+    boolean eject();
+
+    float getFallDistance();
+
+    void setFallDistance(float v);
+
+    void setLastDamageCause(@Nonnull EntityDamageEvent entityDamageEvent);
+
+    int getTicksLived();
+
+    void setTicksLived(int i);
+
+    void playEffect(@Nonnull EntityEffect entityEffect);
+
+    boolean isInsideVehicle();
+
+    boolean leaveVehicle();
+
+    void setCustomNameVisible(boolean b);
+
+    boolean isCustomNameVisible();
+
+    void setGlowing(boolean b);
+
+    void setGlowing(boolean b, @Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility>... players);
+
+    boolean isGlowing();
+
+    void setInvulnerable(boolean b);
+
+    boolean isInvulnerable();
+
+    boolean hasGravity();
+
+    void setGravity(boolean b);
+
+    int getPortalCooldown();
+
+    void setPortalCooldown(int i);
+
+    boolean addScoreboardTag(@Nonnull String s);
+
+    boolean removeScoreboardTag(@Nonnull String s);
+
+    double getEyeHeight();
+
+    double getEyeHeight(boolean b);
+
+    int getRemainingAir();
+
+    void setRemainingAir(int i);
+
+    void setMaximumAir(int i);
+
+    int getMaximumAir();
+
+    int getMaximumNoDamageTicks();
+
+    void setMaximumNoDamageTicks(int i);
+
+    double getLastDamage();
+
+    void setLastDamage(double v);
+
+    int getNoDamageTicks();
+
+    void setNoDamageTicks(int i);
+
+    boolean addPotionEffect(@Nonnull PotionEffect potionEffect);
+
+    boolean addPotionEffects(@Nonnull Collection<PotionEffect> collection);
+
+    boolean hasPotionEffect(@Nonnull PotionEffectType potionEffectType);
+
+    void removePotionEffect(@Nonnull PotionEffectType potionEffectType);
+
+    boolean hasLineOfSight(@Nonnull Entity entity);
+
+    boolean getRemoveWhenFarAway();
+
+    void setRemoveWhenFarAway(boolean b);
+
+    void setCanPickupItems(boolean b);
+
+    boolean getCanPickupItems();
+
+    boolean isLeashed();
+
+    boolean setLeashHolder(@Nonnull Entity entity);
+
+    boolean isGliding();
+
+    void setGliding(boolean b);
+
+    boolean isSwimming();
+
+    void setSwimming(boolean b);
+
+    boolean isRiptiding();
+
+    boolean isSleeping();
+
+    void attack(@Nonnull Entity entity);
+
+    void swingMainHand();
+
+    void swingOffHand();
+
+    void setCollidable(boolean b);
+
+    boolean isCollidable();
+
+    void damage(double v);
+
+    void damage(double v, @Nullable Entity entity);
+
+    double getHealth();
+
+    void setHealth(double v);
+
+    double getAbsorptionAmount();
+
+    void setAbsorptionAmount(double v);
+
+    void setCustomName(@Nonnull String s);
+
+    void setMetadata(@Nonnull String s, @Nonnull MetadataValue metadataValue);
+
+    boolean hasMetadata(@Nonnull String s);
+
+    void removeMetadata(@Nonnull String s, @Nonnull Plugin plugin);
+
+    void sendPluginMessage(@Nonnull Plugin plugin, @Nonnull String s, byte[] bytes);
+
+    void uninject();
+
+    void inject();
 }

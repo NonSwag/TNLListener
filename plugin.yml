@@ -1,6 +1,6 @@
 name: TNLListener
 version: "2.4"
-main: net.nonswag.tnl.listener.TNLMain
+main: net.nonswag.tnl.listener.Loader
 author: NonSwag
 website: https://www.thenextlvl.net/
 api-version: "1.13"

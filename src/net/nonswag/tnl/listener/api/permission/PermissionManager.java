@@ -13,17 +13,17 @@ import java.util.List;
 public class PermissionManager implements Permissions, ServerOperator {
 
     @Nonnull
-    private final TNLPlayer player;
+    private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
     @Nonnull
     private final PermissionAttachment attachment;
 
-    public PermissionManager(@Nonnull TNLPlayer player) {
+    public PermissionManager(@Nonnull TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player) {
         this.player = player;
         this.attachment = player.getBukkitPlayer().addAttachment(Loader.getInstance());
     }
 
     @Nonnull
-    public TNLPlayer getPlayer() {
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
         return player;
     }
 

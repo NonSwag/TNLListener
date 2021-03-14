@@ -1,7 +1,8 @@
 package net.nonswag.tnl.listener.listeners;
 
+import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
-import net.nonswag.tnl.listener.eventhandler.PlayerBottleFillEvent;
+import net.nonswag.tnl.listener.events.PlayerBottleFillEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -13,7 +14,7 @@ public class InteractListener implements Listener {
 
     @EventHandler
     public void onWaterBottleFill(CauldronLevelChangeEvent event) {
-        TNLPlayer player = TNLPlayer.cast(event.getEntity());
+        TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player = TNLListener.getInstance().getPlayer(event.getEntity());
         if (event.getReason().equals(CauldronLevelChangeEvent.ChangeReason.BOTTLE_FILL) && player != null) {
             ItemStack itemStack = player.getInventory().getItemInMainHand();
             ItemStack itemStack1 = player.getInventory().getItemInOffHand();

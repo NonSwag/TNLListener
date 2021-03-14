@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.eventhandler;
+package net.nonswag.tnl.listener.events;
 
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.event.Event;
@@ -6,23 +6,23 @@ import org.bukkit.event.HandlerList;
 
 import java.util.Objects;
 
-public class InventoryLoadedEvent extends Event {
+public class InventorySafeEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
-    private final TNLPlayer player;
+    private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
     private final String inventoryId;
 
-    public InventoryLoadedEvent(boolean async, TNLPlayer player, String inventoryId) {
+    public InventorySafeEvent(boolean async, TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, String inventoryId) {
         super(async);
         this.player = player;
         this.inventoryId = inventoryId;
     }
 
-    public InventoryLoadedEvent(TNLPlayer player, String inventoryId) {
+    public InventorySafeEvent(TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, String inventoryId) {
         this(false, player, inventoryId);
     }
 
-    public TNLPlayer getPlayer() {
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
         return player;
     }
 
@@ -42,7 +42,7 @@ public class InventoryLoadedEvent extends Event {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InventoryLoadedEvent that = (InventoryLoadedEvent) o;
+        InventorySafeEvent that = (InventorySafeEvent) o;
         return Objects.equals(player, that.player) &&
                 Objects.equals(inventoryId, that.inventoryId);
     }

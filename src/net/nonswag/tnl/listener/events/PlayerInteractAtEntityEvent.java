@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.eventhandler;
+package net.nonswag.tnl.listener.events;
 
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
@@ -11,18 +11,19 @@ import java.util.Objects;
 
 public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
 
-    private static final HandlerList handlers = new HandlerList();
-    private final TNLPlayer player;
+    @Nonnull private static final HandlerList handlers = new HandlerList();
+    @Nonnull private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
     private final int entityId;
     private boolean cancelled = false;
 
-    public PlayerInteractAtEntityEvent(@Nonnull TNLPlayer player, int entityId) {
+    public PlayerInteractAtEntityEvent(@Nonnull TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, int entityId) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.entityId = entityId;
     }
 
-    public TNLPlayer getPlayer() {
+    @Nonnull
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
         return player;
     }
 

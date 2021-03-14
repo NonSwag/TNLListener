@@ -1,14 +1,16 @@
-package net.nonswag.tnl.listener.listeners;
+package net.nonswag.tnl.listener.listeners.v1_15_R1;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
+import net.nonswag.tnl.listener.api.object.Objects;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.settings.Settings;
-import net.nonswag.tnl.listener.eventhandler.*;
+import net.nonswag.tnl.listener.events.*;
 import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -22,29 +24,24 @@ import org.bukkit.event.Listener;
 public class PacketListener implements Listener {
 
     @EventHandler
-    public void onPacket(PlayerPacketEvent event) {
+    public void onPacket(PlayerPacketEvent<Packet<?>> event) {
         if (event.isIncoming()) {
-            if (event.getPacket() instanceof PacketPlayInChat) {
-                if (Settings.BETTER_CHAT.getValue()) {
-                    String message = ((PacketPlayInChat) event.getPacket()).b();
-                    if (message == null || message.length() <= 0 || message.replace(" ", "").equals("")) {
-                        event.setCancelled(true);
-                    } else {
-                        if (message.contains("§")) {
-                            message = message.replace("§", "?");
-                        }
-                        PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), message);
-                        Bukkit.getPluginManager().callEvent(chatEvent);
-                        event.setCancelled(chatEvent.isCancelled());
-                        if (!chatEvent.isCancelled() && !event.isCancelled()) {
-                            if (!chatEvent.isCommand()) {
-                                event.setCancelled(true);
-                                for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
-                                    if (chatEvent.getFormat() == null) {
-                                        all.sendMessage(MessageKey.CHAT_FORMAT, new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("message", message));
-                                    } else {
-                                        all.sendMessage(chatEvent.getFormat(), new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("message", message));
-                                    }
+            if (event.getPacket() instanceof PacketPlayInChat && Settings.BETTER_CHAT.getValue()) {
+                String message = Color.Minecraft.unColorize(Objects.getOrDefault(((PacketPlayInChat) event.getPacket()).b(), ""), '§');
+                if (message.length() <= 0 || Color.Minecraft.unColorize(message.replace(" ", ""), '&').isEmpty()) {
+                    event.setCancelled(true);
+                } else {
+                    PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), message);
+                    Bukkit.getPluginManager().callEvent(chatEvent);
+                    event.setCancelled(chatEvent.isCancelled());
+                    if (!chatEvent.isCancelled() && !event.isCancelled()) {
+                        if (!chatEvent.isCommand()) {
+                            event.setCancelled(true);
+                            for (TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> all : TNLListener.getInstance().getOnlinePlayers()) {
+                                if (chatEvent.getFormat() == null) {
+                                    all.sendMessage(MessageKey.CHAT_FORMAT, new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("message", message), new Placeholder("colored_message", Color.Minecraft.colorize(message, '&')), new Placeholder("text", Color.Minecraft.colorize(message, '&')));
+                                } else {
+                                    all.sendMessage(chatEvent.getFormat(), new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("message", message), new Placeholder("colored_message", Color.Minecraft.colorize(message, '&')));
                                 }
                             }
                         }
@@ -52,10 +49,10 @@ public class PacketListener implements Listener {
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseEntity) {
                 if (!event.isCancelled()) {
-                    Entity entity = ((PacketPlayInUseEntity) event.getPacket()).a(event.getPlayer().getWorldServer());
+                    Entity entity = ((PacketPlayInUseEntity) event.getPacket()).a((World) event.getPlayer().getWorldServer());
                     if (entity != null) {
                         if (((PacketPlayInUseEntity) event.getPacket()).b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)) {
-                            EntityDamageByPlayerEvent damageEvent = new EntityDamageByPlayerEvent(event.getPlayer(), entity);
+                            EntityDamageByPlayerEvent<Entity> damageEvent = new EntityDamageByPlayerEvent<>(event.getPlayer(), entity);
                             Bukkit.getPluginManager().callEvent(damageEvent);
                             if (damageEvent.isCancelled()) {
                                 event.setCancelled(true);
@@ -88,7 +85,7 @@ public class PacketListener implements Listener {
                     itemStack = event.getPlayer().getInventory().getItemInOffHand();
                 }
                 if (itemStack != null && itemStack.getType().equals(Material.GLASS_BOTTLE)) {
-                    Block target = event.getPlayer().getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
+                    Block target = event.getPlayer().getBukkitPlayer().getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
                     if (!(target != null && (target.getType().equals(Material.WATER)
                             || (target.getBlockData() instanceof Waterlogged
                             && ((Waterlogged) target.getBlockData()).isWaterlogged())
@@ -125,7 +122,7 @@ public class PacketListener implements Listener {
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
                 BlockPosition position = ((PacketPlayInUseItem) event.getPacket()).c().getBlockPosition();
-                org.bukkit.block.Block block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
+                Block block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
                 final EnumDirection direction = ((PacketPlayInUseItem) event.getPacket()).c().getDirection();
                 try {
                     block = block.getRelative(BlockFace.valueOf(direction.name()));
@@ -145,7 +142,7 @@ public class PacketListener implements Listener {
                         interactEvent.getBlock().getState().update();
                         for (BlockFace blockFace : BlockFace.values()) {
                             Block b = interactEvent.getBlock().getRelative(blockFace).getLocation().getBlock();
-                            event.getPlayer().sendBlockChange(b.getLocation(), b.getBlockData());
+                            event.getPlayer().getBukkitPlayer().sendBlockChange(b.getLocation(), b.getBlockData());
                         }
                         interactEvent.getPlayer().updateInventory();
                     });
@@ -153,22 +150,22 @@ public class PacketListener implements Listener {
             }
         } else if (event.isOutgoing()) {
             if (event.getPacket() instanceof PacketPlayOutSpawnEntity) {
-                Object k = event.getPacketField("k");
-                if (k != null) {
+                Objects<EntityTypes<?>> k = ((Objects<EntityTypes<?>>) event.getPacketField("k"));
+                if (k.hasValue()) {
                     if (Settings.BETTER_TNT.getValue()) {
-                        if (k.equals(EntityTypes.TNT)) {
+                        if (k.nonnull().equals(EntityTypes.TNT)) {
                             event.setCancelled(true);
                         }
                     }
                     if (Settings.BETTER_FALLING_BLOCKS.getValue()) {
-                        if (k.equals(EntityTypes.FALLING_BLOCK)) {
+                        if (k.nonnull().equals(EntityTypes.FALLING_BLOCK)) {
                             event.setCancelled(true);
                         }
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayOutChat) {
-                Object a = event.getPacketField("a");
-                if (a != null) {
+                Objects<ChatComponentText> a = (Objects<ChatComponentText>) event.getPacketField("a");
+                if (a.hasValue()) {
                     TextComponent textComponent = new TextComponent(a.toString());
                     if (Settings.BETTER_PERMISSIONS.getValue()) {
                         if (textComponent.getText().equalsIgnoreCase("TextComponent{text='', " +

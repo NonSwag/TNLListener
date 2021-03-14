@@ -102,4 +102,56 @@ public enum Color {
         }
         return string;
     }
+
+    public enum Minecraft {
+        BLACK('0'),
+        DARK_BLUE('1'),
+        DARK_GREEN('2'),
+        DARK_AQUA('3'),
+        DARK_RED('4'),
+        DARK_PURPLE('5'),
+        GOLD('6'),
+        GRAY('7'),
+        DARK_GRAY('8'),
+        BLUE('9'),
+        GREEN('a'),
+        AQUA('b'),
+        RED('c'),
+        LIGHT_PURPLE('d'),
+        YELLOW('e'),
+        WHITE('f'),
+        MATRIX('k'),
+        BOLD('l'),
+        STRIKETHROUGH('m'),
+        UNDERLINE('n'),
+        ITALIC('o'),
+        RESET('r'),
+        ;
+
+        private final char identifier;
+
+        Minecraft(char identifier) {
+            this.identifier = identifier;
+        }
+
+        public char getIdentifier() {
+            return identifier;
+        }
+
+        @Nonnull
+        public static String unColorize(@Nonnull String string, char prefix) {
+            for (Minecraft minecraft : Minecraft.values()) {
+                string = string.replace(String.valueOf(prefix) + minecraft.getIdentifier(), "");
+            }
+            return string;
+        }
+
+        @Nonnull
+        public static String colorize(@Nonnull String string, char prefix) {
+            for (Minecraft minecraft : Minecraft.values()) {
+                string = string.replace(String.valueOf(prefix) + minecraft.getIdentifier(), "§" + minecraft.getIdentifier());
+            }
+            return string;
+        }
+    }
 }

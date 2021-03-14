@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.eventhandler;
+package net.nonswag.tnl.listener.events;
 
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Bukkit;
@@ -8,17 +8,19 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class PlayerBottleFillEvent extends Event implements Cancellable {
 
-    private static final HandlerList handlers = new HandlerList();
-    private final TNLPlayer player;
-    private ItemStack itemStack;
-    private Block block;
+    @Nonnull private static final HandlerList handlers = new HandlerList();
+    @Nonnull private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
+    @Nullable private ItemStack itemStack;
+    @Nullable private Block block;
     private boolean cancelled;
 
-    public PlayerBottleFillEvent(TNLPlayer player, ItemStack itemStack, Block block) {
+    public PlayerBottleFillEvent(TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, @Nullable ItemStack itemStack, @Nullable Block block) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.cancelled = false;
@@ -26,17 +28,28 @@ public class PlayerBottleFillEvent extends Event implements Cancellable {
         this.block = block;
     }
 
-    public ItemStack getItemStack() { return itemStack; }
+    @Nullable
+    public ItemStack getItemStack() {
+        return itemStack;
+    }
 
-    public TNLPlayer getPlayer() {
+    @Nonnull
+    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
         return player;
     }
 
-    public void setItemStack(ItemStack itemStack) { this.itemStack = itemStack; }
+    public void setItemStack(@Nullable ItemStack itemStack) {
+        this.itemStack = itemStack;
+    }
 
-    public void setBlock(Block block) { this.block = block; }
+    public void setBlock(@Nullable Block block) {
+        this.block = block;
+    }
 
-    public Block getBlock() { return block; }
+    @Nullable
+    public Block getBlock() {
+        return block;
+    }
 
     @Override
     public HandlerList getHandlers() { return handlers; }
@@ -64,7 +77,7 @@ public class PlayerBottleFillEvent extends Event implements Cancellable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PlayerBottleFillEvent that = (PlayerBottleFillEvent) o;
-        return cancelled == that.cancelled && player.equals(that.player) && itemStack.equals(that.itemStack) && block.equals(that.block);
+        return cancelled == that.cancelled && player.equals(that.player) && Objects.equals(itemStack, that.itemStack) && Objects.equals(block, that.block);
     }
 
     @Override

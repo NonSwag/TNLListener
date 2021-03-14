@@ -1,5 +1,6 @@
-package net.nonswag.tnl.listener.listeners;
+package net.nonswag.tnl.listener.listeners.v1_15_R1;
 
+import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.message.Message;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
@@ -15,7 +16,7 @@ public class CommandListener implements Listener {
 
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent event) {
-        TNLPlayer player = TNLPlayer.cast(event.getPlayer());
+        TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player = TNLListener.getInstance().getPlayer(event.getPlayer());
         String command = event.getMessage().split(" ")[0];
         switch (command.toLowerCase()) {
             case "/reload":
