@@ -2,6 +2,8 @@ package net.nonswag.tnl.listener.api.message;
 
 import net.nonswag.tnl.listener.api.file.JsonConfig;
 import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.events.MessagesInitializeEvent;
+import org.bukkit.Bukkit;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -85,7 +87,21 @@ public abstract class Message {
     @Nonnull
     public static final ChatComponent NOT_A_PLAYER_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.NOT_A_PLAYER), "§4%prefix%§4 %player%§c ist kein spieler");
 
-    static {
+    protected Message() {
+    }
+
+    @Nullable
+    public static ChatComponent valueOf(@Nonnull LanguageKey languageKey) {
+        for (ChatComponent message : ChatComponent.getMessages()) {
+            if (message.getLanguageKey().equals(languageKey)) {
+                return message;
+            }
+        }
+        return null;
+    }
+
+    public static void init() {
+        Bukkit.getPluginManager().callEvent(new MessagesInitializeEvent());
         for (Language language : Language.values()) {
             JsonConfig jsonConfig = new JsonConfig("plugins/TNLListener/Messages/", language.getFile());
             for (MessageKey key : MessageKey.getKeys()) {
@@ -139,21 +155,5 @@ public abstract class Message {
             }
             jsonConfig.save();
         }
-    }
-
-    protected Message() {
-    }
-
-    @Nullable
-    public static ChatComponent valueOf(@Nonnull LanguageKey languageKey) {
-        for (ChatComponent message : ChatComponent.getMessages()) {
-            if (message.getLanguageKey().equals(languageKey)) {
-                return message;
-            }
-        }
-        return null;
-    }
-
-    public static void init() {
     }
 }

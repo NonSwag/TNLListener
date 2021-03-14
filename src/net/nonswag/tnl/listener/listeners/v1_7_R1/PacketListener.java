@@ -42,6 +42,16 @@ public class PacketListener implements Listener {
                         }
                     }
                 }
+            } else if (event.getPacket() instanceof PacketPlayInTabComplete) {
+                if (((PacketPlayInTabComplete) event.getPacket()).c().startsWith("/")) {
+                    if (!Settings.TAB_COMPLETER.getValue() && !event.getPlayer().getPermissionManager().hasPermission(Settings.TAB_COMPLETE_BYPASS_PERMISSION.getValue())) {
+                        event.setCancelled(true);
+                    }
+                } else {
+                    if (!Settings.CHAT_COMPLETER.getValue() && !event.getPlayer().getPermissionManager().hasPermission(Settings.TAB_COMPLETE_BYPASS_PERMISSION.getValue())) {
+                        event.setCancelled(true);
+                    }
+                }
             } else if (event.getPacket() instanceof PacketPlayInUseEntity) {
                 if (!event.isCancelled()) {
                     Entity entity = ((PacketPlayInUseEntity) event.getPacket()).a((World) event.getPlayer().getWorldServer());

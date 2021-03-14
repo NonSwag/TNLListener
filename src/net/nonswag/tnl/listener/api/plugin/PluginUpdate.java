@@ -1,6 +1,7 @@
-package net.nonswag.tnl.listener.utils;
+package net.nonswag.tnl.listener.api.plugin;
 
 import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.utils.FileDownloader;
 import org.bukkit.plugin.Plugin;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

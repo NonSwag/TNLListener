@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import net.nonswag.tnl.listener.api.file.JsonConfig;
 import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.events.MessagesInitializeEvent;
+import org.bukkit.Bukkit;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -50,7 +52,13 @@ public abstract class Settings {
     protected Settings() {
     }
 
-    static {
+    @Nonnull
+    public static JsonConfig getConfig() {
+        return config;
+    }
+
+    public static void init() {
+        Bukkit.getPluginManager().callEvent(new MessagesInitializeEvent());
         SERVERS.getValue().add("example-1");
         SERVERS.getValue().add("example-2");
         SERVERS.getValue().add("example-3");
@@ -116,13 +124,5 @@ public abstract class Settings {
             }
         }
         getConfig().save();
-    }
-
-    @Nonnull
-    public static JsonConfig getConfig() {
-        return config;
-    }
-
-    public static void init() {
     }
 }

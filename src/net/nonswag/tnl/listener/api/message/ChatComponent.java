@@ -20,7 +20,9 @@ public class ChatComponent {
     public ChatComponent(@Nonnull LanguageKey languageKey, @Nonnull String text) {
         this.languageKey = languageKey;
         setText(text);
-        getMessages().add(this);
+        if (!getMessages().contains(this)) {
+            getMessages().add(this);
+        }
     }
 
     @Nonnull

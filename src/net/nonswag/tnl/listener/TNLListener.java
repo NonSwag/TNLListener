@@ -12,7 +12,7 @@ import net.nonswag.tnl.listener.listeners.InteractListener;
 import net.nonswag.tnl.listener.listeners.JoinListener;
 import net.nonswag.tnl.listener.listeners.KickListener;
 import net.nonswag.tnl.listener.listeners.QuitListener;
-import net.nonswag.tnl.listener.utils.PluginUpdate;
+import net.nonswag.tnl.listener.api.plugin.PluginUpdate;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -81,7 +81,9 @@ public class TNLListener {
             Settings.getConfig().save();
         }, "server-loader").start();
         Bukkit.getMessenger().registerOutgoingPluginChannel(Loader.getInstance(), "BungeeCord");
-        new PluginUpdate(Loader.getInstance()).downloadUpdate();
+        if (Settings.AUTO_UPDATER.getValue()) {
+            new PluginUpdate(Loader.getInstance()).downloadUpdate();
+        }
         try {
             if (getVersion().equals(ServerVersion.v1_15_2)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15_R1.PacketListener());

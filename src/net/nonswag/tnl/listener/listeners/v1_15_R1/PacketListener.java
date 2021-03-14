@@ -77,6 +77,16 @@ public class PacketListener implements Listener {
                     Bukkit.getPluginManager().callEvent(blockEvent);
                     event.setCancelled(blockEvent.isCancelled());
                 }
+            } else if (event.getPacket() instanceof PacketPlayInTabComplete) {
+                if (((PacketPlayInTabComplete) event.getPacket()).c().startsWith("/")) {
+                    if (!Settings.TAB_COMPLETER.getValue() && !event.getPlayer().getPermissionManager().hasPermission(Settings.TAB_COMPLETE_BYPASS_PERMISSION.getValue())) {
+                        event.setCancelled(true);
+                    }
+                } else {
+                    if (!Settings.CHAT_COMPLETER.getValue() && !event.getPlayer().getPermissionManager().hasPermission(Settings.TAB_COMPLETE_BYPASS_PERMISSION.getValue())) {
+                        event.setCancelled(true);
+                    }
+                }
             } else if (event.getPacket() instanceof PacketPlayInBlockPlace) {
                 org.bukkit.inventory.ItemStack itemStack = null;
                 if (((PacketPlayInBlockPlace) event.getPacket()).b().equals(EnumHand.MAIN_HAND)) {
