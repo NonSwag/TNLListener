@@ -19,6 +19,8 @@ public abstract class Settings {
     @Nonnull
     public static final Setting<Boolean> DEBUG = new Setting<>("debug", true);
     @Nonnull
+    public static final Setting<Boolean> DELETE_OLD_LOGS = new Setting<>("delete-old-logs", true);
+    @Nonnull
     public static final Setting<Boolean> BETTER_PERMISSIONS = new Setting<>("better-permissions", true);
     @Nonnull
     public static final Setting<Boolean> BETTER_COMMANDS = new Setting<>("better-commands", true);

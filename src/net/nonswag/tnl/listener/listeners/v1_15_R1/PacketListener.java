@@ -10,6 +10,7 @@ import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Objects;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.settings.Settings;
+import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.events.*;
 import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
@@ -23,7 +24,7 @@ import org.bukkit.event.Listener;
 
 public class PacketListener implements Listener {
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPacket(PlayerPacketEvent<Packet<?>> event) {
         if (event.isIncoming()) {
             if (event.getPacket() instanceof PacketPlayInChat && Settings.BETTER_CHAT.getValue()) {
@@ -34,7 +35,7 @@ public class PacketListener implements Listener {
                     PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), message);
                     Bukkit.getPluginManager().callEvent(chatEvent);
                     event.setCancelled(chatEvent.isCancelled());
-                    if (!chatEvent.isCancelled() && !event.isCancelled()) {
+                    if (!chatEvent.isCancelled()) {
                         if (!chatEvent.isCommand()) {
                             event.setCancelled(true);
                             for (TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> all : TNLListener.getInstance().getOnlinePlayers()) {
@@ -48,22 +49,21 @@ public class PacketListener implements Listener {
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseEntity) {
-                if (!event.isCancelled()) {
-                    Entity entity = ((PacketPlayInUseEntity) event.getPacket()).a((World) event.getPlayer().getWorldServer());
-                    if (entity != null) {
-                        if (((PacketPlayInUseEntity) event.getPacket()).b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)) {
-                            EntityDamageByPlayerEvent<Entity> damageEvent = new EntityDamageByPlayerEvent<>(event.getPlayer(), entity);
-                            Bukkit.getPluginManager().callEvent(damageEvent);
-                            if (damageEvent.isCancelled()) {
-                                event.setCancelled(true);
-                            }
-                        }
-                    } else {
-                        PlayerInteractAtEntityEvent interactEvent = new PlayerInteractAtEntityEvent(event.getPlayer(), ((PacketPlayInUseEntity) event.getPacket()).getEntityId());
-                        Bukkit.getPluginManager().callEvent(interactEvent);
-                        if (interactEvent.isCancelled()) {
+
+                Entity entity = ((PacketPlayInUseEntity) event.getPacket()).a((World) event.getPlayer().getWorldServer());
+                if (entity != null) {
+                    if (((PacketPlayInUseEntity) event.getPacket()).b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)) {
+                        EntityDamageByPlayerEvent<Entity> damageEvent = new EntityDamageByPlayerEvent<>(event.getPlayer(), entity);
+                        Bukkit.getPluginManager().callEvent(damageEvent);
+                        if (damageEvent.isCancelled()) {
                             event.setCancelled(true);
                         }
+                    }
+                } else {
+                    PlayerInteractAtEntityEvent interactEvent = new PlayerInteractAtEntityEvent(event.getPlayer(), ((PacketPlayInUseEntity) event.getPacket()).getEntityId());
+                    Bukkit.getPluginManager().callEvent(interactEvent);
+                    if (interactEvent.isCancelled()) {
+                        event.setCancelled(true);
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInBlockDig) {
@@ -130,6 +130,19 @@ public class PacketListener implements Listener {
                         }
                     }
                 }
+            } else if (event.getPacket() instanceof PacketPlayInUpdateSign) {
+                if (TNLListener.getInstance().getSignHashMap().containsKey(event.getPlayer().getUniqueId())) {
+                    event.setCancelled(true);
+                    SignMenu signMenu = TNLListener.getInstance().getSignHashMap().get(event.getPlayer().getUniqueId());
+                    if (signMenu.getResponse().hasValue()) {
+                        boolean success = signMenu.getResponse().nonnull().test(event.getPlayer(), ((PacketPlayInUpdateSign) event.getPacket()).c());
+                        if (!success && signMenu.isReopenOnFail()) {
+                            Bukkit.getScheduler().runTaskLater(Loader.getInstance(), () -> event.getPlayer().openVirtualSignEditor(signMenu), 2);
+                        }
+                    }
+                    Bukkit.getScheduler().runTask(Loader.getInstance(), () -> TNLListener.getInstance().getSignHashMap().remove(event.getPlayer().getUniqueId()));
+                    event.getPlayer().getBukkitPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
+                }
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
                 BlockPosition position = ((PacketPlayInUseItem) event.getPacket()).c().getBlockPosition();
                 Block block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
@@ -172,6 +185,11 @@ public class PacketListener implements Listener {
                             event.setCancelled(true);
                         }
                     }
+                }
+            } else if (event.getPacket() instanceof PacketPlayOutEntityStatus) {
+                int id = ((Objects<Integer>) event.getPacketField("a")).getOrDefault(-1);
+                if (event.getPlayer().getEntityId() == id) {
+                    event.setPacketField("b", (byte) 28);
                 }
             } else if (event.getPacket() instanceof PacketPlayOutChat) {
                 Objects<ChatComponentText> a = (Objects<ChatComponentText>) event.getPacketField("a");

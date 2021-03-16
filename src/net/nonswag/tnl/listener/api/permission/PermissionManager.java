@@ -2,15 +2,15 @@ package net.nonswag.tnl.listener.api.permission;
 
 import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
+import net.nonswag.tnl.listener.api.reflection.Reflection;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.permissions.ServerOperator;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PermissionManager implements Permissions, ServerOperator {
+public class PermissionManager implements Permissions {
 
     @Nonnull
     private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
@@ -68,6 +68,34 @@ public class PermissionManager implements Permissions, ServerOperator {
             permissions.add(info.getPermission());
         }
         return permissions;
+    }
+
+    @Override
+    public void updatePermissions() {
+        Class<?> clazz = null;
+        if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_15_R1.NMSPlayer) {
+            try {
+                clazz = Reflection.getClass("net.minecraft.server.v1_15_R1.PacketPlayOutEntityStatus");
+            } catch (NoClassDefFoundError e) {
+                e.printStackTrace();
+            }
+        } else if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_7_R1.NMSPlayer) {
+            try {
+                clazz = Reflection.getClass("net.minecraft.server.v1_7_R1.PacketPlayOutEntityStatus");
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        }
+        if (clazz != null) {
+            try {
+                Object packet = clazz.newInstance();
+                Reflection.setField(packet, "a", getPlayer().getEntityId());
+                Reflection.setField(packet, "b", (byte) 28);
+                getPlayer().sendPacketObject(packet);
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

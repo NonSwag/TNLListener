@@ -77,6 +77,7 @@ public class PlayerPacketEvent<Packet> extends Event implements Cancellable {
     }
 
     public void failedToWrite() {
+        setCancelled(true);
         if (!getPacketFields().isEmpty()) {
             List<String> strings = new ArrayList<>();
             for (String field : getPacketFields()) {

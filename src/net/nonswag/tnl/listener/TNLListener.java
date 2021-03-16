@@ -5,14 +5,15 @@ import net.nonswag.tnl.listener.api.command.CommandManager;
 import net.nonswag.tnl.listener.api.event.EventManager;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
+import net.nonswag.tnl.listener.api.plugin.PluginUpdate;
 import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.api.settings.Settings;
+import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
 import net.nonswag.tnl.listener.listeners.InteractListener;
 import net.nonswag.tnl.listener.listeners.JoinListener;
 import net.nonswag.tnl.listener.listeners.KickListener;
 import net.nonswag.tnl.listener.listeners.QuitListener;
-import net.nonswag.tnl.listener.api.plugin.PluginUpdate;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -21,6 +22,7 @@ import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +37,8 @@ public class TNLListener {
     private final HashMap<World, String> worldAliasHashMap = new HashMap<>();
     @Nonnull
     private final HashMap<Player, TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> playerHashMap = new HashMap<>();
+    @Nonnull
+    private final HashMap<UUID, SignMenu> signHashMap = new HashMap<>();
     @Nonnull
     private final ServerVersion version;
 
@@ -81,6 +85,9 @@ public class TNLListener {
             Settings.getConfig().save();
         }, "server-loader").start();
         Bukkit.getMessenger().registerOutgoingPluginChannel(Loader.getInstance(), "BungeeCord");
+        if (Settings.DELETE_OLD_LOGS.getValue()) {
+            deleteOldLogs();
+        }
         if (Settings.AUTO_UPDATER.getValue()) {
             new PluginUpdate(Loader.getInstance()).downloadUpdate();
         }
@@ -158,7 +165,18 @@ public class TNLListener {
     }
 
     public void deleteOldLogs() {
-        throw new UnsupportedOperationException("This feature is currently not supported");
+        File file = new File("logs/");
+        if (file.exists() && file.isDirectory()) {
+            for (File all : file.listFiles()) {
+                if (all.isFile() && all.getName().endsWith(".log.gz")) {
+                    if (!all.delete()) {
+                        Logger.error.println("§cFailed to delete file §8'§4" + all.getAbsolutePath() + "§8'");
+                    } else {
+                        Logger.debug.println("§aDeleted old log file §8'§6" + all.getAbsolutePath() + "§8'");
+                    }
+                }
+            }
+        }
     }
 
     @Nonnull
@@ -168,5 +186,10 @@ public class TNLListener {
             worlds.add(world.getName());
         }
         return worlds;
+    }
+
+    @Nonnull
+    public HashMap<UUID, SignMenu> getSignHashMap() {
+        return signHashMap;
     }
 }

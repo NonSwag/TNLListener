@@ -1,9 +1,11 @@
 package net.nonswag.tnl.listener.api.permission;
 
+import org.bukkit.permissions.ServerOperator;
+
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public interface Permissions {
+public interface Permissions extends ServerOperator {
 
     void setPermission(@Nonnull String permission, boolean allowed);
 
@@ -15,4 +17,6 @@ public interface Permissions {
 
     @Nonnull
     List<String> getPermissions();
+
+    void updatePermissions();
 }

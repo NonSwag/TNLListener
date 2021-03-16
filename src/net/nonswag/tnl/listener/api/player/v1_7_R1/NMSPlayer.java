@@ -1,5 +1,6 @@
 package net.nonswag.tnl.listener.api.player.v1_7_R1;
 
+import net.minecraft.server.v1_15_R1.BlockPosition;
 import net.minecraft.server.v1_7_R1.*;
 import net.minecraft.util.io.netty.channel.*;
 import net.nonswag.tnl.listener.Loader;
@@ -12,6 +13,7 @@ import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.player.BackFlip;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
+import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.events.InventoryLoadedEvent;
 import net.nonswag.tnl.listener.events.InventorySafeEvent;
@@ -67,15 +69,15 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nonnull
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> cast(@Nonnull Player player) {
+    public static NMSPlayer cast(@Nonnull Player player) {
         if (!TNLListener.getInstance().getPlayerHashMap().containsKey(player)) {
             TNLListener.getInstance().getPlayerHashMap().put(player, new NMSPlayer(player));
         }
-        return (TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void>) TNLListener.getInstance().getPlayerHashMap().get(player);
+        return (NMSPlayer) TNLListener.getInstance().getPlayerHashMap().get(player);
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> cast(@Nullable CommandSender sender) {
+    public static NMSPlayer cast(@Nullable CommandSender sender) {
         if (sender instanceof Player) {
             return cast((Player) sender);
         }
@@ -83,7 +85,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> cast(@Nullable HumanEntity humanEntity) {
+    public static NMSPlayer cast(@Nullable HumanEntity humanEntity) {
         if (humanEntity instanceof Player) {
             return cast((Player) humanEntity);
         }
@@ -91,7 +93,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> cast(@Nullable Entity entity) {
+    public static NMSPlayer cast(@Nullable Entity entity) {
         if (entity instanceof Player) {
             return cast((Player) entity);
         }
@@ -99,7 +101,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> cast(@Nullable LivingEntity livingEntity) {
+    public static NMSPlayer cast(@Nullable LivingEntity livingEntity) {
         if (livingEntity instanceof Player) {
             return cast((Player) livingEntity);
         }
@@ -107,7 +109,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> cast(@Nonnull String string) {
+    public static NMSPlayer cast(@Nonnull String string) {
         Player player = Bukkit.getPlayer(string);
         if (player != null) {
             return cast(player);
@@ -116,16 +118,16 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> cast(@Nullable Object object) {
+    public static NMSPlayer cast(@Nullable Object object) {
         if (object instanceof Player) {
             return cast(((Player) object));
         }
         return null;
     }
 
-    @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> cast(@Nullable TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> player) {
-        return player;
+    @Nonnull
+    public static NMSPlayer cast(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> player) {
+        return ((NMSPlayer) player);
     }
 
     @Override
@@ -219,6 +221,16 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
         for (Packet packet : packets) {
             sendPacket(packet);
         }
+    }
+
+    @Override
+    public void sendPacketObject(@Nonnull Object packet) {
+        sendPacket(((Packet) packet));
+    }
+
+    @Override
+    public void sendPacketObjects(@Nonnull Object... packets) {
+        sendPackets(((Packet[]) packets));
     }
 
     @Override
@@ -366,6 +378,29 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     @Override
     public void openInventory(@Nonnull InventoryView inventoryView) {
         getBukkitPlayer().openInventory(inventoryView);
+    }
+
+    @Override
+    public void openSignEditor(@Nonnull Location location) {
+        BlockPosition position = new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        sendPacket(new PacketPlayOutOpenSignEditor(position.getX(), position.getY(), position.getZ()));
+    }
+
+    @Override
+    public void openVirtualSignEditor(@Nonnull SignMenu signMenu) {
+        BlockPosition position = new BlockPosition(signMenu.getLocation().getBlockX(), signMenu.getLocation().getBlockY(), signMenu.getLocation().getBlockZ());
+        TileEntitySign tileEntitySign = new TileEntitySign();
+        tileEntitySign.a(getWorldServer());
+        tileEntitySign.x = signMenu.getLocation().getBlockX();
+        tileEntitySign.y = signMenu.getLocation().getBlockY();
+        tileEntitySign.z = signMenu.getLocation().getBlockZ();
+        for (int line = 0; line < 4; line++) {
+            if (signMenu.getLines().length >= (line + 1)) {
+                tileEntitySign.lines[line] = signMenu.getLines()[line];
+            }
+        }
+        sendPacket(tileEntitySign.getUpdatePacket());
+        sendPacket(new PacketPlayOutOpenSignEditor(position.getX(), position.getY(), position.getZ()));
     }
 
     @Override

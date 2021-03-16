@@ -23,6 +23,7 @@ public class JoinListener implements Listener {
                 player = net.nonswag.tnl.listener.api.player.v1_15_R1.NMSPlayer.cast(event.getPlayer());
             }
             if (player != null) {
+                player.getPermissionManager().updatePermissions();
                 player.inject();
                 if (!Settings.JOIN_MESSAGE.getValue() || Settings.FIRST_JOIN_MESSAGE.getValue()) {
                     event.setJoinMessage(null);

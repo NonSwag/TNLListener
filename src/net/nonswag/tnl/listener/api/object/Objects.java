@@ -9,9 +9,9 @@ public class Objects<V> {
     public static final Objects<?> EMPTY = new Objects<>();
 
     @Nullable
-    private final V value;
+    private V value;
 
-    public Objects(V value) {
+    public Objects(@Nullable V value) {
         this.value = value;
     }
 
@@ -22,6 +22,10 @@ public class Objects<V> {
     @Nullable
     public V getValue() {
         return value;
+    }
+
+    public void setValue(@Nullable V value) {
+        this.value = value;
     }
 
     @Nonnull

@@ -12,6 +12,7 @@ import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.player.BackFlip;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
+import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.events.InventoryLoadedEvent;
 import net.nonswag.tnl.listener.events.InventorySafeEvent;
@@ -75,20 +76,20 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nonnull
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> cast(@Nonnull Player player) {
+    public static NMSPlayer cast(@Nonnull Player player) {
         if (!TNLListener.getInstance().getPlayerHashMap().containsKey(player)) {
             TNLListener.getInstance().getPlayerHashMap().put(player, new NMSPlayer(player));
         }
-        return (TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility>) TNLListener.getInstance().getPlayerHashMap().get(player);
+        return (NMSPlayer) TNLListener.getInstance().getPlayerHashMap().get(player);
     }
 
     @Nonnull
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> cast(@Nonnull CraftPlayer craftPlayer) {
+    public static NMSPlayer cast(@Nonnull CraftPlayer craftPlayer) {
         return cast((Player) craftPlayer);
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> cast(@Nullable CommandSender sender) {
+    public static NMSPlayer cast(@Nullable CommandSender sender) {
         if (sender instanceof Player) {
             return cast((Player) sender);
         }
@@ -96,7 +97,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> cast(@Nullable HumanEntity humanEntity) {
+    public static NMSPlayer cast(@Nullable HumanEntity humanEntity) {
         if (humanEntity instanceof Player) {
             return cast((Player) humanEntity);
         }
@@ -104,7 +105,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> cast(@Nullable Entity entity) {
+    public static NMSPlayer cast(@Nullable Entity entity) {
         if (entity instanceof Player) {
             return cast((Player) entity);
         }
@@ -112,7 +113,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> cast(@Nullable LivingEntity livingEntity) {
+    public static NMSPlayer cast(@Nullable LivingEntity livingEntity) {
         if (livingEntity instanceof Player) {
             return cast((Player) livingEntity);
         }
@@ -120,7 +121,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> cast(@Nonnull String string) {
+    public static NMSPlayer cast(@Nonnull String string) {
         Player player = Bukkit.getPlayer(string);
         if (player != null) {
             return cast(player);
@@ -129,16 +130,16 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> cast(@Nullable Object object) {
+    public static NMSPlayer cast(@Nullable Object object) {
         if (object instanceof Player) {
             return cast(((Player) object));
         }
         return null;
     }
 
-    @Nullable
-    public static TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> cast(@Nullable TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> player) {
-        return player;
+    @Nonnull
+    public static NMSPlayer cast(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> player) {
+        return ((NMSPlayer) player);
     }
 
     @Override
@@ -232,6 +233,16 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
         } else {
             Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().sendPacket(packet));
         }
+    }
+
+    @Override
+    public void sendPacketObject(@Nonnull Object packet) {
+        sendPacket(((Packet<?>) packet));
+    }
+
+    @Override
+    public void sendPacketObjects(@Nonnull Object... packets) {
+        sendPackets(((Packet<?>[]) packets));
     }
 
     @Override
@@ -386,6 +397,32 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     @Nullable
     public InventoryView openEnchanting(@Nonnull Location location, boolean b) {
         return getBukkitPlayer().openEnchanting(location, b);
+    }
+
+    @Override
+    public void openSignEditor(@Nonnull Location location) {
+        if (location.getBlock().getBlockData() instanceof org.bukkit.block.data.type.Sign) {
+            sendPacket(new PacketPlayOutOpenSignEditor(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ())));
+        }
+    }
+
+    @Override
+    public void openVirtualSignEditor(@Nonnull SignMenu signMenu) {
+        BlockPosition position = new BlockPosition(signMenu.getLocation().getBlockX(), signMenu.getLocation().getBlockY(), signMenu.getLocation().getBlockZ());
+        PacketPlayOutOpenSignEditor editor = new PacketPlayOutOpenSignEditor(position);
+        TileEntitySign tileEntitySign = new TileEntitySign();
+        tileEntitySign.setLocation(getWorldServer(), position);
+        for (int line = 0; line < 4; line++) {
+            if (signMenu.getLines().length >= (line + 1)) {
+                tileEntitySign.lines[line] = new ChatMessage(signMenu.getLines()[line]);
+            }
+        }
+        getBukkitPlayer().sendBlockChange(signMenu.getLocation(), Material.SPRUCE_SIGN.createBlockData());
+        PacketPlayOutTileEntityData updatePacket = tileEntitySign.getUpdatePacket();
+        assert updatePacket != null;
+        sendPacket(updatePacket);
+        sendPacket(editor);
+        TNLListener.getInstance().getSignHashMap().put(getUniqueId(), signMenu);
     }
 
     @Override

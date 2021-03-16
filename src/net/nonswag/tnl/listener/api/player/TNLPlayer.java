@@ -7,6 +7,7 @@ import net.nonswag.tnl.listener.api.message.Language;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
+import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
@@ -130,6 +131,10 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
     @Nullable
     InventoryView openEnchanting(@Nonnull Location location, boolean b);
 
+    void openVirtualSignEditor(@Nonnull SignMenu signMenu);
+
+    void openSignEditor(@Nonnull Location location);
+
     @Nullable
     Entity getSpectatorTarget();
 
@@ -240,6 +245,10 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
     void sendPacket(@Nonnull Packet packet);
 
     void sendPackets(@Nonnull Packet... packets);
+
+    void sendPacketObject(@Nonnull Object packet);
+
+    void sendPacketObjects(@Nonnull Object... packets);
 
     double getMaxHealth();
 

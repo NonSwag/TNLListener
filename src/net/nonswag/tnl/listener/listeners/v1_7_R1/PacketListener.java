@@ -13,6 +13,8 @@ import net.nonswag.tnl.listener.events.PlayerChatEvent;
 import net.nonswag.tnl.listener.events.PlayerInteractAtEntityEvent;
 import net.nonswag.tnl.listener.events.PlayerPacketEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -32,6 +34,19 @@ public class PacketListener implements Listener {
                     if (!chatEvent.isCancelled() && !event.isCancelled()) {
                         if (!chatEvent.isCommand()) {
                             event.setCancelled(true);
+                            String[] strings = message.split(" ");
+                            for (Player all : Bukkit.getOnlinePlayers()) {
+                                if (message.toLowerCase().contains(all.getDisplayName().toLowerCase())) {
+                                    for (String string : strings) {
+                                        if (string.equalsIgnoreCase("@" + all.getDisplayName())) {
+                                            message = message.replace(string + " ", "§8(§3" + all.getDisplayName() + "§8) §f");
+                                            message = message.replace(string, "§8(§3" + all.getDisplayName() + "§8) §f");
+                                            all.playSound(all.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 5);
+                                        }
+                                    }
+                                }
+                                all.playSound(all.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 15);
+                            }
                             for (TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> all : TNLListener.getInstance().getOnlinePlayers()) {
                                 if (chatEvent.getFormat() == null) {
                                     all.sendMessage(MessageKey.CHAT_FORMAT, new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("message", message), new Placeholder("colored_message", Color.Minecraft.colorize(message, '&')), new Placeholder("text", Color.Minecraft.colorize(message, '&')));
@@ -73,7 +88,12 @@ public class PacketListener implements Listener {
                 }
             }
         } else if (event.isOutgoing()) {
-           if (event.getPacket() instanceof PacketPlayOutChat) {
+           if (event.getPacket() instanceof PacketPlayOutEntityStatus) {
+               int id = ((Objects<Integer>) event.getPacketField("a")).getOrDefault(-1);
+               if (event.getPlayer().getEntityId() == id) {
+                   event.setPacketField("b", (byte) 28);
+               }
+           } else if (event.getPacket() instanceof PacketPlayOutChat) {
                 Objects<IChatBaseComponent> a = ((Objects<IChatBaseComponent>) event.getPacketField("a"));
                 if (a.hasValue()) {
                     String text = a.nonnull().toString();
