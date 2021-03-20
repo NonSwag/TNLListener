@@ -1,6 +1,5 @@
-package net.nonswag.tnl.listener.api.player.v1_7_R1;
+package net.nonswag.tnl.listener.api.player.v1_7.R1;
 
-import net.minecraft.server.v1_15_R1.BlockPosition;
 import net.minecraft.server.v1_7_R1.*;
 import net.minecraft.util.io.netty.channel.*;
 import net.nonswag.tnl.listener.Loader;
@@ -305,11 +304,6 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void setNameTagVisibility(@Nonnull Void unused) {
-        throw new UnsupportedOperationException("method is not supported in this version");
-    }
-
-    @Override
     public void setCollision(@Nonnull Void collision) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
@@ -382,13 +376,11 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
 
     @Override
     public void openSignEditor(@Nonnull Location location) {
-        BlockPosition position = new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-        sendPacket(new PacketPlayOutOpenSignEditor(position.getX(), position.getY(), position.getZ()));
+        sendPacket(new PacketPlayOutOpenSignEditor(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
     }
 
     @Override
     public void openVirtualSignEditor(@Nonnull SignMenu signMenu) {
-        BlockPosition position = new BlockPosition(signMenu.getLocation().getBlockX(), signMenu.getLocation().getBlockY(), signMenu.getLocation().getBlockZ());
         TileEntitySign tileEntitySign = new TileEntitySign();
         tileEntitySign.a(getWorldServer());
         tileEntitySign.x = signMenu.getLocation().getBlockX();
@@ -400,7 +392,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
             }
         }
         sendPacket(tileEntitySign.getUpdatePacket());
-        sendPacket(new PacketPlayOutOpenSignEditor(position.getX(), position.getY(), position.getZ()));
+        sendPacket(new PacketPlayOutOpenSignEditor(signMenu.getLocation().getBlockX(), signMenu.getLocation().getBlockY(), signMenu.getLocation().getBlockZ()));
     }
 
     @Override
@@ -1058,7 +1050,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
 
     @Override
     @Nonnull
-    public Location getTargetLocation(int i) {
+    public Location getTargetLocation(double i) {
         return getLocation().clone().add(getBukkitPlayer().getLocation().getDirection().multiply(i));
     }
 

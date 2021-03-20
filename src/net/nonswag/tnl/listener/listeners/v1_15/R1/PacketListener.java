@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.listeners.v1_15_R1;
+package net.nonswag.tnl.listener.listeners.v1_15.R1;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_15_R1.*;
@@ -188,8 +188,11 @@ public class PacketListener implements Listener {
                 }
             } else if (event.getPacket() instanceof PacketPlayOutEntityStatus) {
                 int id = ((Objects<Integer>) event.getPacketField("a")).getOrDefault(-1);
+                byte b = ((Objects<Byte>) event.getPacketField("b")).getOrDefault((byte) -1);
                 if (event.getPlayer().getEntityId() == id) {
-                    event.setPacketField("b", (byte) 28);
+                    if (b >= 24 && b < 28) {
+                        event.setPacketField("b", (byte) 28);
+                    }
                 }
             } else if (event.getPacket() instanceof PacketPlayOutChat) {
                 Objects<ChatComponentText> a = (Objects<ChatComponentText>) event.getPacketField("a");

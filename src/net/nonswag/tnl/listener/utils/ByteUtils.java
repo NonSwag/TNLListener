@@ -8,7 +8,7 @@ import net.minecraft.server.v1_15_R1.MinecraftKey;
 import net.minecraft.server.v1_15_R1.PacketDataSerializer;
 import net.minecraft.server.v1_15_R1.PacketPlayOutCustomPayload;
 import net.nonswag.tnl.listener.api.logger.Logger;
-import net.nonswag.tnl.listener.api.player.v1_15_R1.NMSPlayer;
+import net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

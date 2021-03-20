@@ -7,7 +7,7 @@ import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.api.logger.Logger;
-import net.nonswag.tnl.listener.api.player.v1_15_R1.NMSPlayer;
+import net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftServer;

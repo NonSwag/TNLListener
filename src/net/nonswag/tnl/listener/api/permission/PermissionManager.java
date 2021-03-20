@@ -73,15 +73,21 @@ public class PermissionManager implements Permissions {
     @Override
     public void updatePermissions() {
         Class<?> clazz = null;
-        if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_15_R1.NMSPlayer) {
+        if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer) {
             try {
                 clazz = Reflection.getClass("net.minecraft.server.v1_15_R1.PacketPlayOutEntityStatus");
             } catch (NoClassDefFoundError e) {
                 e.printStackTrace();
             }
-        } else if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_7_R1.NMSPlayer) {
+        } else if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_7.R1.NMSPlayer) {
             try {
                 clazz = Reflection.getClass("net.minecraft.server.v1_7_R1.PacketPlayOutEntityStatus");
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        } else if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_7.R4.NMSPlayer) {
+            try {
+                clazz = Reflection.getClass("net.minecraft.server.v1_7_R4.PacketPlayOutEntityStatus");
             } catch (Throwable t) {
                 t.printStackTrace();
             }

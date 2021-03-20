@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 public enum ServerVersion {
     UNKNOWN,
     v1_7_2("1.7.2"),
+    v1_7_10("1.7.10"),
     v1_8_8("1.8.8"),
     v1_12_2("1.12.2"),
     v1_13_2("1.13.2"),

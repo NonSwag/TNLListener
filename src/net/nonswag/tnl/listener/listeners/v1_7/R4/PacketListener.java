@@ -1,6 +1,6 @@
-package net.nonswag.tnl.listener.listeners.v1_7_R1;
+package net.nonswag.tnl.listener.listeners.v1_7.R4;
 
-import net.minecraft.server.v1_7_R1.*;
+import net.minecraft.server.v1_7_R4.*;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.message.MessageKey;
@@ -13,7 +13,6 @@ import net.nonswag.tnl.listener.events.PlayerChatEvent;
 import net.nonswag.tnl.listener.events.PlayerInteractAtEntityEvent;
 import net.nonswag.tnl.listener.events.PlayerPacketEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -41,11 +40,9 @@ public class PacketListener implements Listener {
                                         if (string.equalsIgnoreCase("@" + all.getDisplayName())) {
                                             message = message.replace(string + " ", "§8(§3" + all.getDisplayName() + "§8) §f");
                                             message = message.replace(string, "§8(§3" + all.getDisplayName() + "§8) §f");
-                                            all.playSound(all.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 5);
                                         }
                                     }
                                 }
-                                all.playSound(all.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 15);
                             }
                             for (TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> all : TNLListener.getInstance().getOnlinePlayers()) {
                                 if (chatEvent.getFormat() == null) {

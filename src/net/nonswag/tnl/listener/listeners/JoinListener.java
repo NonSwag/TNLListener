@@ -18,9 +18,11 @@ public class JoinListener implements Listener {
         try {
             TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player = null;
             if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
-                player = net.nonswag.tnl.listener.api.player.v1_7_R1.NMSPlayer.cast(event.getPlayer());
+                player = net.nonswag.tnl.listener.api.player.v1_7.R1.NMSPlayer.cast(event.getPlayer());
+            } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
+                player = net.nonswag.tnl.listener.api.player.v1_7.R4.NMSPlayer.cast(event.getPlayer());
             } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
-                player = net.nonswag.tnl.listener.api.player.v1_15_R1.NMSPlayer.cast(event.getPlayer());
+                player = net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer.cast(event.getPlayer());
             }
             if (player != null) {
                 player.getPermissionManager().updatePermissions();

@@ -1,7 +1,7 @@
 package net.nonswag.tnl.listener.api.scoreboard;
 
 import net.minecraft.server.v1_15_R1.*;
-import net.nonswag.tnl.listener.api.player.v1_15_R1.NMSPlayer;
+import net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer;
 
 import javax.annotation.Nonnull;
 

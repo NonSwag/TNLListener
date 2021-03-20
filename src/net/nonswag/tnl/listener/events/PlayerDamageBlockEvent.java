@@ -3,7 +3,7 @@ package net.nonswag.tnl.listener.events;
 import net.minecraft.server.v1_15_R1.PacketPlayInBlockDig;
 import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
-import net.nonswag.tnl.listener.api.player.v1_15_R1.NMSPlayer;
+import net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;

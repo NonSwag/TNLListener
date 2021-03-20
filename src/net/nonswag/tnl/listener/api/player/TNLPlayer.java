@@ -172,7 +172,7 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
     Location getLocation(@Nonnull Location location);
 
     @Nonnull
-    Location getTargetLocation(int i);
+    Location getTargetLocation(double i);
 
     @Nonnull
     Vector getVelocity();
@@ -267,8 +267,6 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
     void disconnect(@Nonnull MessageKey messageKey, @Nonnull String append, @Nonnull Placeholder... placeholders);
 
     void disconnect(@Nonnull String kickMessage);
-
-    void setNameTagVisibility(@Nonnull EnumNameTagVisibility visibility);
 
     void setCollision(@Nonnull EnumTeamPush collision);
 
