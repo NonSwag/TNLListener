@@ -44,7 +44,7 @@ public class PacketListener implements Listener {
                                     }
                                 }
                             }
-                            for (TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> all : TNLListener.getInstance().getOnlinePlayers()) {
+                            for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
                                 if (chatEvent.getFormat() == null) {
                                     all.sendMessage(MessageKey.CHAT_FORMAT, new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("message", message), new Placeholder("colored_message", Color.Minecraft.colorize(message, '&')), new Placeholder("text", Color.Minecraft.colorize(message, '&')));
                                 } else {

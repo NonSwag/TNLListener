@@ -1,12 +1,8 @@
 package net.nonswag.tnl.listener.events;
 
-import net.minecraft.server.v1_15_R1.PacketPlayInBlockDig;
-import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
-import net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -16,20 +12,18 @@ import java.util.Objects;
 
 public class PlayerDamageBlockEvent extends Event implements Cancellable {
 
-    @Nonnull private static final HandlerList handlers = new HandlerList();
-    @Nonnull private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
-    @Nonnull private final Block block;
-    @Nonnull private final BlockDamageType blockDamageType;
+    @Nonnull
+    private static final HandlerList handlers = new HandlerList();
+    @Nonnull
+    private final TNLPlayer player;
+    @Nonnull
+    private final Block block;
+    @Nonnull
+    private final BlockDamageType blockDamageType;
     private boolean cancelled = false;
+    private boolean update = false;
 
-    public PlayerDamageBlockEvent(@Nonnull NMSPlayer player, @Nonnull Block block) {
-        super(!Bukkit.isPrimaryThread());
-        this.player = player;
-        this.block = block;
-        this.blockDamageType = BlockDamageType.UNKNOWN;
-    }
-
-    public PlayerDamageBlockEvent(TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, Block block, BlockDamageType blockDamageType) {
+    public PlayerDamageBlockEvent(@Nonnull TNLPlayer player, @Nonnull Block block, @Nonnull BlockDamageType blockDamageType) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.block = block;
@@ -40,18 +34,19 @@ public class PlayerDamageBlockEvent extends Event implements Cancellable {
         return handlers;
     }
 
-    public BlockDamageType getBlockDamageType() {
-        return blockDamageType;
-    }
-
     @Nonnull
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
+    public TNLPlayer getPlayer() {
         return player;
     }
 
     @Nonnull
     public Block getBlock() {
         return block;
+    }
+
+    @Nonnull
+    public BlockDamageType getBlockDamageType() {
+        return blockDamageType;
     }
 
     @Override
@@ -64,33 +59,17 @@ public class PlayerDamageBlockEvent extends Event implements Cancellable {
         return cancelled;
     }
 
+    public boolean isUpdate() {
+        return update;
+    }
+
     @Override
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
-        if (isCancelled()) {
-            if (getBlockDamageType().equals(BlockDamageType.STOP_DESTROY_BLOCK)
-                    || getBlockDamageType().equals(BlockDamageType.START_DESTROY_BLOCK)) {
-                Bukkit.getScheduler().runTask(Loader.getInstance(), () -> {
-                    getBlock().getState().update();
-                    getPlayer().getBukkitPlayer().sendBlockChange(getBlock().getLocation(), getBlock().getBlockData());
-                    getPlayer().getBukkitPlayer().sendBlockChange(getBlock().getRelative(BlockFace.EAST).getLocation(),
-                            getBlock().getRelative(BlockFace.EAST).getLocation().getBlock().getBlockData());
-                    getPlayer().getBukkitPlayer().sendBlockChange(getBlock().getRelative(BlockFace.NORTH).getLocation(),
-                            getBlock().getRelative(BlockFace.NORTH).getLocation().getBlock().getBlockData());
-                    getPlayer().getBukkitPlayer().sendBlockChange(getBlock().getRelative(BlockFace.SOUTH).getLocation(),
-                            getBlock().getRelative(BlockFace.SOUTH).getLocation().getBlock().getBlockData());
-                    getPlayer().getBukkitPlayer().sendBlockChange(getBlock().getRelative(BlockFace.WEST).getLocation(),
-                            getBlock().getRelative(BlockFace.WEST).getLocation().getBlock().getBlockData());
-                    getPlayer().getBukkitPlayer().sendBlockChange(getBlock().getRelative(BlockFace.UP).getLocation(),
-                            getBlock().getRelative(BlockFace.UP).getLocation().getBlock().getBlockData());
-                    getPlayer().getBukkitPlayer().sendBlockChange(getBlock().getRelative(BlockFace.DOWN).getLocation(),
-                            getBlock().getRelative(BlockFace.DOWN).getLocation().getBlock().getBlockData());
-                });
-            } else if(getBlockDamageType().equals(BlockDamageType.DROP_ITEM)
-                    || getBlockDamageType().equals(BlockDamageType.DROP_ALL_ITEMS)) {
-                getPlayer().updateInventory();
-            }
-        }
+    }
+
+    public void setUpdate(boolean update) {
+        this.update = update;
     }
 
     @Override
@@ -130,42 +109,20 @@ public class PlayerDamageBlockEvent extends Event implements Cancellable {
         BlockDamageType() {
         }
 
-        public static BlockDamageType fromString(String string) {
+        @Nonnull
+        public static BlockDamageType fromString(@Nonnull String string) {
             try {
-                for (BlockDamageType blockDamageType : BlockDamageType.values()) {
-                    if (blockDamageType.name().equalsIgnoreCase(string)) {
-                        return blockDamageType;
-                    }
-                }
-            } catch (Throwable ignored) {
+                return valueOf(string.toUpperCase());
+            } catch (Exception ignored) {
             }
             return UNKNOWN;
         }
 
-        public static BlockDamageType fromObject(Object object) {
+        @Nonnull
+        public static BlockDamageType fromObject(@Nonnull Object object) {
             try {
                 return fromString(object.toString() + "");
-            } catch (Throwable t) {
-                return UNKNOWN;
-            }
-        }
-
-        public static BlockDamageType fromPacket(PacketPlayInBlockDig packet) {
-            if(packet.d().equals(PacketPlayInBlockDig.EnumPlayerDigType.START_DESTROY_BLOCK)) {
-                return START_DESTROY_BLOCK;
-            } else if(packet.d().equals(PacketPlayInBlockDig.EnumPlayerDigType.STOP_DESTROY_BLOCK)) {
-                return STOP_DESTROY_BLOCK;
-            } else if(packet.d().equals(PacketPlayInBlockDig.EnumPlayerDigType.ABORT_DESTROY_BLOCK)) {
-                return ABORT_DESTROY_BLOCK;
-            } else if(packet.d().equals(PacketPlayInBlockDig.EnumPlayerDigType.SWAP_HELD_ITEMS)) {
-                return SWAP_HELD_ITEMS;
-            } else if(packet.d().equals(PacketPlayInBlockDig.EnumPlayerDigType.DROP_ALL_ITEMS)) {
-                return DROP_ALL_ITEMS;
-            } else if(packet.d().equals(PacketPlayInBlockDig.EnumPlayerDigType.DROP_ITEM)) {
-                return DROP_ITEM;
-            } else if(packet.d().equals(PacketPlayInBlockDig.EnumPlayerDigType.RELEASE_USE_ITEM)) {
-                return RELEASE_USE_ITEM;
-            } else {
+            } catch (Exception t) {
                 return UNKNOWN;
             }
         }

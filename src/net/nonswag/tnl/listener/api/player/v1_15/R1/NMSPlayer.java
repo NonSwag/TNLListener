@@ -6,6 +6,7 @@ import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
+import net.nonswag.tnl.listener.api.bossbar.v1_15.R1.NMSBossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
@@ -26,7 +27,9 @@ import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -52,12 +55,12 @@ import java.net.InetSocketAddress;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
 
-public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> {
+public class NMSPlayer implements TNLPlayer {
 
     @Nonnull
     private static final HashMap<UUID, List<String>> bossBars = new HashMap<>();
     @Nonnull
-    private static final HashMap<UUID, BossBar> bossHashMap = new HashMap<>();
+    private static final HashMap<UUID, NMSBossBar> bossHashMap = new HashMap<>();
 
     @Nonnull
     private final Player bukkitPlayer;
@@ -139,7 +142,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nonnull
-    public static NMSPlayer cast(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> player) {
+    public static NMSPlayer cast(@Nonnull TNLPlayer player) {
         return ((NMSPlayer) player);
     }
 
@@ -221,29 +224,19 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void sendPackets(@Nonnull Packet<?>... packets) {
-        for (Packet<?> packet : packets) {
+    public void sendPackets(@Nonnull Object... packets) {
+        for (Object packet : packets) {
             sendPacket(packet);
         }
     }
 
     @Override
-    public void sendPacket(@Nonnull Packet<?> packet) {
+    public void sendPacket(@Nonnull Object packet) {
         if (Bukkit.isPrimaryThread()) {
-            getPlayerConnection().sendPacket(packet);
+            getPlayerConnection().sendPacket((Packet<?>) packet);
         } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().sendPacket(packet));
+            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().sendPacket((Packet<?>) packet));
         }
-    }
-
-    @Override
-    public void sendPacketObject(@Nonnull Object packet) {
-        sendPacket(((Packet<?>) packet));
-    }
-
-    @Override
-    public void sendPacketObjects(@Nonnull Object... packets) {
-        sendPackets(((Packet<?>[]) packets));
     }
 
     @Override
@@ -329,8 +322,8 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void setCollision(@Nonnull ScoreboardTeamBase.EnumTeamPush collision) {
-        getOptionTeam().setCollisionRule(collision);
+    public <EnumTeamPush> void setCollision(@Nonnull EnumTeamPush collision) {
+        getOptionTeam().setCollisionRule((ScoreboardTeamBase.EnumTeamPush) collision);
         sendPacket(new PacketPlayOutScoreboardTeam(getOptionTeam(), 0));
     }
 
@@ -438,7 +431,16 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
 
     @Override
     public void setCooldown(@Nonnull Material material, int i) {
-        getBukkitPlayer().setCooldown(material, i);
+        if (Bukkit.isPrimaryThread()) {
+            getCraftPlayer().setCooldown(material, i);
+        } else {
+            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getCraftPlayer().setCooldown(material, i));
+        }
+    }
+
+    @Override
+    public void setCooldown(@Nonnull ItemStack itemStack, int i) {
+        sendPacket(new PacketPlayOutSetCooldown(CraftItemStack.asNMSCopy(itemStack).getItem(), i));
     }
 
     @Override
@@ -478,15 +480,15 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
         return getBukkitPlayer().getBedLocation();
     }
 
-    @Override
     @Nonnull
+    @Override
     public GameMode getGameMode() {
-        return getBukkitPlayer().getGameMode();
+        return getCraftPlayer().getGameMode();
     }
 
     @Override
-    public void setGameMode(@Nonnull GameMode gameMode) {
-        getBukkitPlayer().setGameMode(gameMode);
+    public void setGameMode(@Nonnull GameMode gamemode) {
+        getCraftPlayer().setGameMode(gamemode);
     }
 
     @Override
@@ -532,44 +534,47 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void hideTabListName(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility>[] players) {
-        for (TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> all : players) {
-            if (!all.equals(this)) {
-                sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, all.getEntityPlayer()));
+    public void hideTabListName(@Nonnull TNLPlayer[] players) {
+        for (TNLPlayer all : players) {
+            if (!all.getUniqueId().equals(getUniqueId())) {
+                sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ((NMSPlayer) all).getEntityPlayer()));
             }
         }
     }
 
+    @Nonnull
     @Override
-    public void disguise(@Nonnull EntityLiving entity, @Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> receiver) {
-        if (!this.equals(receiver)) {
-            receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
-            entity.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
-            entity.world = this.getWorldServer();
-            Reflection.setField(entity, net.minecraft.server.v1_15_R1.Entity.class, "id", this.getEntityId());
-            receiver.sendPacket(new PacketPlayOutSpawnEntityLiving(entity));
-        }
+    public void disguise(@Nonnull net.nonswag.tnl.listener.api.entity.LivingEntity<?> entity) {
+        disguise(entity, TNLListener.getInstance().getOnlinePlayers());
     }
 
+    @Nonnull
     @Override
-    public void disguise(@Nonnull EntityLiving entity, @Nonnull List<TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility>> receivers) {
-        for (TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> receiver : receivers) {
+    public void disguise(@Nonnull net.nonswag.tnl.listener.api.entity.LivingEntity<?> entity, @Nonnull List<TNLPlayer> receivers) {
+        for (TNLPlayer receiver : receivers) {
             disguise(entity, receiver);
         }
     }
 
+    @Nonnull
     @Override
-    public void disguise(@Nonnull EntityLiving entity) {
-        disguise(entity, (TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility>) TNLListener.getInstance().getOnlinePlayers());
+    public void disguise(@Nonnull net.nonswag.tnl.listener.api.entity.LivingEntity<?> entity, @Nonnull TNLPlayer receiver) {
+        if (!receiver.getUniqueId().equals(getUniqueId()) && entity.getParameter() instanceof EntityLiving) {
+            receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
+            ((EntityLiving) entity.getParameter()).setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
+            ((EntityLiving) entity.getParameter()).world = this.getWorldServer();
+            Reflection.setField(entity, net.minecraft.server.v1_15_R1.Entity.class, "id", this.getEntityId());
+            receiver.sendPacket(new PacketPlayOutSpawnEntityLiving(((EntityLiving) entity.getParameter())));
+        }
     }
 
     @Nonnull
-    private static HashMap<UUID, BossBar> getBossHashMap() {
+    private static HashMap<UUID, NMSBossBar> getBossHashMap() {
         return bossHashMap;
     }
 
     @Nonnull
-    public static HashMap<UUID, List<String>> getBossBars() {
+    private static HashMap<UUID, List<String>> getBossBars() {
         return bossBars;
     }
 
@@ -578,45 +583,14 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
         return bossBars.getOrDefault(uniqueId, new ArrayList<>());
     }
 
+    @Nonnull
     @Override
-    public void sendBossBar(@Nonnull BossBar bossBar) {
-        if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
-            List<String> bars = getBossBars(getUniqueId());
-            bars.add(bossBar.getId());
-            getBossBars().put(getUniqueId(), bars);
-        }
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.ADD, bossBar.getBossBar().getHandle()));
-        updateBossBar(bossBar);
-    }
-
-    @Override
-    public void updateBossBar(@Nonnull BossBar bossBar) {
-        if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
-            List<String> bars = getBossBars(getUniqueId());
-            bars.add(bossBar.getId());
-            getBossBars().put(getUniqueId(), bars);
-        }
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_NAME, bossBar.getBossBar().getHandle()));
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_PCT, bossBar.getBossBar().getHandle()));
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_PROPERTIES, bossBar.getBossBar().getHandle()));
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_STYLE, bossBar.getBossBar().getHandle()));
-    }
-
-    @Override
-    public void hideBossBar(@Nonnull BossBar bossBar) {
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.REMOVE, bossBar.getBossBar().getHandle()));
-        List<String> bars = getBossBars(getUniqueId());
-        bars.remove(bossBar.getId());
-        getBossBars().put(getUniqueId(), bars);
-        BossBar.removeBossBar(bossBar.getId());
-    }
-
-    @Override
-    public void sendBossBar(@Nonnull BossBar bossBar, long millis) {
+    public void sendBossBar(@Nonnull BossBar<?> bossBar, long millis) {
+        NMSBossBar.createBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
         if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null) {
             hideBossBar(getBossHashMap().get(getBukkitPlayer().getUniqueId()));
         }
-        getBossHashMap().put(getBukkitPlayer().getUniqueId(), bossBar);
+        getBossHashMap().put(getBukkitPlayer().getUniqueId(), (NMSBossBar) bossBar);
         sendBossBar(bossBar);
         new Thread(() -> {
             try {
@@ -630,13 +604,48 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
         }).start();
     }
 
+    @Nonnull
+    @Override
+    public void sendBossBar(@Nonnull BossBar<?> bossBar) {
+        NMSBossBar.createBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+        if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
+            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.ADD, ((NMSBossBar) bossBar).getBossBar().getHandle()));
+            List<String> bars = getBossBars(getUniqueId());
+            bars.add(bossBar.getId());
+            getBossBars().put(getUniqueId(), bars);
+        }
+        updateBossBar(bossBar);
+    }
+
+    @Nonnull
+    @Override
+    public void updateBossBar(@Nonnull BossBar<?> bossBar) {
+        NMSBossBar.createBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+        if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
+            sendBossBar(bossBar);
+        } else {
+            BossBattleServer handle = ((NMSBossBar) bossBar).getBossBar().getHandle();
+            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_NAME, handle));
+            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_PCT, handle));
+            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_PROPERTIES, handle));
+            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_STYLE, handle));
+        }
+    }
+
+    @Nonnull
+    @Override
+    public void hideBossBar(@Nonnull BossBar<?> bossBar) {
+        NMSBossBar.deleteBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.REMOVE, ((NMSBossBar) bossBar).getBossBar().getHandle()));
+        List<String> bars = getBossBars(getUniqueId());
+        bars.remove(bossBar.getId());
+        getBossBars().put(getUniqueId(), bars);
+        NMSBossBar.removeBossBar(bossBar.getId());
+    }
+
     @Override
     public void sendTitle(@Nonnull Title title) {
-        getBukkitPlayer().sendTitle(title.getTitle(),
-                title.getSubtitle(),
-                title.getTimeIn(),
-                title.getTimeStay(),
-                title.getTimeOut());
+        getCraftPlayer().sendTitle(title.getTitle(), title.getSubtitle(), title.getTimeIn(), title.getTimeStay(), title.getTimeOut());
     }
 
     @Override
@@ -877,6 +886,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     @Override
     public void setPlayerTime(long l, boolean b) {
         getBukkitPlayer().setPlayerTime(l, b);
+        sendPacket(new PacketPlayOutUpdateTime(l, l, b));
     }
 
     @Override
@@ -897,11 +907,17 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     @Override
     public void resetPlayerTime() {
         getBukkitPlayer().resetPlayerTime();
+        sendPacket(new PacketPlayOutUpdateTime(getWorld().getTime(), getWorld().getTime(), true));
     }
 
     @Override
     public void setPlayerWeather(@Nonnull WeatherType weatherType) {
         getBukkitPlayer().setPlayerWeather(weatherType);
+        if (weatherType.equals(WeatherType.DOWNFALL)) {
+            sendPacket(new PacketPlayOutGameStateChange(2, 0.0F));
+        } else {
+            sendPacket(new PacketPlayOutGameStateChange(1, 0.0F));
+        }
     }
 
     @Override
@@ -1011,12 +1027,12 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void hidePlayer(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> player) {
+    public void hidePlayer(@Nonnull TNLPlayer player) {
         sendPacket(new PacketPlayOutEntityDestroy(player.getEntityId()));
     }
 
     @Override
-    public void showPlayer(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> player) {
+    public void showPlayer(@Nonnull TNLPlayer player) {
         sendPacket(new PacketPlayOutSpawnEntityLiving(player.getEntityPlayer()));
     }
 
@@ -1063,17 +1079,22 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     @Override
     @Nullable
     public Entity getSpectatorTarget() {
-        return getBukkitPlayer().getSpectatorTarget();
+        return getCraftPlayer().getSpectatorTarget();
     }
 
     @Override
-    public void setSpectatorTarget(@Nonnull Entity entity) {
-        getBukkitPlayer().setSpectatorTarget(entity);
+    public void spectate(@Nonnull Entity entity) {
+        getCraftPlayer().setSpectatorTarget(entity);
+    }
+
+    @Override
+    public void spectate() {
+        getCraftPlayer().setSpectatorTarget(getCraftPlayer());
     }
 
     @Override
     public void resetTitle() {
-        sendTitle(Title.EMPTY);
+        sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.RESET, null));
     }
 
     @Override
@@ -1310,13 +1331,21 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void setGlowing(boolean b, @Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility>... players) {
+    public void setGlowing(boolean b, @Nonnull TNLPlayer... players) {
         boolean glowing = getEntityPlayer().glowing;
         getEntityPlayer().glowing = b;
-        for (TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> all : players) {
+        for (TNLPlayer all : players) {
             sendPacket(new PacketPlayOutEntityMetadata(getEntityId(), getEntityPlayer().getDataWatcher(), true));
         }
         getEntityPlayer().glowing = glowing;
+    }
+
+    @Override
+    public void setGlowing(boolean b, @Nonnull Entity entity) {
+        net.minecraft.server.v1_15_R1.Entity handle = ((CraftEntity) entity).getHandle();
+        handle.glowing = b;
+        sendPacket(new PacketPlayOutEntityMetadata(entity.getEntityId(), handle.getDataWatcher(), true));
+        // handle.glowing = glowing;
     }
 
     @Override
@@ -1480,7 +1509,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
 
     @Nullable
     @Override
-    public TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet<?>, EntityPlayer, CraftPlayer, ScoreboardTeamBase.EnumTeamPush, ScoreboardTeamBase.EnumNameTagVisibility> getKiller() {
+    public TNLPlayer getKiller() {
         if (getBukkitPlayer().getKiller() != null) {
             return cast(getBukkitPlayer().getKiller());
         }

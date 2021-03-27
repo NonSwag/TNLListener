@@ -15,14 +15,14 @@ public class PlayerChatEvent extends Event implements Cancellable {
     @Nonnull
     private static final HandlerList handlerList = new HandlerList();
     @Nonnull
-    private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
+    private final TNLPlayer player;
     @Nonnull
     private String message;
     @Nullable
     private String format = null;
     private boolean cancelled = false;
 
-    public PlayerChatEvent(@Nonnull TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, @Nonnull String message) {
+    public PlayerChatEvent(@Nonnull TNLPlayer player, @Nonnull String message) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.message = message;
@@ -46,7 +46,7 @@ public class PlayerChatEvent extends Event implements Cancellable {
     }
 
     @Nonnull
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
+    public TNLPlayer getPlayer() {
         return player;
     }
 

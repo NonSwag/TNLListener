@@ -15,12 +15,12 @@ import java.util.Objects;
 public class PlayerBottleFillEvent extends Event implements Cancellable {
 
     @Nonnull private static final HandlerList handlers = new HandlerList();
-    @Nonnull private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
+    @Nonnull private final TNLPlayer player;
     @Nullable private ItemStack itemStack;
     @Nullable private Block block;
     private boolean cancelled;
 
-    public PlayerBottleFillEvent(TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, @Nullable ItemStack itemStack, @Nullable Block block) {
+    public PlayerBottleFillEvent(TNLPlayer player, @Nullable ItemStack itemStack, @Nullable Block block) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.cancelled = false;
@@ -34,7 +34,7 @@ public class PlayerBottleFillEvent extends Event implements Cancellable {
     }
 
     @Nonnull
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
+    public TNLPlayer getPlayer() {
         return player;
     }
 

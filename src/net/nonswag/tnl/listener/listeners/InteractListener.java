@@ -14,7 +14,7 @@ public class InteractListener implements Listener {
 
     @EventHandler
     public void onWaterBottleFill(CauldronLevelChangeEvent event) {
-        TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player = TNLListener.getInstance().getPlayer(event.getEntity());
+        TNLPlayer player = TNLListener.getInstance().getPlayer(event.getEntity());
         if (event.getReason().equals(CauldronLevelChangeEvent.ChangeReason.BOTTLE_FILL) && player != null) {
             ItemStack itemStack = player.getInventory().getItemInMainHand();
             ItemStack itemStack1 = player.getInventory().getItemInOffHand();

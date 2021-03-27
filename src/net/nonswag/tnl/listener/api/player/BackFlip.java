@@ -10,14 +10,14 @@ import java.util.Objects;
 public class BackFlip {
 
     @Nonnull
-    private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
+    private final TNLPlayer player;
 
-    public BackFlip(@Nonnull TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player) {
+    public BackFlip(@Nonnull TNLPlayer player) {
         this.player = player;
     }
 
     @Nonnull
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
+    public TNLPlayer getPlayer() {
         return player;
     }
 

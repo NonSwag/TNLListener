@@ -54,7 +54,7 @@ import java.net.InetSocketAddress;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
 
-public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> {
+public class NMSPlayer implements TNLPlayer {
     
     @Nonnull private final Player bukkitPlayer;
     @Nonnull private final Scoreboard optionScoreboard = new Scoreboard();
@@ -125,7 +125,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Nonnull
-    public static NMSPlayer cast(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> player) {
+    public static NMSPlayer cast(@Nonnull TNLPlayer player) {
         return ((NMSPlayer) player);
     }
 
@@ -207,29 +207,19 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void sendPacket(@Nonnull Packet packet) {
+    public void sendPacket(@Nonnull Object packet) {
         if (Bukkit.isPrimaryThread()) {
-            getPlayerConnection().sendPacket(packet);
+            getPlayerConnection().sendPacket((Packet) packet);
         } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().sendPacket(packet));
+            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().sendPacket((Packet) packet));
         }
     }
 
     @Override
-    public void sendPackets(@Nonnull Packet... packets) {
-        for (Packet packet : packets) {
+    public void sendPackets(@Nonnull Object... packets) {
+        for (Object packet : packets) {
             sendPacket(packet);
         }
-    }
-
-    @Override
-    public void sendPacketObject(@Nonnull Object packet) {
-        sendPacket(((Packet) packet));
-    }
-
-    @Override
-    public void sendPacketObjects(@Nonnull Object... packets) {
-        sendPackets(((Packet[]) packets));
     }
 
     @Override
@@ -304,7 +294,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void setCollision(@Nonnull Void collision) {
+    public <EnumTeamPush> void setCollision(@Nonnull EnumTeamPush collision) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
@@ -416,6 +406,11 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
+    public void setCooldown(@Nonnull ItemStack itemStack, int i) {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
+    @Override
     public int getSleepTicks() {
         return getBukkitPlayer().getSleepTicks();
     }
@@ -506,70 +501,57 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void hideTabListName(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void>[] players) {
+    public void hideTabListName(@Nonnull TNLPlayer[] players) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
+    @Nonnull
     @Override
-    public void disguise(@Nonnull EntityLiving entity, @Nonnull List<TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void>> receivers) {
-        for (TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> receiver : receivers) {
+    public void disguise(@Nonnull net.nonswag.tnl.listener.api.entity.LivingEntity<?> entity, @Nonnull List<TNLPlayer> receivers) {
+        for (TNLPlayer receiver : receivers) {
             disguise(entity, receiver);
         }
     }
 
+    @Nonnull
     @Override
-    public void disguise(@Nonnull EntityLiving entity, @Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> receiver) {
-        if (!this.equals(receiver)) {
+    public void disguise(@Nonnull net.nonswag.tnl.listener.api.entity.LivingEntity<?> entity, @Nonnull TNLPlayer receiver) {
+        if (!this.equals(receiver) && entity.getParameter() instanceof EntityLiving) {
             receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
-            entity.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
-            entity.world = getWorldServer();
+            ((EntityLiving) entity.getParameter()).setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
+            ((EntityLiving) entity.getParameter()).world = getWorldServer();
             Reflection.setField(entity, Entity.class, "id", this.getEntityId());
-            receiver.sendPacket(new PacketPlayOutSpawnEntityLiving(entity));
+            receiver.sendPacket(new PacketPlayOutSpawnEntityLiving(((EntityLiving) entity.getParameter())));
         }
     }
 
+    @Nonnull
     @Override
-    public void disguise(@Nonnull EntityLiving entity) {
-        disguise(entity, (TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void>) TNLListener.getInstance().getOnlinePlayers());
+    public void disguise(@Nonnull net.nonswag.tnl.listener.api.entity.LivingEntity<?> entity) {
+        disguise(entity, TNLListener.getInstance().getOnlinePlayers());
     }
 
     @Nonnull
-    private static final HashMap<UUID, List<String>> bossBars = new HashMap<>();
-    @Nonnull
-    private static final HashMap<UUID, BossBar> bossHashMap = new HashMap<>();
-
-    @Nonnull
-    private static HashMap<UUID, BossBar> getBossHashMap() {
-        return bossHashMap;
-    }
-
-    @Nonnull
-    public static HashMap<UUID, List<String>> getBossBars() {
-        return bossBars;
-    }
-
-    @Nonnull
-    public static List<String> getBossBars(@Nonnull UUID uniqueId) {
-        return bossBars.getOrDefault(uniqueId, new ArrayList<>());
-    }
-
     @Override
-    public void sendBossBar(@Nonnull BossBar bossBar) {
+    public void sendBossBar(@Nonnull BossBar<?> bossBar) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
+    @Nonnull
     @Override
-    public void updateBossBar(@Nonnull BossBar bossBar) {
+    public void sendBossBar(@Nonnull BossBar<?> bossBar, long millis) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
+    @Nonnull
     @Override
-    public void hideBossBar(@Nonnull BossBar bossBar) {
+    public void updateBossBar(@Nonnull BossBar<?> bossBar) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
+    @Nonnull
     @Override
-    public void sendBossBar(@Nonnull BossBar bossBar, long millis) {
+    public void hideBossBar(@Nonnull BossBar<?> bossBar) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
@@ -929,12 +911,12 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void hidePlayer(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> player) {
+    public void hidePlayer(@Nonnull TNLPlayer player) {
         sendPacket(new PacketPlayOutEntityDestroy(player.getEntityId()));
     }
 
     @Override
-    public void showPlayer(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> player) {
+    public void showPlayer(@Nonnull TNLPlayer player) {
         sendPacket(new PacketPlayOutSpawnEntityLiving(player.getEntityPlayer()));
     }
 
@@ -992,7 +974,12 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void setSpectatorTarget(@Nonnull Entity entity) {
+    public void spectate(@Nonnull Entity entity) {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
+    @Override
+    public void spectate() {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
@@ -1243,7 +1230,12 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
     }
 
     @Override
-    public void setGlowing(boolean b, @Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void>... players) {
+    public void setGlowing(boolean b, @Nonnull TNLPlayer... players) {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
+    @Override
+    public void setGlowing(boolean b, @Nonnull Entity entity) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
@@ -1408,7 +1400,7 @@ public class NMSPlayer implements TNLPlayer<NetworkManager, PlayerConnection, Sc
 
     @Override
     @Nullable
-    public TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, Void, Void> getKiller() {
+    public TNLPlayer getKiller() {
         if (getBukkitPlayer().getKiller() != null) {
             return NMSPlayer.cast(getBukkitPlayer().getKiller());
         }

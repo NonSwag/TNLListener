@@ -16,7 +16,7 @@ public class JoinListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         try {
-            TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player = null;
+            TNLPlayer player = null;
             if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
                 player = net.nonswag.tnl.listener.api.player.v1_7.R1.NMSPlayer.cast(event.getPlayer());
             } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
@@ -31,13 +31,13 @@ public class JoinListener implements Listener {
                     event.setJoinMessage(null);
                     if (player.hasPlayedBefore()) {
                         if (Settings.JOIN_MESSAGE.getValue()) {
-                            for (TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> all : TNLListener.getInstance().getOnlinePlayers()) {
+                            for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
                                 all.sendMessage(MessageKey.JOIN_MESSAGE, new Placeholder("player", event.getPlayer().getName()));
                             }
                         }
                     } else {
                         if (Settings.FIRST_JOIN_MESSAGE.getValue()) {
-                            for (TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> all : TNLListener.getInstance().getOnlinePlayers()) {
+                            for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
                                 all.sendMessage(MessageKey.FIRST_JOIN_MESSAGE, new Placeholder("player", event.getPlayer().getName()));
                             }
                         }

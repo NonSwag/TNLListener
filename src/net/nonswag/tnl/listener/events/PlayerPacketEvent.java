@@ -19,19 +19,19 @@ public class PlayerPacketEvent<Packet> extends Event implements Cancellable {
     @Nonnull
     private static final HandlerList handlers = new HandlerList();
     @Nonnull
-    private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
+    private final TNLPlayer player;
     @Nonnull
     private final Packet packet;
     private boolean cancelled = false;
 
-    public PlayerPacketEvent(@Nonnull TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, @Nonnull Packet packet) {
+    public PlayerPacketEvent(@Nonnull TNLPlayer player, @Nonnull Packet packet) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.packet = packet;
     }
 
     @Nonnull
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
+    public TNLPlayer getPlayer() {
         return player;
     }
 

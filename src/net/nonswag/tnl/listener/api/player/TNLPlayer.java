@@ -2,6 +2,7 @@ package net.nonswag.tnl.listener.api.player;
 
 import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
+import net.nonswag.tnl.listener.api.entity.LivingEntity;
 import net.nonswag.tnl.listener.api.message.ChatComponent;
 import net.nonswag.tnl.listener.api.message.Language;
 import net.nonswag.tnl.listener.api.message.MessageKey;
@@ -31,21 +32,9 @@ import java.util.*;
 
 /**
  * TNLPlayer is a more net.minecraft.server based player
- *
- * @see TNLPlayer#backflip()
- * @see TNLPlayer#bungeeConnect(net.nonswag.tnl.listener.api.server.Server)
- * @see TNLPlayer#getVirtualStorage()
- * @see TNLPlayer#updateBossBar(BossBar)
- * @see TNLPlayer#hideBossBar(BossBar)
- * @see TNLPlayer#sendBossBar(BossBar)
- * @see TNLPlayer#sendBossBar(BossBar, long)
- * @see TNLPlayer#resetTitle()
- * @see TNLPlayer#sendTitle(Title)
- * @see TNLPlayer#sendTitle(Title.Animation)
- *
  **/
 
-public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility> {
+public interface TNLPlayer {
 
     @Nullable
     Entity getVehicle();
@@ -81,7 +70,7 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
     org.bukkit.block.Block getTargetBlockExact(int i);
 
     @Nullable
-    TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility> getKiller();
+    TNLPlayer getKiller();
 
     @Nullable
     PotionEffect getPotionEffect(@Nonnull PotionEffectType potionEffectType);
@@ -142,16 +131,16 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
     Inventory getEnderChest();
 
     @Nonnull
-    NetworkManager getNetworkManager();
+    <NetworkManager> NetworkManager getNetworkManager();
 
     @Nonnull
-    PlayerConnection getPlayerConnection();
+    <PlayerConnection> PlayerConnection getPlayerConnection();
 
     @Nonnull
-    ScoreboardTeam getOptionTeam();
+    <ScoreboardTeam> ScoreboardTeam getOptionTeam();
 
     @Nonnull
-    Scoreboard getOptionScoreboard();
+    <Scoreboard> Scoreboard getOptionScoreboard();
 
     @Nonnull
     HashMap<String, Object> getVirtualStorage();
@@ -181,7 +170,7 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
     World getWorld();
 
     @Nonnull
-    WorldServer getWorldServer();
+    <WorldServer> WorldServer getWorldServer();
 
     @Nonnull
     List<Entity> getNearbyEntities(double v, double v1, double v2);
@@ -202,16 +191,18 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
     String getPlayerListName();
 
     @Nonnull
-    CraftPlayer getCraftPlayer();
+    <CraftPlayer> CraftPlayer getCraftPlayer();
 
     @Nonnull
-    EntityPlayer getEntityPlayer();
+    <EntityPlayer> EntityPlayer getEntityPlayer();
 
     @Nonnull
     Location getBedLocation();
 
     @Nonnull
     GameMode getGameMode();
+
+    void setGameMode(@Nonnull GameMode gamemode);
 
     @Nullable
     Location getBedSpawnLocation();
@@ -242,13 +233,9 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
 
     boolean hasPlayedBefore();
 
-    void sendPacket(@Nonnull Packet packet);
+    void sendPacket(@Nonnull Object packet);
 
-    void sendPackets(@Nonnull Packet... packets);
-
-    void sendPacketObject(@Nonnull Object packet);
-
-    void sendPacketObjects(@Nonnull Object... packets);
+    void sendPackets(@Nonnull Object... packets);
 
     double getMaxHealth();
 
@@ -268,7 +255,7 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
 
     void disconnect(@Nonnull String kickMessage);
 
-    void setCollision(@Nonnull EnumTeamPush collision);
+    <EnumTeamPush> void setCollision(@Nonnull EnumTeamPush collision);
 
     boolean setWindowProperty(@Nonnull InventoryView.Property property, int i);
 
@@ -282,6 +269,8 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
 
     void setCooldown(@Nonnull Material material, int i);
 
+    void setCooldown(@Nonnull ItemStack itemStack, int i);
+
     int getSleepTicks();
 
     void setDisplayName(@Nonnull String s);
@@ -294,8 +283,6 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
 
     void wakeup(boolean b);
 
-    void setGameMode(@Nonnull GameMode gameMode);
-
     boolean isBlocking();
 
     boolean isHandRaised();
@@ -306,21 +293,28 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
 
     void saveInventory(@Nonnull String id);
 
-    void hideTabListName(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility>[] players);
+    void hideTabListName(@Nonnull TNLPlayer[] players);
 
-    void disguise(@Nonnull EntityLiving entity, @Nonnull List<TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility>> receivers);
+    @Nonnull
+    void disguise(@Nonnull LivingEntity<?> entity, @Nonnull List<TNLPlayer> receivers);
 
-    void disguise(@Nonnull EntityLiving entity, @Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility> receiver);
+    @Nonnull
+    void disguise(@Nonnull LivingEntity<?> entity, @Nonnull TNLPlayer receiver);
 
-    void disguise(@Nonnull EntityLiving entity);
+    @Nonnull
+    void disguise(@Nonnull LivingEntity<?> entity);
 
-    void sendBossBar(@Nonnull BossBar bossBar);
+    @Nonnull
+    void sendBossBar(@Nonnull BossBar<?> bossBar);
 
-    void updateBossBar(@Nonnull BossBar bossBar);
+    @Nonnull
+    void updateBossBar(@Nonnull BossBar<?> bossBar);
 
-    void hideBossBar(@Nonnull BossBar bossBar);
+    @Nonnull
+    void hideBossBar(@Nonnull BossBar<?> bossBar);
 
-    void sendBossBar(@Nonnull BossBar bossBar, long millis);
+    @Nonnull
+    void sendBossBar(@Nonnull BossBar<?> bossBar, long millis);
 
     void sendTitle(@Nonnull Title title);
 
@@ -420,9 +414,9 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
 
     void setArrowCount(int arrows);
 
-    void hidePlayer(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility> player);
+    void hidePlayer(@Nonnull TNLPlayer player);
 
-    void showPlayer(@Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility> player);
+    void showPlayer(@Nonnull TNLPlayer player);
 
     boolean isFlying();
 
@@ -440,7 +434,9 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
 
     double getHealthScale();
 
-    void setSpectatorTarget(@Nonnull Entity entity);
+    void spectate(@Nonnull Entity entity);
+
+    void spectate();
 
     void resetTitle();
 
@@ -506,7 +502,9 @@ public interface TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Sco
 
     void setGlowing(boolean b);
 
-    void setGlowing(boolean b, @Nonnull TNLPlayer<NetworkManager, PlayerConnection, ScoreboardTeam, Scoreboard, EntityLiving, WorldServer, Packet, EntityPlayer, CraftPlayer, EnumTeamPush, EnumNameTagVisibility>... players);
+    void setGlowing(boolean b, @Nonnull TNLPlayer... players);
+
+    void setGlowing(boolean b, @Nonnull Entity entity);
 
     boolean isGlowing();
 

@@ -12,18 +12,18 @@ import java.util.Objects;
 public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
 
     @Nonnull private static final HandlerList handlers = new HandlerList();
-    @Nonnull private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
+    @Nonnull private final TNLPlayer player;
     private final int entityId;
     private boolean cancelled = false;
 
-    public PlayerInteractAtEntityEvent(@Nonnull TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, int entityId) {
+    public PlayerInteractAtEntityEvent(@Nonnull TNLPlayer player, int entityId) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.entityId = entityId;
     }
 
     @Nonnull
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
+    public TNLPlayer getPlayer() {
         return player;
     }
 

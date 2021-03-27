@@ -38,7 +38,7 @@ public class PacketListener implements Listener {
                     if (!chatEvent.isCancelled()) {
                         if (!chatEvent.isCommand()) {
                             event.setCancelled(true);
-                            for (TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> all : TNLListener.getInstance().getOnlinePlayers()) {
+                            for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
                                 if (chatEvent.getFormat() == null) {
                                     all.sendMessage(MessageKey.CHAT_FORMAT, new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("message", message), new Placeholder("colored_message", Color.Minecraft.colorize(message, '&')), new Placeholder("text", Color.Minecraft.colorize(message, '&')));
                                 } else {
@@ -67,15 +67,35 @@ public class PacketListener implements Listener {
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInBlockDig) {
-                PlayerDamageBlockEvent.BlockDamageType damageType = PlayerDamageBlockEvent.BlockDamageType.fromPacket(((PacketPlayInBlockDig) event.getPacket()));
+                PlayerDamageBlockEvent.BlockDamageType damageType = PlayerDamageBlockEvent.BlockDamageType.fromString(((PacketPlayInBlockDig) event.getPacket()).d().name());
                 if (damageType.equals(PlayerDamageBlockEvent.BlockDamageType.STOP_DESTROY_BLOCK)
                         || damageType.equals(PlayerDamageBlockEvent.BlockDamageType.START_DESTROY_BLOCK)
                         || damageType.equals(PlayerDamageBlockEvent.BlockDamageType.ABORT_DESTROY_BLOCK)) {
                     BlockPosition position = ((PacketPlayInBlockDig) event.getPacket()).b();
-                    Location location = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ());
-                    PlayerDamageBlockEvent blockEvent = new PlayerDamageBlockEvent(event.getPlayer(), location.getBlock(), damageType);
+                    EnumDirection againstBlock = ((PacketPlayInBlockDig) event.getPacket()).c();
+                    Block block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
+                    Block relative = block.getRelative(againstBlock.getAdjacentX(), againstBlock.getAdjacentY(), againstBlock.getAdjacentZ());
+                    if (relative.getType().equals(Material.FIRE)) {
+                        position = new BlockPosition(relative.getX(), relative.getY(), relative.getZ());
+                        block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
+                    }
+                    PlayerDamageBlockEvent blockEvent = new PlayerDamageBlockEvent(event.getPlayer(), block, damageType);
                     Bukkit.getPluginManager().callEvent(blockEvent);
                     event.setCancelled(blockEvent.isCancelled());
+                    if (blockEvent.isCancelled() && blockEvent.isUpdate()) {
+                        if (blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.STOP_DESTROY_BLOCK)
+                                || blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.START_DESTROY_BLOCK)) {
+                            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> {
+                                for (BlockFace blockFace : BlockFace.values()) {
+                                    Block rel = blockEvent.getBlock().getRelative(blockFace);
+                                    event.getPlayer().getBukkitPlayer().sendBlockChange(rel.getLocation(), rel.getBlockData());
+                                    rel.getState().update(true, false);
+                                }
+                            });
+                        } else if (blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.DROP_ITEM) || blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.DROP_ALL_ITEMS)) {
+                            event.getPlayer().updateInventory();
+                        }
+                    }
                 }
             } else if (event.getPacket() instanceof PacketPlayInTabComplete) {
                 if (((PacketPlayInTabComplete) event.getPacket()).c().startsWith("/")) {

@@ -1,10 +1,9 @@
 package net.nonswag.tnl.listener.listeners.v1_15.R1;
 
-import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.message.Message;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
-import net.nonswag.tnl.listener.api.player.TNLPlayer;
+import net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -16,7 +15,7 @@ public class CommandListener implements Listener {
 
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent event) {
-        TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player = TNLListener.getInstance().getPlayer(event.getPlayer());
+        NMSPlayer player = NMSPlayer.cast(event.getPlayer());
         String command = event.getMessage().split(" ")[0];
         switch (command.toLowerCase()) {
             case "/reload":

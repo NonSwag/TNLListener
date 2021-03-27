@@ -15,7 +15,7 @@ public class CommandListener implements Listener {
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent event) {
         String command = event.getMessage().split(" ")[0];
-        TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player = TNLListener.getInstance().getPlayer(event.getPlayer());
+        TNLPlayer player = TNLListener.getInstance().getPlayer(event.getPlayer());
         if (command.equalsIgnoreCase("/reload") || command.equalsIgnoreCase("/rl") || command.equalsIgnoreCase("/spigot")) {
             event.setCancelled(true);
             player.sendMessage(MessageKey.DISABLED_COMMAND, new Placeholder("command", command.toLowerCase()));

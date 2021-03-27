@@ -16,14 +16,14 @@ public class PlayerInteractEvent extends Event implements Cancellable {
     @Nonnull
     private static final HandlerList handlers = new HandlerList();
     @Nonnull
-    private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
+    private final TNLPlayer player;
     @Nonnull
     private final Block block;
     @Nonnull
     private final ItemStack heldItem;
     private boolean cancelled = false;
 
-    public PlayerInteractEvent(@Nonnull TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, @Nonnull Block block, @Nonnull ItemStack heldItem) {
+    public PlayerInteractEvent(@Nonnull TNLPlayer player, @Nonnull Block block, @Nonnull ItemStack heldItem) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.block = block;
@@ -50,7 +50,7 @@ public class PlayerInteractEvent extends Event implements Cancellable {
     }
 
     @Nonnull
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
+    public TNLPlayer getPlayer() {
         return player;
     }
 

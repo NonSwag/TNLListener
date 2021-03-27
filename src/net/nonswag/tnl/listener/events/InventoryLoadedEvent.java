@@ -10,10 +10,10 @@ import java.util.Objects;
 public class InventoryLoadedEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
-    private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
+    private final TNLPlayer player;
     private final String inventoryId;
 
-    public InventoryLoadedEvent(boolean async, TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, String inventoryId) {
+    public InventoryLoadedEvent(boolean async, TNLPlayer player, String inventoryId) {
         super(async);
         this.player = player;
         this.inventoryId = inventoryId;
@@ -23,7 +23,7 @@ public class InventoryLoadedEvent extends Event {
         this(false, player, inventoryId);
     }
 
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
+    public TNLPlayer getPlayer() {
         return player;
     }
 

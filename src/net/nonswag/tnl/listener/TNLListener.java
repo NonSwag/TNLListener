@@ -36,7 +36,7 @@ public class TNLListener {
     @Nonnull
     private final HashMap<World, String> worldAliasHashMap = new HashMap<>();
     @Nonnull
-    private final HashMap<Player, TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> playerHashMap = new HashMap<>();
+    private final HashMap<Player, TNLPlayer> playerHashMap = new HashMap<>();
     @Nonnull
     private final HashMap<UUID, SignMenu> signHashMap = new HashMap<>();
     @Nonnull
@@ -113,7 +113,7 @@ public class TNLListener {
     }
 
     @Nonnull
-    public List<TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> getOnlinePlayers() {
+    public List<TNLPlayer> getOnlinePlayers() {
         return new ArrayList<>(getPlayerHashMap().values());
     }
 
@@ -123,17 +123,17 @@ public class TNLListener {
     }
 
     @Nonnull
-    public HashMap<Player, TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> getPlayerHashMap() {
+    public HashMap<Player, TNLPlayer> getPlayerHashMap() {
         return playerHashMap;
     }
 
     @Nonnull
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer(@Nonnull Player player) {
+    public TNLPlayer getPlayer(@Nonnull Player player) {
         return getPlayerHashMap().get(player);
     }
 
     @Nullable
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer(@Nonnull CommandSender player) {
+    public TNLPlayer getPlayer(@Nonnull CommandSender player) {
         if (player instanceof Player) {
             return getPlayerHashMap().get(player);
         }
@@ -141,7 +141,7 @@ public class TNLListener {
     }
 
     @Nullable
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer(@Nullable Entity player) {
+    public TNLPlayer getPlayer(@Nullable Entity player) {
         if (player instanceof Player) {
             return getPlayerHashMap().get(player);
         } else {
@@ -150,12 +150,12 @@ public class TNLListener {
     }
 
     @Nullable
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer(@Nonnull String player) {
+    public TNLPlayer getPlayer(@Nonnull String player) {
         return getPlayerHashMap().get(Bukkit.getPlayer(player));
     }
 
     @Nullable
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer(@Nonnull UUID player) {
+    public TNLPlayer getPlayer(@Nonnull UUID player) {
         return getPlayerHashMap().get(Bukkit.getPlayer(player));
     }
 

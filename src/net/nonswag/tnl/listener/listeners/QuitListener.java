@@ -17,7 +17,7 @@ public class QuitListener implements Listener {
         try {
             event.setQuitMessage(null);
             if(Settings.QUIT_MESSAGE.getValue()) {
-                for (TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> all : TNLListener.getInstance().getOnlinePlayers()) {
+                for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
                     all.sendMessage(MessageKey.QUIT_MESSAGE, new Placeholder("player", event.getPlayer().getName()));
                 }
             }

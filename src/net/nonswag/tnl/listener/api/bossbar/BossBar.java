@@ -1,150 +1,45 @@
 package net.nonswag.tnl.listener.api.bossbar;
 
-import net.nonswag.tnl.listener.utils.MathUtil;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
-import org.bukkit.craftbukkit.v1_15_R1.boss.CraftBossBar;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 
-public class BossBar {
+public interface BossBar<CBB> {
 
     @Nonnull
-    private static final HashMap<String, BossBar> bossBarMap = new HashMap<>();
+    String getId();
 
     @Nonnull
-    private final String id;
-    @Nonnull
-    private String text;
-    @Nonnull
-    private BarColor color;
-    @Nonnull
-    private BarStyle style;
-    @Nonnull
-    private BarFlag[] barFlags;
-    private long progress;
-    @Nonnull
-    private final CraftBossBar bossBar;
+    String getText();
 
     @Nonnull
-    private static HashMap<String, BossBar> getBossBarMap() {
-        return bossBarMap;
-    }
-
-    @Nullable
-    public static BossBar getBossBar(@Nonnull String id) {
-        return getBossBarMap().get(id);
-    }
-
-    public static void removeBossBar(@Nonnull String id) {
-        getBossBarMap().remove(id);
-    }
-
-    public static void clearBossBars() {
-        getBossBarMap().clear();
-    }
+    BarColor getColor();
 
     @Nonnull
-    public static Collection<BossBar> getBossBars() {
-        return getBossBarMap().values();
-    }
-
-    public BossBar(@Nonnull String id, @Nonnull Object text, @Nonnull BarColor color, @Nonnull BarStyle style, long progress, @Nonnull BarFlag... barFlags) {
-        this.id = id;
-        this.text = text.toString();
-        this.color = color;
-        this.style = style;
-        this.progress = MathUtil.validateLong(0, 100, progress);
-        this.barFlags = barFlags;
-        this.bossBar = new CraftBossBar(getText(), getColor(), getStyle(), getBarFlags());
-        bossBar.setProgress(getProgress());
-        getBossBarMap().put(getId(), this);
-    }
-
-    public BossBar(@Nonnull String id, @Nonnull Object text, @Nonnull BarColor color, @Nonnull BarStyle style, @Nonnull BarFlag... barFlags) {
-        this(id, text, color, style, 1, barFlags);
-    }
-
-    public BossBar(@Nonnull String id, @Nonnull Object text, @Nonnull BarColor color, @Nonnull BarFlag... barFlags) {
-        this(id, text, color, BarStyle.SEGMENTED_6, 1, barFlags);
-    }
+    BarStyle getStyle();
 
     @Nonnull
-    public String getText() {
-        return text;
-    }
+    BarFlag[] getBarFlags();
+
+    double getProgress();
 
     @Nonnull
-    public BarColor getColor() {
-        return color;
-    }
+    BossBar<CBB> setText(@Nonnull String text);
 
     @Nonnull
-    public BarStyle getStyle() {
-        return style;
-    }
+    BossBar<CBB> setColor(@Nonnull BarColor color);
 
     @Nonnull
-    public BarFlag[] getBarFlags() {
-        return barFlags;
-    }
-
-    public long getProgress() {
-        return progress;
-    }
+    BossBar<CBB> setStyle(@Nonnull BarStyle style);
 
     @Nonnull
-    public String getId() {
-        return id;
-    }
+    BossBar<CBB> setBarFlags(@Nonnull BarFlag... barFlags);
 
     @Nonnull
-    public BossBar setText(@Nonnull String text) {
-        getBossBar().setTitle(text);
-        this.text = text;
-        return this;
-    }
+    BossBar<CBB> setProgress(double progress);
 
     @Nonnull
-    public BossBar setColor(@Nonnull BarColor color) {
-        getBossBar().setColor(color);
-        this.color = color;
-        return this;
-    }
-
-    @Nonnull
-    public BossBar setStyle(@Nonnull BarStyle style) {
-        getBossBar().setStyle(style);
-        this.style = style;
-        return this;
-    }
-
-    @Nonnull
-    public BossBar setBarFlags(@Nonnull BarFlag... barFlags) {
-        for (BarFlag flag : BarFlag.values()) {
-            if (Arrays.asList(barFlags).contains(flag)) {
-                getBossBar().addFlag(flag);
-            } else {
-                getBossBar().removeFlag(flag);
-            }
-        }
-        this.barFlags = barFlags;
-        return this;
-    }
-
-    @Nonnull
-    public BossBar setProgress(long progress) {
-        this.progress = progress;
-        return this;
-    }
-
-    @Nonnull
-    public CraftBossBar getBossBar() {
-        return bossBar;
-    }
+    CBB getBossBar();
 }

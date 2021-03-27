@@ -11,11 +11,11 @@ import java.util.Objects;
 public class EntityDamageByPlayerEvent<Entity> extends Event implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
-    private final TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player;
+    private final TNLPlayer player;
     private final Entity entity;
     private boolean cancelled = false;
 
-    public EntityDamageByPlayerEvent(TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> player, Entity entity) {
+    public EntityDamageByPlayerEvent(TNLPlayer player, Entity entity) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.entity = entity;
@@ -25,7 +25,7 @@ public class EntityDamageByPlayerEvent<Entity> extends Event implements Cancella
         return handlers;
     }
 
-    public TNLPlayer<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> getPlayer() {
+    public TNLPlayer getPlayer() {
         return player;
     }
 
