@@ -6,7 +6,7 @@ import net.nonswag.tnl.listener.api.message.Language;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Generic;
-import net.nonswag.tnl.listener.api.permission.PermissionManager;
+import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import org.bukkit.*;
@@ -93,7 +93,7 @@ public interface TNLPlayer {
     Player getBukkitPlayer();
 
     @Nonnull
-    PermissionManager getPermissionManager();
+    Permissions getPermissionManager();
 
     @Nonnull
     String getName();

@@ -10,6 +10,7 @@ import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
+import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
@@ -70,7 +71,7 @@ public class NMSPlayer implements TNLPlayer {
     @Nonnull
     private final HashMap<String, Object> virtualStorage = new HashMap<>();
     @Nonnull
-    private final PermissionManager permissionManager;
+    private final Permissions permissionManager;
 
     protected NMSPlayer(@Nonnull Player bukkitPlayer) {
         this.bukkitPlayer = bukkitPlayer;
@@ -182,7 +183,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     @Nonnull
-    public PermissionManager getPermissionManager() {
+    public Permissions getPermissionManager() {
         return permissionManager;
     }
 
