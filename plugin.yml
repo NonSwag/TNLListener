@@ -1,10 +1,6 @@
-name: TNLListener
+name: "TNLListener"
 version: "2.4"
-main: net.nonswag.tnl.listener.Loader
-author: NonSwag
-website: https://www.thenextlvl.net/
+author: "NonSwag"
 api-version: "1.13"
-authors:
- - NonSwag
-commands:
- bridge:
+main: net.nonswag.tnl.listener.Loader
+website: "https://www.thenextlvl.net/"
