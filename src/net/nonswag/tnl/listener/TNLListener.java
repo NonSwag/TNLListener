@@ -53,6 +53,9 @@ public class TNLListener {
             }
         }
         this.version = version;
+        if (getVersion().equals(ServerVersion.UNKNOWN)) {
+            System.exit(1);
+        }
     }
 
     protected void enable() {
@@ -92,7 +95,6 @@ public class TNLListener {
             new PluginUpdate(Loader.getInstance()).downloadUpdate();
         }
         try {
-            Logger.info.println("§aLoading §6TNLListener §8(§7" + getVersion().name().replace("_", ".") + "§8)");
             if (getVersion().equals(ServerVersion.v1_16_5)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.CommandListener());
@@ -101,13 +103,14 @@ public class TNLListener {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15.R1.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15.R1.CommandListener());
                 eventManager.registerListener(new InteractListener());
-            } else if (getVersion().equals(ServerVersion.v1_7_2)) {
-                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R1.PacketListener());
-                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.CommandListener());
             } else if (getVersion().equals(ServerVersion.v1_7_10)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R4.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.CommandListener());
+            } else if (getVersion().equals(ServerVersion.v1_7_2)) {
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R1.PacketListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.CommandListener());
             }
+            Logger.info.println("§aLoading §6TNLListener §8(§7" + getVersion().name().replace("_", ".") + "§8)");
             eventManager.registerListener(new JoinListener());
             eventManager.registerListener(new KickListener());
             eventManager.registerListener(new QuitListener());
