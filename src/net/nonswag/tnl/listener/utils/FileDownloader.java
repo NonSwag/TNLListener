@@ -2,6 +2,7 @@ package net.nonswag.tnl.listener.utils;
 
 import net.nonswag.tnl.listener.api.logger.Logger;
 
+import javax.annotation.Nonnull;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,7 +12,7 @@ import java.net.URL;
 
 public class FileDownloader {
 
-    public static void downloadFile(String url, String saveDir) throws IOException {
+    public static void downloadFile(@Nonnull String url, @Nonnull String directory) throws IOException {
         HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
         connection.setRequestMethod("GET");
         connection.connect();
@@ -31,7 +32,7 @@ public class FileDownloader {
             }
             if (fileName != null) {
                 InputStream inputStream = connection.getInputStream();
-                String saveFilePath = saveDir + File.separator + fileName;
+                String saveFilePath = directory + File.separator + fileName;
                 FileOutputStream outputStream = new FileOutputStream(saveFilePath);
                 int bytesRead;
                 byte[] buffer = new byte[4096];

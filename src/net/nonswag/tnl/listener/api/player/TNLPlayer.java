@@ -1,6 +1,5 @@
 package net.nonswag.tnl.listener.api.player;
 
-import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
 import net.nonswag.tnl.listener.api.message.ChatComponent;
 import net.nonswag.tnl.listener.api.message.Language;
@@ -47,9 +46,6 @@ public interface TNLPlayer {
 
     @Nonnull
     BlockFace getFacing();
-
-    @Nonnull
-    BackFlip backflip();
 
     @Nonnull
     Location getEyeLocation();
@@ -320,7 +316,7 @@ public interface TNLPlayer {
 
     void sendTitle(@Nonnull Title.Animation animation);
 
-    void sendActionBar(@Nonnull ActionBar actionBar);
+    void sendActionbar(@Nonnull String actionbar);
 
     void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server);
 

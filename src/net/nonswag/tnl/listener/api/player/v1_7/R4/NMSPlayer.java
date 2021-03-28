@@ -4,13 +4,11 @@ import net.minecraft.server.v1_7_R4.*;
 import net.minecraft.util.io.netty.channel.*;
 import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
-import net.nonswag.tnl.listener.api.player.BackFlip;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
@@ -567,8 +565,8 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public void sendActionBar(@Nonnull ActionBar actionBar) {
-        sendPacket(new PacketPlayOutChat(new ChatMessage(actionBar.getText())));
+    public void sendActionbar(@Nonnull String actionbar) {
+        sendPacket(new PacketPlayOutChat(new ChatMessage(actionbar)));
     }
 
     @Override
@@ -1301,12 +1299,6 @@ public class NMSPlayer implements TNLPlayer {
     @Nonnull
     public BlockFace getFacing() {
         throw new UnsupportedOperationException("method is not supported in this version");
-    }
-
-    @Override
-    @Nonnull
-    public BackFlip backflip() {
-        return new BackFlip(this);
     }
 
     @Override

@@ -4,14 +4,12 @@ import io.netty.channel.*;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
 import net.nonswag.tnl.listener.api.bossbar.v1_15.R1.NMSBossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
-import net.nonswag.tnl.listener.api.player.BackFlip;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
@@ -676,8 +674,8 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public void sendActionBar(@Nonnull ActionBar actionBar) {
-        sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + actionBar.getText() + "\"}"), ChatMessageType.a((byte) 2)));
+    public void sendActionbar(@Nonnull String actionbar) {
+        sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + actionbar + "\"}"), ChatMessageType.a((byte) 2)));
     }
 
     @Override
@@ -1410,12 +1408,6 @@ public class NMSPlayer implements TNLPlayer {
     @Nonnull
     public BlockFace getFacing() {
         return getBukkitPlayer().getFacing();
-    }
-
-    @Override
-    @Nonnull
-    public BackFlip backflip() {
-        return new BackFlip(this);
     }
 
     @Override
