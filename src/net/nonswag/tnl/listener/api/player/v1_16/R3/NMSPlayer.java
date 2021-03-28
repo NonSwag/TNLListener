@@ -189,7 +189,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public boolean isOnline() {
-        return getBukkitPlayer().isOnline();
+        return getCraftPlayer().isOnline();
     }
 
     @Override
