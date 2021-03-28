@@ -1,11 +1,12 @@
-package net.nonswag.tnl.listener.api.player.v1_7.R1;
+package net.nonswag.tnl.listener.api.player.v1_16.R3;
 
-import net.minecraft.server.v1_7_R1.*;
-import net.minecraft.util.io.netty.channel.*;
+import io.netty.channel.*;
+import net.minecraft.server.v1_16_R3.*;
 import net.nonswag.tnl.listener.Loader;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
+import net.nonswag.tnl.listener.api.bossbar.v1_16.R3.NMSBossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
 import net.nonswag.tnl.listener.api.object.Generic;
@@ -26,8 +27,10 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -49,23 +52,32 @@ import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 public class NMSPlayer implements TNLPlayer {
-    
-    @Nonnull private final Player bukkitPlayer;
-    @Nonnull private final Scoreboard optionScoreboard = new Scoreboard();
-    @Nonnull private final ScoreboardTeam optionTeam = new ScoreboardTeam(getOptionScoreboard(), "TNLOptionPacket");
-    @Nonnull private final HashMap<String, Object> virtualStorage = new HashMap<>();
-    @Nonnull private final PermissionManager permissionManager;
+
+    @Nonnull
+    private static final HashMap<UUID, List<String>> bossBars = new HashMap<>();
+    @Nonnull
+    private static final HashMap<UUID, NMSBossBar> bossHashMap = new HashMap<>();
+
+    @Nonnull
+    private final Player bukkitPlayer;
+    @Nonnull
+    private final Scoreboard optionScoreboard = new Scoreboard();
+    @Nonnull
+    private final ScoreboardTeam optionTeam = new ScoreboardTeam(getOptionScoreboard(), "TNLOptionPacket");
+    @Nonnull
+    private final HashMap<String, Object> virtualStorage = new HashMap<>();
+    @Nonnull
+    private final PermissionManager permissionManager;
 
     protected NMSPlayer(@Nonnull Player bukkitPlayer) {
         this.bukkitPlayer = bukkitPlayer;
         this.permissionManager = new PermissionManager(this);
+        getOptionScoreboard().addPlayerToTeam(getName(), getOptionTeam());
     }
 
     @Nonnull
@@ -74,6 +86,11 @@ public class NMSPlayer implements TNLPlayer {
             TNLListener.getInstance().getPlayerHashMap().put(player, new NMSPlayer(player));
         }
         return (NMSPlayer) TNLListener.getInstance().getPlayerHashMap().get(player);
+    }
+
+    @Nonnull
+    public static NMSPlayer cast(@Nonnull CraftPlayer craftPlayer) {
+        return cast((Player) craftPlayer);
     }
 
     @Nullable
@@ -208,18 +225,18 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public void sendPacket(@Nonnull Object packet) {
-        if (Bukkit.isPrimaryThread()) {
-            getPlayerConnection().sendPacket((Packet) packet);
-        } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().sendPacket((Packet) packet));
+    public void sendPackets(@Nonnull Object... packets) {
+        for (Object packet : packets) {
+            sendPacket(packet);
         }
     }
 
     @Override
-    public void sendPackets(@Nonnull Object... packets) {
-        for (Object packet : packets) {
-            sendPacket(packet);
+    public void sendPacket(@Nonnull Object packet) {
+        if (Bukkit.isPrimaryThread()) {
+            getPlayerConnection().sendPacket((Packet<?>) packet);
+        } else {
+            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().sendPacket((Packet<?>) packet));
         }
     }
 
@@ -247,7 +264,7 @@ public class NMSPlayer implements TNLPlayer {
     public void sendMessage(@Nonnull MessageKey messageKey, @Nonnull Placeholder... placeholders) {
         Language language = Language.ROOT;
         if (!messageKey.isSystemMessage()) {
-            language = getLanguage();
+            language = Language.fromLocale(getBukkitPlayer().getLocale());
         }
         LanguageKey languageKey = new LanguageKey(language, messageKey);
         ChatComponent component = Message.valueOf(languageKey);
@@ -261,14 +278,14 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void disconnect() {
-        disconnect(MessageKey.KICKED, "\n§cDisconnected");
+        disconnect(MessageKey.KICKED + "\n§cDisconnected");
     }
 
     @Override
     public void disconnect(@Nonnull MessageKey messageKey, @Nonnull String append, @Nonnull Placeholder... placeholders) {
         Language language = Language.ROOT;
         if (!messageKey.isSystemMessage()) {
-            language = getLanguage();
+            language = Language.fromLocale(getBukkitPlayer().getLocale());
         }
         LanguageKey languageKey = new LanguageKey(language, messageKey);
         ChatComponent component = Message.valueOf(languageKey);
@@ -288,20 +305,27 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void disconnect(@Nonnull String kickMessage) {
         if (Bukkit.isPrimaryThread()) {
-            getPlayerConnection().disconnect(kickMessage);
+            if (!getPlayerConnection().processedDisconnect) {
+                getPlayerConnection().disconnect(kickMessage);
+            }
         } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().disconnect(kickMessage));
+            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> {
+                if (!getPlayerConnection().processedDisconnect) {
+                    getPlayerConnection().disconnect(kickMessage);
+                }
+            });
         }
-    }
-
-    @Override
-    public <EnumTeamPush> void setCollision(@Nonnull EnumTeamPush collision) {
-        throw new UnsupportedOperationException("method is not supported in this version");
     }
 
     @Override
     public String getWorldAlias() {
         return getWorldAlias(getWorld());
+    }
+
+    @Override
+    public <EnumTeamPush> void setCollision(@Nonnull EnumTeamPush collision) {
+        getOptionTeam().setCollisionRule((ScoreboardTeamBase.EnumTeamPush) collision);
+        sendPacket(new PacketPlayOutScoreboardTeam(getOptionTeam(), 0));
     }
 
     @Nonnull
@@ -361,29 +385,34 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public void openInventory(@Nonnull InventoryView inventoryView) {
-        getBukkitPlayer().openInventory(inventoryView);
-    }
-
-    @Override
     public void openSignEditor(@Nonnull Location location) {
-        sendPacket(new PacketPlayOutOpenSignEditor(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+        if (location.getBlock().getBlockData() instanceof org.bukkit.block.data.type.Sign) {
+            sendPacket(new PacketPlayOutOpenSignEditor(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ())));
+        }
     }
 
     @Override
     public void openVirtualSignEditor(@Nonnull SignMenu signMenu) {
+        BlockPosition position = new BlockPosition(signMenu.getLocation().getBlockX(), signMenu.getLocation().getBlockY(), signMenu.getLocation().getBlockZ());
+        PacketPlayOutOpenSignEditor editor = new PacketPlayOutOpenSignEditor(position);
         TileEntitySign tileEntitySign = new TileEntitySign();
-        tileEntitySign.a(getWorldServer());
-        tileEntitySign.x = signMenu.getLocation().getBlockX();
-        tileEntitySign.y = signMenu.getLocation().getBlockY();
-        tileEntitySign.z = signMenu.getLocation().getBlockZ();
+        tileEntitySign.setLocation(getWorldServer(), position);
         for (int line = 0; line < 4; line++) {
             if (signMenu.getLines().length >= (line + 1)) {
-                tileEntitySign.lines[line] = signMenu.getLines()[line];
+                tileEntitySign.lines[line] = new ChatMessage(signMenu.getLines()[line]);
             }
         }
-        sendPacket(tileEntitySign.getUpdatePacket());
-        sendPacket(new PacketPlayOutOpenSignEditor(signMenu.getLocation().getBlockX(), signMenu.getLocation().getBlockY(), signMenu.getLocation().getBlockZ()));
+        getBukkitPlayer().sendBlockChange(signMenu.getLocation(), Material.SPRUCE_SIGN.createBlockData());
+        PacketPlayOutTileEntityData updatePacket = tileEntitySign.getUpdatePacket();
+        assert updatePacket != null;
+        sendPacket(updatePacket);
+        sendPacket(editor);
+        TNLListener.getInstance().getSignHashMap().put(getUniqueId(), signMenu);
+    }
+
+    @Override
+    public void openInventory(@Nonnull InventoryView inventoryView) {
+        getBukkitPlayer().openInventory(inventoryView);
     }
 
     @Override
@@ -398,17 +427,21 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public int getCooldown(@Nonnull Material material) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getCooldown(material);
     }
 
     @Override
     public void setCooldown(@Nonnull Material material, int i) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        if (Bukkit.isPrimaryThread()) {
+            getCraftPlayer().setCooldown(material, i);
+        } else {
+            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getCraftPlayer().setCooldown(material, i));
+        }
     }
 
     @Override
     public void setCooldown(@Nonnull ItemStack itemStack, int i) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        sendPacket(new PacketPlayOutSetCooldown(CraftItemStack.asNMSCopy(itemStack).getItem(), i));
     }
 
     @Override
@@ -434,29 +467,29 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public boolean sleep(@Nonnull Location location, boolean b) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().sleep(location, b);
     }
 
     @Override
     public void wakeup(boolean b) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().wakeup(b);
     }
 
     @Override
     @Nonnull
     public Location getBedLocation() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getBedLocation();
     }
 
-    @Override
     @Nonnull
+    @Override
     public GameMode getGameMode() {
-        return getBukkitPlayer().getGameMode();
+        return getCraftPlayer().getGameMode();
     }
 
     @Override
-    public void setGameMode(@Nonnull GameMode gameMode) {
-        getBukkitPlayer().setGameMode(gameMode);
+    public void setGameMode(@Nonnull GameMode gamemode) {
+        getCraftPlayer().setGameMode(gamemode);
     }
 
     @Override
@@ -466,7 +499,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public boolean isHandRaised() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().isHandRaised();
     }
 
     @Override
@@ -476,7 +509,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public float getAttackCooldown() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getAttackCooldown();
     }
 
     @Override
@@ -503,7 +536,17 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void hideTabListName(@Nonnull TNLPlayer[] players) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        for (TNLPlayer all : players) {
+            if (!all.getUniqueId().equals(getUniqueId())) {
+                sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ((NMSPlayer) all).getEntityPlayer()));
+            }
+        }
+    }
+
+    @Nonnull
+    @Override
+    public void disguise(@Nonnull Generic<?> entity) {
+        disguise(entity, TNLListener.getInstance().getOnlinePlayers());
     }
 
     @Nonnull
@@ -517,58 +560,124 @@ public class NMSPlayer implements TNLPlayer {
     @Nonnull
     @Override
     public void disguise(@Nonnull Generic<?> entity, @Nonnull TNLPlayer receiver) {
-        if (!this.equals(receiver) && entity.getParameter() instanceof EntityLiving) {
+        if (!receiver.getUniqueId().equals(getUniqueId()) && entity.getParameter() instanceof EntityLiving) {
             receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
             ((EntityLiving) entity.getParameter()).setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
-            ((EntityLiving) entity.getParameter()).world = getWorldServer();
-            Reflection.setField(entity, Entity.class, "id", this.getEntityId());
+            ((EntityLiving) entity.getParameter()).world = this.getWorldServer();
+            Reflection.setField(entity, net.minecraft.server.v1_16_R3.Entity.class, "id", this.getEntityId());
             receiver.sendPacket(new PacketPlayOutSpawnEntityLiving(((EntityLiving) entity.getParameter())));
         }
     }
 
     @Nonnull
-    @Override
-    public void disguise(@Nonnull Generic<?> entity) {
-        disguise(entity, TNLListener.getInstance().getOnlinePlayers());
+    private static HashMap<UUID, NMSBossBar> getBossHashMap() {
+        return bossHashMap;
     }
 
     @Nonnull
-    @Override
-    public void sendBossBar(@Nonnull BossBar<?> bossBar) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+    private static HashMap<UUID, List<String>> getBossBars() {
+        return bossBars;
+    }
+
+    @Nonnull
+    public static List<String> getBossBars(@Nonnull UUID uniqueId) {
+        return bossBars.getOrDefault(uniqueId, new ArrayList<>());
     }
 
     @Nonnull
     @Override
     public void sendBossBar(@Nonnull BossBar<?> bossBar, long millis) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        NMSBossBar.createBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+        if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null) {
+            hideBossBar(getBossHashMap().get(getBukkitPlayer().getUniqueId()));
+        }
+        getBossHashMap().put(getBukkitPlayer().getUniqueId(), (NMSBossBar) bossBar);
+        sendBossBar(bossBar);
+        new Thread(() -> {
+            try {
+                Thread.sleep(millis);
+            } catch (Exception ignored) {
+            }
+            if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null
+                    && getBossHashMap().get(getBukkitPlayer().getUniqueId()).equals(bossBar)) {
+                hideBossBar(getBossHashMap().get(getBukkitPlayer().getUniqueId()));
+            }
+        }).start();
+    }
+
+    @Nonnull
+    @Override
+    public void sendBossBar(@Nonnull BossBar<?> bossBar) {
+        NMSBossBar.createBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+        if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
+            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.ADD, ((NMSBossBar) bossBar).getBossBar().getHandle()));
+            List<String> bars = getBossBars(getUniqueId());
+            bars.add(bossBar.getId());
+            getBossBars().put(getUniqueId(), bars);
+        }
+        updateBossBar(bossBar);
     }
 
     @Nonnull
     @Override
     public void updateBossBar(@Nonnull BossBar<?> bossBar) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        NMSBossBar.createBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+        if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
+            sendBossBar(bossBar);
+        } else {
+            BossBattleServer handle = ((NMSBossBar) bossBar).getBossBar().getHandle();
+            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_NAME, handle));
+            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_PCT, handle));
+            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_PROPERTIES, handle));
+            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_STYLE, handle));
+        }
     }
 
     @Nonnull
     @Override
     public void hideBossBar(@Nonnull BossBar<?> bossBar) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        NMSBossBar.deleteBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.REMOVE, ((NMSBossBar) bossBar).getBossBar().getHandle()));
+        List<String> bars = getBossBars(getUniqueId());
+        bars.remove(bossBar.getId());
+        getBossBars().put(getUniqueId(), bars);
+        NMSBossBar.removeBossBar(bossBar.getId());
     }
 
     @Override
     public void sendTitle(@Nonnull Title title) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getCraftPlayer().sendTitle(title.getTitle(), title.getSubtitle(), title.getTimeIn(), title.getTimeStay(), title.getTimeOut());
     }
 
     @Override
     public void sendTitle(@Nonnull Title.Animation animation) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        new Thread(() -> {
+            try {
+                String[] split = animation.getTitle().getTitle().split("");
+                String spaces = "          ";
+                do {
+                    spaces = spaces.replaceFirst(" ", "");
+                    getBukkitPlayer().sendTitle((animation.getDesign().getSecondaryColor() +
+                                    "- " +
+                                    animation.getDesign().getPrimaryColor() +
+                                    String.join(spaces, split) +
+                                    animation.getDesign().getSecondaryColor() +
+                                    " -"),
+                            animation.getDesign().getExtraColor() + animation.getTitle().getSubtitle(),
+                            animation.getTitle().getTimeIn(),
+                            animation.getTitle().getTimeStay(),
+                            animation.getTitle().getTimeOut());
+                    Thread.sleep(50);
+                } while (!spaces.isEmpty());
+            } catch (Exception e) {
+                Logger.error.println(e);
+            }
+        }).start();
     }
 
     @Override
     public void sendActionBar(@Nonnull ActionBar actionBar) {
-        sendPacket(new PacketPlayOutChat(new ChatMessage(actionBar.getText())));
+        sendPacket(new PacketPlayOutChat(new ChatMessage(actionBar.getText()), ChatMessageType.a((byte) 2), getUniqueId()));
     }
 
     @Override
@@ -668,28 +777,28 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     @Nullable
     public String getPlayerListHeader() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getPlayerListHeader();
     }
 
     @Override
     @Nullable
     public String getPlayerListFooter() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getPlayerListFooter();
     }
 
     @Override
     public void setPlayerListHeader(@Nonnull String s) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setPlayerListHeader(s);
     }
 
     @Override
     public void setPlayerListFooter(@Nonnull String s) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setPlayerListFooter(s);
     }
 
     @Override
     public void setPlayerListHeaderFooter(@Nonnull String s, @Nonnull String s1) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setPlayerListHeaderFooter(s, s1);
     }
 
     @Override
@@ -772,12 +881,13 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void updateInventory() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().updateInventory();
     }
 
     @Override
     public void setPlayerTime(long l, boolean b) {
         getBukkitPlayer().setPlayerTime(l, b);
+        sendPacket(new PacketPlayOutUpdateTime(l, l, b));
     }
 
     @Override
@@ -798,11 +908,17 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void resetPlayerTime() {
         getBukkitPlayer().resetPlayerTime();
+        sendPacket(new PacketPlayOutUpdateTime(getWorld().getTime(), getWorld().getTime(), true));
     }
 
     @Override
     public void setPlayerWeather(@Nonnull WeatherType weatherType) {
         getBukkitPlayer().setPlayerWeather(weatherType);
+        if (weatherType.equals(WeatherType.DOWNFALL)) {
+            sendPacket(new PacketPlayOutGameStateChange(new PacketPlayOutGameStateChange.a(2), 0.0F));
+        } else {
+            sendPacket(new PacketPlayOutGameStateChange(new PacketPlayOutGameStateChange.a(1), 0.0F));
+        }
     }
 
     @Override
@@ -858,12 +974,12 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void sendExperienceChange(float v) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().sendExperienceChange(v);
     }
 
     @Override
     public void sendExperienceChange(float v, int i) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().sendExperienceChange(v, i);
     }
 
     @Override
@@ -908,7 +1024,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void setArrowCount(int arrows) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getEntityPlayer().setArrowCount(arrows);
     }
 
     @Override
@@ -953,14 +1069,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void setResourcePack(@Nonnull String s, byte[] bytes) {
-        net.nonswag.tnl.listener.api.object.Objects<Method> resourcePack = Reflection.getMethod(getBukkitPlayer(), "setResourcePack", String.class);
-        if (resourcePack.hasValue()) {
-            try {
-                resourcePack.nonnull().invoke(s);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                Logger.error.println(e);
-            }
-        }
+        getBukkitPlayer().setResourcePack(s, bytes);
     }
 
     @Override
@@ -971,57 +1080,49 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     @Nullable
     public Entity getSpectatorTarget() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getCraftPlayer().getSpectatorTarget();
     }
 
     @Override
     public void spectate(@Nonnull Entity entity) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getCraftPlayer().setSpectatorTarget(entity);
     }
 
     @Override
     public void spectate() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getCraftPlayer().setSpectatorTarget(getCraftPlayer());
     }
 
     @Override
     public void resetTitle() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.RESET, null));
     }
 
     @Override
     public int getClientViewDistance() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getClientViewDistance();
     }
 
     @Override
     @Nonnull
     public String getLocale() {
-        return getLanguage().getShorthand();
+        return getBukkitPlayer().getLocale();
     }
 
     @Nonnull
     @Override
     public Language getLanguage() {
-        Language language = Language.ENGLISH;
-        try {
-            net.nonswag.tnl.listener.api.object.Objects<Method> locale = Reflection.getMethod(getBukkitPlayer().spigot(), "getLocale");
-            if (locale.hasValue()) {
-                language = Language.fromLocale((String) locale.nonnull().invoke(getBukkitPlayer().spigot()));
-            }
-        } catch (Exception ignored) {
-        }
-        return language;
+        return Language.fromLocale(getLocale());
     }
 
     @Override
     public void updateCommands() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().updateCommands();
     }
 
     @Override
     public void openBook(@Nonnull ItemStack itemStack) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().openBook(itemStack);
     }
 
     @Override
@@ -1055,17 +1156,17 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public double getHeight() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getHeight();
     }
 
     @Override
     public double getWidth() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getWidth();
     }
 
     @Override
     public boolean isOnGround() {
-        return getEntityPlayer().onGround;
+        return getBukkitPlayer().isOnGround();
     }
 
     @Override
@@ -1082,7 +1183,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void setRotation(float v, float v1) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setRotation(v, v1);
     }
 
     @Override
@@ -1139,17 +1240,17 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     @Nonnull
     public List<Entity> getPassengers() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getPassengers();
     }
 
     @Override
     public boolean addPassenger(@Nonnull Entity entity) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().addPassenger(entity);
     }
 
     @Override
     public boolean removePassenger(@Nonnull Entity entity) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().removePassenger(entity);
     }
 
     @Override
@@ -1227,80 +1328,88 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void setGlowing(boolean b) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setGlowing(b);
     }
 
     @Override
     public void setGlowing(boolean b, @Nonnull TNLPlayer... players) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        boolean glowing = getEntityPlayer().glowing;
+        getEntityPlayer().glowing = b;
+        for (TNLPlayer all : players) {
+            sendPacket(new PacketPlayOutEntityMetadata(getEntityId(), getEntityPlayer().getDataWatcher(), true));
+        }
+        getEntityPlayer().glowing = glowing;
     }
 
     @Override
     public void setGlowing(boolean b, @Nonnull Entity entity) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        net.minecraft.server.v1_16_R3.Entity handle = ((CraftEntity) entity).getHandle();
+        handle.glowing = b;
+        sendPacket(new PacketPlayOutEntityMetadata(entity.getEntityId(), handle.getDataWatcher(), true));
+        // handle.glowing = glowing;
     }
 
     @Override
     public boolean isGlowing() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().isGlowing();
     }
 
     @Override
     public void setInvulnerable(boolean b) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setInvulnerable(b);
     }
 
     @Override
     public boolean isInvulnerable() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().isInvulnerable();
     }
 
     @Override
     public boolean hasGravity() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().hasGravity();
     }
 
     @Override
     public void setGravity(boolean b) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setGravity(b);
     }
 
     @Override
     public int getPortalCooldown() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getPortalCooldown();
     }
 
     @Override
     public void setPortalCooldown(int i) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setPortalCooldown(i);
     }
 
     @Override
     @Nonnull
     public Set<String> getScoreboardTags() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getScoreboardTags();
     }
 
     @Override
     public boolean addScoreboardTag(@Nonnull String s) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().addScoreboardTag(s);
     }
 
     @Override
     public boolean removeScoreboardTag(@Nonnull String s) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().removeScoreboardTag(s);
     }
 
     @Override
     @Nonnull
     public PistonMoveReaction getPistonMoveReaction() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getPistonMoveReaction();
     }
 
     @Override
     @Nonnull
     public BlockFace getFacing() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getFacing();
     }
 
     @Override
@@ -1328,25 +1437,25 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     @Nonnull
     public List<Block> getLineOfSight(@Nonnull Set<Material> set, int i) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getLineOfSight(set, i);
     }
 
     @Override
     @Nonnull
     public Block getTargetBlock(@Nonnull Set<Material> set, int i) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getTargetBlock(set, i);
     }
 
     @Override
     @Nonnull
     public List<Block> getLastTwoTargetBlocks(@Nonnull Set<Material> set, int i) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getLastTwoTargetBlocks(set, i);
     }
 
     @Override
     @Nullable
     public Block getTargetBlockExact(int i) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getTargetBlockExact(i);
     }
 
     @Override
@@ -1381,7 +1490,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public double getLastDamage() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getLastDamage();
     }
 
     @Override
@@ -1399,11 +1508,11 @@ public class NMSPlayer implements TNLPlayer {
         getBukkitPlayer().setNoDamageTicks(i);
     }
 
-    @Override
     @Nullable
+    @Override
     public TNLPlayer getKiller() {
         if (getBukkitPlayer().getKiller() != null) {
-            return NMSPlayer.cast(getBukkitPlayer().getKiller());
+            return cast(getBukkitPlayer().getKiller());
         }
         return null;
     }
@@ -1426,7 +1535,7 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     @Nullable
     public PotionEffect getPotionEffect(@Nonnull PotionEffectType potionEffectType) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getPotionEffect(potionEffectType);
     }
 
     @Override
@@ -1489,27 +1598,27 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public boolean isGliding() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().isGliding();
     }
 
     @Override
     public void setGliding(boolean b) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setGliding(b);
     }
 
     @Override
     public boolean isSwimming() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().isSwimming();
     }
 
     @Override
     public void setSwimming(boolean b) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setSwimming(b);
     }
 
     @Override
     public boolean isRiptiding() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().isRiptiding();
     }
 
     @Override
@@ -1519,27 +1628,27 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void attack(@Nonnull Entity entity) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().attack(entity);
     }
 
     @Override
     public void swingMainHand() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().swingMainHand();
     }
 
     @Override
     public void swingOffHand() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().swingOffHand();
     }
 
     @Override
     public void setCollidable(boolean b) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setCollidable(b);
     }
 
     @Override
     public boolean isCollidable() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().isCollidable();
     }
 
     @Override
@@ -1554,7 +1663,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public double getHealth() {
-        return getEntityPlayer().getHealth();
+        return getBukkitPlayer().getHealth();
     }
 
     @Override
@@ -1564,12 +1673,12 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public double getAbsorptionAmount() {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        return getBukkitPlayer().getAbsorptionAmount();
     }
 
     @Override
     public void setAbsorptionAmount(double v) {
-        throw new UnsupportedOperationException("method is not supported in this version");
+        getBukkitPlayer().setAbsorptionAmount(v);
     }
 
     @Override
@@ -1610,19 +1719,9 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public void uninject() {
-        try {
-            net.nonswag.tnl.listener.api.object.Objects<Channel> field = (net.nonswag.tnl.listener.api.object.Objects<Channel>) Reflection.getField(getNetworkManager(), "k");
-            if (field.hasValue()) {
-                Channel channel = field.nonnull();
-                if (channel.pipeline().get(getName() + "-TNLListener") != null) {
-                    channel.eventLoop().submit(() -> channel.pipeline().remove(getName() + "-TNLListener"));
-                }
-            } else {
-                disconnect();
-            }
-        } catch (Exception ignored) {
-        }
+    @Nonnull
+    public Set<String> getListeningPluginChannels() {
+        return getBukkitPlayer().getListeningPluginChannels();
     }
 
     @Override
@@ -1635,7 +1734,7 @@ public class NMSPlayer implements TNLPlayer {
                     @Override
                     public void channelRead(ChannelHandlerContext channelHandlerContext, Object packetObject) {
                         try {
-                            PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(player, ((Packet) packetObject));
+                            PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(player, ((Packet<?>) packetObject));
                             Bukkit.getPluginManager().callEvent(event);
                             if (!event.isCancelled()) {
                                 super.channelRead(channelHandlerContext, event.getPacket());
@@ -1649,7 +1748,7 @@ public class NMSPlayer implements TNLPlayer {
                     @Override
                     public void write(ChannelHandlerContext channelHandlerContext, Object packetObject, ChannelPromise channelPromise) {
                         try {
-                            PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(player, ((Packet) packetObject));
+                            PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(player, ((Packet<?>) packetObject));
                             Bukkit.getPluginManager().callEvent(event);
                             if (!event.isCancelled()) {
                                 super.write(channelHandlerContext, event.getPacket(), channelPromise);
@@ -1658,19 +1757,12 @@ public class NMSPlayer implements TNLPlayer {
                             Logger.error.println(e);
                             uninject();
                         }
-
                     }
                 };
-                net.nonswag.tnl.listener.api.object.Objects<Channel> field = (net.nonswag.tnl.listener.api.object.Objects<Channel>) Reflection.getField(getNetworkManager(), "k");
-                if (field.hasValue()) {
-                    Channel channel = field.nonnull();
-                    ChannelPipeline pipeline = channel.pipeline();
-                    try {
-                        pipeline.addBefore("packet_handler", getName() + "-TNLListener", channelDuplexHandler);
-                    } catch (Exception ignored) {
-                        uninject();
-                    }
-                } else {
+                ChannelPipeline pipeline = getNetworkManager().channel.pipeline();
+                try {
+                    pipeline.addBefore("packet_handler", getName() + "-TNLListener", channelDuplexHandler);
+                } catch (Throwable ignored) {
                     uninject();
                 }
             } else {
@@ -1684,14 +1776,21 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    @Nonnull
-    public Set<String> getListeningPluginChannels() {
-        return getBukkitPlayer().getListeningPluginChannels();
+    public void uninject() {
+        try {
+            Channel channel = getNetworkManager().channel;
+            if (channel.pipeline().get(getName() + "-TNLListener") != null) {
+                channel.eventLoop().submit(() -> {
+                    channel.pipeline().remove(getName() + "-TNLListener");
+                });
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     @Override
     public String toString() {
-        return "NMSPlayer{" +
+        return "TNLPlayer{" +
                 "bukkitPlayer=" + bukkitPlayer +
                 ", optionScoreboard=" + optionScoreboard +
                 ", optionTeam=" + optionTeam +
@@ -1704,8 +1803,8 @@ public class NMSPlayer implements TNLPlayer {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NMSPlayer nmsPlayer = (NMSPlayer) o;
-        return bukkitPlayer.equals(nmsPlayer.bukkitPlayer) && optionScoreboard.equals(nmsPlayer.optionScoreboard) && optionTeam.equals(nmsPlayer.optionTeam) && virtualStorage.equals(nmsPlayer.virtualStorage) && permissionManager.equals(nmsPlayer.permissionManager);
+        NMSPlayer player = (NMSPlayer) o;
+        return bukkitPlayer.equals(player.bukkitPlayer) && optionScoreboard.equals(player.optionScoreboard) && optionTeam.equals(player.optionTeam) && virtualStorage.equals(player.virtualStorage) && permissionManager.equals(player.permissionManager);
     }
 
     @Override

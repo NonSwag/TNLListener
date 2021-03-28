@@ -2,11 +2,11 @@ package net.nonswag.tnl.listener.api.player;
 
 import net.nonswag.tnl.listener.api.actionbar.ActionBar;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
-import net.nonswag.tnl.listener.api.entity.LivingEntity;
 import net.nonswag.tnl.listener.api.message.ChatComponent;
 import net.nonswag.tnl.listener.api.message.Language;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
+import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
@@ -296,13 +296,13 @@ public interface TNLPlayer {
     void hideTabListName(@Nonnull TNLPlayer[] players);
 
     @Nonnull
-    void disguise(@Nonnull LivingEntity<?> entity, @Nonnull List<TNLPlayer> receivers);
+    void disguise(@Nonnull Generic<?> entity, @Nonnull List<TNLPlayer> receivers);
 
     @Nonnull
-    void disguise(@Nonnull LivingEntity<?> entity, @Nonnull TNLPlayer receiver);
+    void disguise(@Nonnull Generic<?> entity, @Nonnull TNLPlayer receiver);
 
     @Nonnull
-    void disguise(@Nonnull LivingEntity<?> entity);
+    void disguise(@Nonnull Generic<?> entity);
 
     @Nonnull
     void sendBossBar(@Nonnull BossBar<?> bossBar);

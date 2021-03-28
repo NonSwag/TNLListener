@@ -9,6 +9,7 @@ import net.nonswag.tnl.listener.api.bossbar.BossBar;
 import net.nonswag.tnl.listener.api.bossbar.v1_15.R1.NMSBossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
+import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.player.BackFlip;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
@@ -544,13 +545,13 @@ public class NMSPlayer implements TNLPlayer {
 
     @Nonnull
     @Override
-    public void disguise(@Nonnull net.nonswag.tnl.listener.api.entity.LivingEntity<?> entity) {
+    public void disguise(@Nonnull Generic<?> entity) {
         disguise(entity, TNLListener.getInstance().getOnlinePlayers());
     }
 
     @Nonnull
     @Override
-    public void disguise(@Nonnull net.nonswag.tnl.listener.api.entity.LivingEntity<?> entity, @Nonnull List<TNLPlayer> receivers) {
+    public void disguise(@Nonnull Generic<?> entity, @Nonnull List<TNLPlayer> receivers) {
         for (TNLPlayer receiver : receivers) {
             disguise(entity, receiver);
         }
@@ -558,7 +559,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Nonnull
     @Override
-    public void disguise(@Nonnull net.nonswag.tnl.listener.api.entity.LivingEntity<?> entity, @Nonnull TNLPlayer receiver) {
+    public void disguise(@Nonnull Generic<?> entity, @Nonnull TNLPlayer receiver) {
         if (!receiver.getUniqueId().equals(getUniqueId()) && entity.getParameter() instanceof EntityLiving) {
             receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
             ((EntityLiving) entity.getParameter()).setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());

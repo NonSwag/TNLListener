@@ -93,7 +93,11 @@ public class TNLListener {
         }
         try {
             Logger.info.println("§aLoading §6TNLListener §8(§7" + getVersion().name().replace("_", ".") + "§8)");
-            if (getVersion().equals(ServerVersion.v1_15_2)) {
+            if (getVersion().equals(ServerVersion.v1_16_5)) {
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.PacketListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.CommandListener());
+                eventManager.registerListener(new InteractListener());
+            } else if (getVersion().equals(ServerVersion.v1_15_2)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15.R1.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15.R1.CommandListener());
                 eventManager.registerListener(new InteractListener());

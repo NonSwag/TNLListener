@@ -73,7 +73,13 @@ public class PermissionManager implements Permissions {
     @Override
     public void updatePermissions() {
         Class<?> clazz = null;
-        if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer) {
+        if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_16.R3.NMSPlayer) {
+            try {
+                clazz = Reflection.getClass("net.minecraft.server.v1_16_R3.PacketPlayOutEntityStatus");
+            } catch (NoClassDefFoundError e) {
+                e.printStackTrace();
+            }
+        } else if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer) {
             try {
                 clazz = Reflection.getClass("net.minecraft.server.v1_15_R1.PacketPlayOutEntityStatus");
             } catch (NoClassDefFoundError e) {
@@ -82,14 +88,14 @@ public class PermissionManager implements Permissions {
         } else if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_7.R1.NMSPlayer) {
             try {
                 clazz = Reflection.getClass("net.minecraft.server.v1_7_R1.PacketPlayOutEntityStatus");
-            } catch (Throwable t) {
-                t.printStackTrace();
+            } catch (NoClassDefFoundError e) {
+                e.printStackTrace();
             }
         } else if (getPlayer() instanceof net.nonswag.tnl.listener.api.player.v1_7.R4.NMSPlayer) {
             try {
                 clazz = Reflection.getClass("net.minecraft.server.v1_7_R4.PacketPlayOutEntityStatus");
-            } catch (Throwable t) {
-                t.printStackTrace();
+            } catch (NoClassDefFoundError e) {
+                e.printStackTrace();
             }
         }
         if (clazz != null) {
