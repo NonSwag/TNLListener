@@ -1,6 +1,7 @@
 package net.nonswag.tnl.listener.api.item.v1_15.R1;
 
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
+import net.nonswag.tnl.listener.api.item.TNLItem;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -17,7 +18,7 @@ import javax.annotation.Nonnull;
 import java.net.URI;
 import java.util.*;
 
-public class NMSItem {
+public class NMSItem implements TNLItem {
 
     @Nonnull
     private ItemStack itemStack;
@@ -33,44 +34,52 @@ public class NMSItem {
         this(new ItemStack(material));
     }
 
+    @Override
     public void setItemStack(@Nonnull ItemStack itemStack) {
         this.itemStack = itemStack;
     }
 
+    @Override
     public void setItemMeta(@Nonnull ItemMeta itemMeta) {
         this.itemMeta = itemMeta;
     }
 
+    @Override
     @Nonnull
     public ItemStack getItemStack() {
         return itemStack;
     }
 
+    @Override
     @Nonnull
     public ItemMeta getItemMeta() {
         return itemMeta;
     }
 
     @Nonnull
+    @Override
     public ItemStack build() {
         getItemStack().setItemMeta(getItemMeta());
         return getItemStack();
     }
 
     @Nonnull
-    public NMSItem setName(@Nonnull String name) {
+    @Override
+    public TNLItem setName(@Nonnull String name) {
         getItemMeta().setDisplayName(name);
         return this;
     }
 
     @Nonnull
-    public NMSItem enchant(@Nonnull Enchantment enchantment, int level) {
+    @Override
+    public TNLItem enchant(@Nonnull Enchantment enchantment, int level) {
         getItemMeta().addEnchant(enchantment, level, true);
         return this;
     }
 
     @Nonnull
-    public NMSItem setDamage(float damage) {
+    @Override
+    public TNLItem setDamage(float damage) {
         if (getItemMeta() instanceof Damageable) {
             ((Damageable) getItemMeta()).setDamage(((short) damage));
         }
@@ -78,13 +87,15 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem hideFlag(@Nonnull ItemFlag itemFlag) {
+    @Override
+    public TNLItem hideFlag(@Nonnull ItemFlag itemFlag) {
         getItemMeta().addItemFlags(itemFlag);
         return this;
     }
 
     @Nonnull
-    public NMSItem setSkullOwner(@Nonnull OfflinePlayer owner) {
+    @Override
+    public TNLItem setSkullOwner(@Nonnull OfflinePlayer owner) {
         if (getItemMeta() instanceof SkullMeta) {
             ((SkullMeta) getItemMeta()).setOwningPlayer(owner);
         }
@@ -92,7 +103,8 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem setSkullOwner(@Nonnull String name) {
+    @Override
+    public TNLItem setSkullOwner(@Nonnull String name) {
         if (getItemMeta() instanceof SkullMeta) {
             ((SkullMeta) getItemMeta()).setOwningPlayer(Bukkit.getOfflinePlayer(name));
         }
@@ -100,7 +112,8 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem setSkullImgURL(@Nonnull String url) {
+    @Override
+    public TNLItem setSkullImgURL(@Nonnull String url) {
         try {
             setSkullValue(Base64.getEncoder().encodeToString(("{\"textures\":{\"SKIN\":{\"url\":\"" + new URI(url).toString() + "\"}}}").getBytes()));
         } catch (Exception e) {
@@ -110,7 +123,8 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem setSkullValue(@Nonnull String base64) {
+    @Override
+    public TNLItem setSkullValue(@Nonnull String base64) {
         try {
             modifyNBT("{SkullOwner:{Id:\"" + new UUID(base64.hashCode(), base64.hashCode()) + "\",Properties:{textures:[{Value:\"" + base64 + "\"}]}}}");
         } catch (Exception e) {
@@ -120,7 +134,8 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem setColor(@Nonnull Color color) {
+    @Override
+    public TNLItem setColor(@Nonnull Color color) {
         if (getItemMeta() instanceof PotionMeta) {
             ((PotionMeta) getItemMeta()).setColor(color);
         } else if (getItemMeta() instanceof FireworkEffectMeta) {
@@ -132,7 +147,8 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem addBannerPattern(@Nonnull Pattern pattern) {
+    @Override
+    public TNLItem addBannerPattern(@Nonnull Pattern pattern) {
         if (getItemMeta() instanceof BannerMeta) {
             ((BannerMeta) getItemMeta()).addPattern(pattern);
         }
@@ -140,6 +156,7 @@ public class NMSItem {
     }
 
     @Nonnull
+    @Override
     public List<Pattern> getBannerPatterns() {
         if (getItemMeta() instanceof BannerMeta) {
             ((BannerMeta) getItemMeta()).getPatterns();
@@ -148,29 +165,34 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem setCustomModelData(int customModelData) {
+    @Override
+    public TNLItem setCustomModelData(int customModelData) {
         modifyNBT("{CustomModelData:" + customModelData + "}");
         return this;
     }
 
+    @Override
     public int getCustomModelData() {
         return getNBT().getInt("{CustomModelData}");
     }
 
     @Nonnull
+    @Override
     public NBTTagCompound getNBT() {
         return CraftItemStack.asNMSCopy(getItemStack()).getOrCreateTag();
     }
 
     @Nonnull
-    public NMSItem modifyNBT(@Nonnull String nbt) {
+    @Override
+    public TNLItem modifyNBT(@Nonnull String nbt) {
         setItemStack(Bukkit.getUnsafe().modifyItemStack(getItemStack(), nbt));
         setItemMeta(getItemStack().getItemMeta());
         return this;
     }
 
     @Nonnull
-    public NMSItem setPower(int power) {
+    @Override
+    public TNLItem setPower(int power) {
         if (getItemMeta() instanceof FireworkMeta) {
             ((FireworkMeta) getItemMeta()).setPower(power);
         }
@@ -178,7 +200,8 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem setEffect(@Nonnull FireworkEffect effect) {
+    @Override
+    public TNLItem setEffect(@Nonnull FireworkEffect effect) {
         if (getItemMeta() instanceof FireworkEffectMeta) {
             ((FireworkEffectMeta) getItemMeta()).setEffect(effect);
         }
@@ -186,7 +209,8 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem addEffects(@Nonnull PotionEffect... effects) {
+    @Override
+    public TNLItem addEffects(@Nonnull PotionEffect... effects) {
         if (getItemMeta() instanceof PotionMeta) {
             for (PotionEffect effect : effects) {
                 ((PotionMeta) getItemMeta()).addCustomEffect(effect, false);
@@ -196,24 +220,22 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem hideFlags() {
-        getItemMeta().addItemFlags(ItemFlag.HIDE_ENCHANTS,
-                ItemFlag.HIDE_ATTRIBUTES,
-                ItemFlag.HIDE_DESTROYS,
-                ItemFlag.HIDE_UNBREAKABLE,
-                ItemFlag.HIDE_PLACED_ON,
-                ItemFlag.HIDE_POTION_EFFECTS);
+    @Override
+    public TNLItem hideFlags() {
+        getItemMeta().addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_PLACED_ON, ItemFlag.HIDE_POTION_EFFECTS);
         return this;
     }
 
     @Nonnull
-    public NMSItem addAttribute(@Nonnull Attribute attribute, @Nonnull AttributeModifier modifier) {
+    @Override
+    public TNLItem addAttribute(@Nonnull Attribute attribute, @Nonnull AttributeModifier modifier) {
         getItemMeta().addAttributeModifier(attribute, modifier);
         return this;
     }
 
     @Nonnull
-    public NMSItem removeAttributes(@Nonnull Attribute... attributes) {
+    @Override
+    public TNLItem removeAttributes(@Nonnull Attribute... attributes) {
         for (Attribute attribute : attributes) {
             getItemMeta().removeAttributeModifier(attribute);
         }
@@ -221,13 +243,15 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem addFlags(@Nonnull ItemFlag... itemFlags) {
+    @Override
+    public TNLItem addFlags(@Nonnull ItemFlag... itemFlags) {
         getItemMeta().addItemFlags(itemFlags);
         return this;
     }
 
     @Nonnull
-    public NMSItem addStoredEnchantment(@Nonnull Enchantment enchantment, int level) {
+    @Override
+    public TNLItem addStoredEnchantment(@Nonnull Enchantment enchantment, int level) {
         if (getItemMeta() instanceof EnchantmentStorageMeta) {
             ((EnchantmentStorageMeta) getItemMeta()).addStoredEnchant(enchantment, level, true);
         }
@@ -235,31 +259,36 @@ public class NMSItem {
     }
 
     @Nonnull
-    public NMSItem setLore(@Nonnull String... lore) {
+    @Override
+    public TNLItem setLore(@Nonnull String... lore) {
         getItemMeta().setLore(Arrays.asList(lore));
         return this;
     }
 
     @Nonnull
-    public NMSItem setLore(@Nonnull List<String> lore) {
+    @Override
+    public TNLItem setLore(@Nonnull List<String> lore) {
         getItemMeta().setLore(lore);
         return this;
     }
 
     @Nonnull
-    public NMSItem setAmount(int amount) {
+    @Override
+    public TNLItem setAmount(int amount) {
         getItemStack().setAmount(amount);
         return this;
     }
 
     @Nonnull
-    public NMSItem setUnbreakable() {
+    @Override
+    public TNLItem setUnbreakable() {
         getItemMeta().setUnbreakable(true);
         return this;
     }
 
     @Nonnull
-    public NMSItem setBreakable() {
+    @Override
+    public TNLItem setBreakable() {
         getItemMeta().setUnbreakable(false);
         return this;
     }
