@@ -12,6 +12,7 @@ import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
+import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.events.InventoryLoadedEvent;
@@ -1339,6 +1340,12 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     @Nullable
     public Block getTargetBlockExact(int i) {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
+    @Nonnull
+    @Override
+    public Sidebar<?, ?> getSidebar() {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 

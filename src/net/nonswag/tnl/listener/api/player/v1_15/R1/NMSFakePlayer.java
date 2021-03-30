@@ -43,16 +43,16 @@ public class NMSFakePlayer implements TNLFakePlayer<MinecraftServer, WorldServer
         this.receivers = receivers;
         this.worldServer = ((CraftWorld) Objects.requireNonNull(getLocation().getWorld())).getHandle();
         this.profile = new GameProfile(UUID.randomUUID(), getName());
+        this.server = ((CraftServer) Bukkit.getServer()).getServer();
         this.player = new EntityPlayer(getServer(), getWorldServer(), getProfile(), new PlayerInteractManager(getWorldServer()));
         this.player.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
-        this.server = ((CraftServer) Bukkit.getServer()).getServer();
         this.skin = new Skin("", "");
     }
 
     @Override
     public void setSkin(@Nonnull Skin skin) {
         this.skin = skin;
-        this.profile.getProperties().put("textures", new Property("textures", getSkin().getSignature(), getSkin().getValue()));
+        this.profile.getProperties().put("textures", new Property("textures", getSkin().getValue(), getSkin().getSignature()));
     }
 
     @Override

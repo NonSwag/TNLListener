@@ -7,6 +7,7 @@ import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.permission.Permissions;
+import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import org.bukkit.*;
@@ -64,6 +65,9 @@ public interface TNLPlayer {
 
     @Nullable
     org.bukkit.block.Block getTargetBlockExact(int i);
+
+    @Nonnull
+    Sidebar<?, ?> getSidebar();
 
     @Nullable
     TNLPlayer getKiller();

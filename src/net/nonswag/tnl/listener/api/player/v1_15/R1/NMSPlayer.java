@@ -13,6 +13,7 @@ import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
+import net.nonswag.tnl.listener.api.scoreboard.v1_15.R1.NMSSidebar;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.events.InventoryLoadedEvent;
@@ -1449,6 +1450,15 @@ public class NMSPlayer implements TNLPlayer {
     @Nullable
     public Block getTargetBlockExact(int i) {
         return getBukkitPlayer().getTargetBlockExact(i);
+    }
+
+    @Nonnull
+    @Override
+    public NMSSidebar getSidebar() {
+        if (!NMSSidebar.getSidebars().containsKey(getUniqueId())) {
+            NMSSidebar.getSidebars().put(getUniqueId(), new NMSSidebar(this));
+        }
+        return NMSSidebar.getSidebars().get(getUniqueId());
     }
 
     @Override
