@@ -11,8 +11,10 @@ import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -219,6 +221,17 @@ public interface TNLPlayer {
     @Nullable
     InetSocketAddress getAddress();
 
+    default void sendBlockChange(@Nonnull Location location, @Nonnull BlockFace blockFace) {
+        Block relative = location.getBlock().getRelative(blockFace);
+        sendBlockChange(relative.getLocation());
+    }
+
+    void sendBlockChange(@Nonnull Location location, @Nonnull BlockData block);
+
+    default void sendBlockChange(@Nonnull Location location) {
+        sendBlockChange(location, location.getBlock().getBlockData());
+    }
+
     int getPing();
 
     boolean isOnline();
@@ -338,17 +351,29 @@ public interface TNLPlayer {
 
     void setCompassTarget(@Nonnull Location location);
 
-    void chat(@Nonnull String s);
+    default void chat(@Nonnull String s) {
+        getBukkitPlayer().chat(s);
+    }
 
-    boolean performCommand(@Nonnull String s);
+    default boolean performCommand(@Nonnull String s) {
+        return getBukkitPlayer().performCommand(s);
+    }
 
-    boolean isSneaking();
+    default boolean isSneaking() {
+        return getBukkitPlayer().isSneaking();
+    }
 
-    void setSneaking(boolean b);
+    default void setSneaking(boolean b) {
+        getBukkitPlayer().setSneaking(b);
+    }
 
-    boolean isSprinting();
+    default boolean isSprinting() {
+        return getBukkitPlayer().isSprinting();
+    }
 
-    void setSprinting(boolean b);
+    default void setSprinting(boolean b) {
+        getBukkitPlayer().setSprinting(b);
+    }
 
     void saveData();
 

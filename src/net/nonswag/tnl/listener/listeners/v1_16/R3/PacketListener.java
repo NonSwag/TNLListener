@@ -88,7 +88,7 @@ public class PacketListener implements Listener {
                             Bukkit.getScheduler().runTask(Loader.getInstance(), () -> {
                                 for (BlockFace blockFace : BlockFace.values()) {
                                     Block rel = blockEvent.getBlock().getRelative(blockFace);
-                                    event.getPlayer().getBukkitPlayer().sendBlockChange(rel.getLocation(), rel.getBlockData());
+                                    event.getPlayer().sendBlockChange(rel.getLocation(), rel.getBlockData());
                                     rel.getState().update(true, false);
                                 }
                             });
@@ -161,7 +161,7 @@ public class PacketListener implements Listener {
                         }
                     }
                     Bukkit.getScheduler().runTask(Loader.getInstance(), () -> TNLListener.getInstance().getSignHashMap().remove(event.getPlayer().getUniqueId()));
-                    event.getPlayer().getBukkitPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
+                    event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
                 BlockPosition position = ((PacketPlayInUseItem) event.getPacket()).c().getBlockPosition();
@@ -185,7 +185,7 @@ public class PacketListener implements Listener {
                         interactEvent.getBlock().getState().update();
                         for (BlockFace blockFace : BlockFace.values()) {
                             Block b = interactEvent.getBlock().getRelative(blockFace).getLocation().getBlock();
-                            event.getPlayer().getBukkitPlayer().sendBlockChange(b.getLocation(), b.getBlockData());
+                            event.getPlayer().sendBlockChange(b.getLocation(), b.getBlockData());
                         }
                         interactEvent.getPlayer().updateInventory();
                     });

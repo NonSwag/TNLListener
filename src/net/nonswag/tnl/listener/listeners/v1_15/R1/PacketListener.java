@@ -68,33 +68,25 @@ public class PacketListener implements Listener {
                 }
             } else if (event.getPacket() instanceof PacketPlayInBlockDig) {
                 PlayerDamageBlockEvent.BlockDamageType damageType = PlayerDamageBlockEvent.BlockDamageType.fromString(((PacketPlayInBlockDig) event.getPacket()).d().name());
-                if (damageType.equals(PlayerDamageBlockEvent.BlockDamageType.STOP_DESTROY_BLOCK)
-                        || damageType.equals(PlayerDamageBlockEvent.BlockDamageType.START_DESTROY_BLOCK)
-                        || damageType.equals(PlayerDamageBlockEvent.BlockDamageType.ABORT_DESTROY_BLOCK)) {
-                    BlockPosition position = ((PacketPlayInBlockDig) event.getPacket()).b();
-                    EnumDirection againstBlock = ((PacketPlayInBlockDig) event.getPacket()).c();
-                    Block block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
-                    Block relative = block.getRelative(againstBlock.getAdjacentX(), againstBlock.getAdjacentY(), againstBlock.getAdjacentZ());
-                    if (relative.getType().equals(Material.FIRE)) {
-                        position = new BlockPosition(relative.getX(), relative.getY(), relative.getZ());
-                        block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
-                    }
-                    PlayerDamageBlockEvent blockEvent = new PlayerDamageBlockEvent(event.getPlayer(), block, damageType);
-                    Bukkit.getPluginManager().callEvent(blockEvent);
-                    event.setCancelled(blockEvent.isCancelled());
-                    if (blockEvent.isCancelled() && blockEvent.isUpdate()) {
-                        if (blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.STOP_DESTROY_BLOCK)
-                                || blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.START_DESTROY_BLOCK)) {
-                            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> {
-                                for (BlockFace blockFace : BlockFace.values()) {
-                                    Block rel = blockEvent.getBlock().getRelative(blockFace);
-                                    event.getPlayer().getBukkitPlayer().sendBlockChange(rel.getLocation(), rel.getBlockData());
-                                    rel.getState().update(true, false);
-                                }
-                            });
-                        } else if (blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.DROP_ITEM) || blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.DROP_ALL_ITEMS)) {
-                            event.getPlayer().updateInventory();
+                BlockPosition position = ((PacketPlayInBlockDig) event.getPacket()).b();
+                EnumDirection againstBlock = ((PacketPlayInBlockDig) event.getPacket()).c();
+                Block block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
+                Block relative = block.getRelative(againstBlock.getAdjacentX(), againstBlock.getAdjacentY(), againstBlock.getAdjacentZ());
+                if (relative.getType().equals(Material.FIRE)) {
+                    position = new BlockPosition(relative.getX(), relative.getY(), relative.getZ());
+                    block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
+                }
+                PlayerDamageBlockEvent blockEvent = new PlayerDamageBlockEvent(event.getPlayer(), block, damageType);
+                Bukkit.getPluginManager().callEvent(blockEvent);
+                event.setCancelled(blockEvent.isCancelled());
+                if (blockEvent.isCancelled() && blockEvent.isUpdate()) {
+                    if (blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.STOP_DESTROY_BLOCK)
+                            || blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.START_DESTROY_BLOCK)) {
+                        for (BlockFace blockFace : BlockFace.values()) {
+                            event.getPlayer().sendBlockChange(blockEvent.getBlock().getLocation(), blockFace);
                         }
+                    } else if (blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.DROP_ITEM) || blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.DROP_ALL_ITEMS)) {
+                        event.getPlayer().updateInventory();
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInTabComplete) {
@@ -161,7 +153,7 @@ public class PacketListener implements Listener {
                         }
                     }
                     Bukkit.getScheduler().runTask(Loader.getInstance(), () -> TNLListener.getInstance().getSignHashMap().remove(event.getPlayer().getUniqueId()));
-                    event.getPlayer().getBukkitPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
+                    event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
                 BlockPosition position = ((PacketPlayInUseItem) event.getPacket()).c().getBlockPosition();
@@ -185,7 +177,7 @@ public class PacketListener implements Listener {
                         interactEvent.getBlock().getState().update();
                         for (BlockFace blockFace : BlockFace.values()) {
                             Block b = interactEvent.getBlock().getRelative(blockFace).getLocation().getBlock();
-                            event.getPlayer().getBukkitPlayer().sendBlockChange(b.getLocation(), b.getBlockData());
+                            event.getPlayer().sendBlockChange(b.getLocation(), b.getBlockData());
                         }
                         interactEvent.getPlayer().updateInventory();
                     });

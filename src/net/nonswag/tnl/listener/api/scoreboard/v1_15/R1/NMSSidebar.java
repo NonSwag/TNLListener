@@ -5,13 +5,8 @@ import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.UUID;
 
 public class NMSSidebar implements Sidebar<Scoreboard, ScoreboardObjective> {
-
-    @Nonnull
-    private static final HashMap<UUID, NMSSidebar> sidebars = new HashMap<>();
 
     @Nonnull
     private Scoreboard scoreboard = new Scoreboard();
@@ -81,10 +76,5 @@ public class NMSSidebar implements Sidebar<Scoreboard, ScoreboardObjective> {
     @Override
     public void setTitle(@Nonnull String scoreboardDisplayName) {
         getScoreboardObjective().setDisplayName(new ChatMessage(scoreboardDisplayName));
-    }
-
-    @Nonnull
-    public static HashMap<UUID, NMSSidebar> getSidebars() {
-        return sidebars;
     }
 }

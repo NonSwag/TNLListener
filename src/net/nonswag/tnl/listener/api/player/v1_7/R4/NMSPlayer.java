@@ -24,10 +24,12 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_7_R4.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -707,6 +709,13 @@ public class NMSPlayer implements TNLPlayer {
     @Nullable
     public InetSocketAddress getAddress() {
         return getBukkitPlayer().getAddress();
+    }
+
+    @Override
+    public void sendBlockChange(@Nonnull Location location, @Nonnull BlockData block) {
+        PacketPlayOutBlockChange packet = new PacketPlayOutBlockChange(location.getBlockX(), location.getBlockY(), location.getBlockZ(), ((CraftWorld) location.getWorld()).getHandle());
+        packet.block = CraftMagicNumbers.getBlock(block.getMaterial());
+        sendPacket(packet);
     }
 
     @Override

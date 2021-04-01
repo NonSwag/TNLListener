@@ -14,7 +14,7 @@ import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
-import net.nonswag.tnl.listener.api.scoreboard.v1_15.R1.NMSSidebar;
+import net.nonswag.tnl.listener.api.scoreboard.v1_16.R3.NMSSidebar;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.events.InventoryLoadedEvent;
@@ -26,8 +26,10 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
@@ -403,7 +405,7 @@ public class NMSPlayer implements TNLPlayer {
                 tileEntitySign.lines[line] = new ChatMessage(signMenu.getLines()[line]);
             }
         }
-        getBukkitPlayer().sendBlockChange(signMenu.getLocation(), Material.SPRUCE_SIGN.createBlockData());
+        sendBlockChange(signMenu.getLocation(), Material.SPRUCE_SIGN.createBlockData());
         PacketPlayOutTileEntityData updatePacket = tileEntitySign.getUpdatePacket();
         assert updatePacket != null;
         sendPacket(updatePacket);
@@ -817,6 +819,13 @@ public class NMSPlayer implements TNLPlayer {
     @Nullable
     public InetSocketAddress getAddress() {
         return getBukkitPlayer().getAddress();
+    }
+
+    @Override
+    public void sendBlockChange(@Nonnull Location location, @Nonnull BlockData block) {
+        PacketPlayOutBlockChange packet = new PacketPlayOutBlockChange(((CraftWorld) location.getWorld()).getHandle(), new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+        packet.block = ((CraftBlockData) block).getState();
+        sendPacket(packet);
     }
 
     @Override
@@ -1456,10 +1465,10 @@ public class NMSPlayer implements TNLPlayer {
     @Nonnull
     @Override
     public Sidebar<?, ?> getSidebar() {
-        if (!NMSSidebar.getSidebars().containsKey(getUniqueId())) {
-            NMSSidebar.getSidebars().put(getUniqueId(), new NMSSidebar(this));
+        if (!Sidebar.Storage.getSaves().containsKey(this)) {
+            Sidebar.Storage.getSaves().put(this, new NMSSidebar(this));
         }
-        return NMSSidebar.getSidebars().get(getUniqueId());
+        return Sidebar.Storage.getSaves().get(this);
     }
 
     @Override
@@ -1782,6 +1791,7 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void uninject() {
         try {
+            Sidebar.Storage.getSaves().remove(this);
             Channel channel = getNetworkManager().channel;
             if (channel.pipeline().get(getName() + "-TNLListener") != null) {
                 channel.eventLoop().submit(() -> {
