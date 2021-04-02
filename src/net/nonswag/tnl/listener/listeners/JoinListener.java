@@ -23,6 +23,10 @@ public class JoinListener implements Listener {
                 player = net.nonswag.tnl.listener.api.player.v1_7.R4.NMSPlayer.cast(event.getPlayer());
             } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
                 player = net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer.cast(event.getPlayer());
+            } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+                player = net.nonswag.tnl.listener.api.player.v1_16.R3.NMSPlayer.cast(event.getPlayer());
+            } else {
+                Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
             }
             if (player != null) {
                 player.getPermissionManager().updatePermissions();

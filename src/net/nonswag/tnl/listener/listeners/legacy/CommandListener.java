@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.listeners.v1_7;
+package net.nonswag.tnl.listener.listeners.legacy;
 
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.message.MessageKey;

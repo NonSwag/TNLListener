@@ -10,7 +10,6 @@ import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
-import net.nonswag.tnl.listener.listeners.InteractListener;
 import net.nonswag.tnl.listener.listeners.JoinListener;
 import net.nonswag.tnl.listener.listeners.KickListener;
 import net.nonswag.tnl.listener.listeners.QuitListener;
@@ -24,10 +23,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class TNLListener {
 
@@ -97,18 +93,18 @@ public class TNLListener {
         try {
             if (getVersion().equals(ServerVersion.v1_16_5)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.PacketListener());
-                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.CommandListener());
-                eventManager.registerListener(new InteractListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.updated.CommandListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.updated.InteractListener());
             } else if (getVersion().equals(ServerVersion.v1_15_2)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15.R1.PacketListener());
-                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15.R1.CommandListener());
-                eventManager.registerListener(new InteractListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.updated.CommandListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.updated.InteractListener());
             } else if (getVersion().equals(ServerVersion.v1_7_10)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R4.PacketListener());
-                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.CommandListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.legacy.CommandListener());
             } else if (getVersion().equals(ServerVersion.v1_7_2)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R1.PacketListener());
-                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.CommandListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.legacy.CommandListener());
             }
             Logger.info.println("§aLoading §6TNLListener §8(§7" + getVersion().name().replace("_", ".") + "§8)");
             eventManager.registerListener(new JoinListener());
