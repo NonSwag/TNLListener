@@ -101,7 +101,7 @@ public class PermissionManager implements Permissions {
         if (clazz != null) {
             try {
                 Object packet = clazz.newInstance();
-                Reflection.setField(packet, "a", getPlayer().getEntityId());
+                Reflection.setField(packet, "a", getPlayer().getId());
                 Reflection.setField(packet, "b", (byte) 28);
                 getPlayer().sendPacket(packet);
             } catch (InstantiationException | IllegalAccessException e) {

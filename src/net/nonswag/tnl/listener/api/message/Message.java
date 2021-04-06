@@ -11,6 +11,8 @@ import javax.annotation.Nullable;
 public abstract class Message {
 
     @Nonnull
+    public static final ChatComponent PREFIX = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.PREFIX), "§8[§f§lTNL§8]§r");
+    @Nonnull
     public static final ChatComponent LOG_INFO = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_INFO), "§8[§1%time% §8|§1 Info §8| §1%thread%§8]§a");
     @Nonnull
     public static final ChatComponent LOG_WARN = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_WARN), "§8[§e%time% §8|§e Warning §8| §e%thread%§8]§e");
@@ -20,8 +22,6 @@ public abstract class Message {
     public static final ChatComponent LOG_DEBUG = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_DEBUG), "§8[§6%time% §8|§6 Debug §8| §6%thread%§8]§a");
     @Nonnull
     public static final ChatComponent CHAT_FORMAT = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.CHAT_FORMAT), "§8[§f%world%§8] §f%player% §8» §f%message%");
-    @Nonnull
-    public static final ChatComponent PREFIX = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.PREFIX), "§8[§f§lTNL§8]§r");
     @Nonnull
     public static final ChatComponent SERVER_BRAND = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.SERVER_BRAND), "§8» §f%version%§7");
     @Nonnull
@@ -155,5 +155,6 @@ public abstract class Message {
             }
             jsonConfig.save();
         }
+        Placeholder.Registry.updateValue(new Placeholder("prefix", Message.PREFIX.getText()));
     }
 }

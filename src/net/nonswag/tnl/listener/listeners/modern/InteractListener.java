@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.listeners.updated;
+package net.nonswag.tnl.listener.listeners.modern;
 
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;

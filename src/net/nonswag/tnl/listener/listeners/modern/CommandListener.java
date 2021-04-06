@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.listeners.updated;
+package net.nonswag.tnl.listener.listeners.modern;
 
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.message.Message;
@@ -23,7 +23,7 @@ public class CommandListener implements Listener {
             case "/rl":
             case "/spigot":
                 event.setCancelled(true);
-                player.sendMessage(MessageKey.DISABLED_COMMAND, new Placeholder("command", command.toLowerCase()));
+                player.sendMessage(MessageKey.DISABLED_COMMAND, new Placeholder("command", command.toLowerCase().replaceFirst("/", "")));
                 return;
         }
         if (Settings.BETTER_COMMANDS.getValue()) {

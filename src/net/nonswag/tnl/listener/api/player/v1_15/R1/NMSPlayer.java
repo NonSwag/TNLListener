@@ -217,6 +217,12 @@ public class NMSPlayer implements TNLPlayer {
         return bukkitPlayer;
     }
 
+    @Nonnull
+    @Override
+    public Entity getBukkitEntity() {
+        return getBukkitPlayer();
+    }
+
     @Override
     public long getFirstPlayed() {
         return getBukkitPlayer().getFirstPlayed();
@@ -564,10 +570,10 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void disguise(@Nonnull Generic<?> entity, @Nonnull TNLPlayer receiver) {
         if (!receiver.getUniqueId().equals(getUniqueId()) && entity.getParameter() instanceof EntityLiving) {
-            receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
+            receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getId()));
             ((EntityLiving) entity.getParameter()).setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
             ((EntityLiving) entity.getParameter()).world = this.getWorldServer();
-            Reflection.setField(entity, net.minecraft.server.v1_15_R1.Entity.class, "id", this.getEntityId());
+            Reflection.setField(entity, net.minecraft.server.v1_15_R1.Entity.class, "id", this.getId());
             receiver.sendPacket(new PacketPlayOutSpawnEntityLiving(((EntityLiving) entity.getParameter())));
         }
     }
@@ -1009,7 +1015,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void hidePlayer(@Nonnull TNLPlayer player) {
-        sendPacket(new PacketPlayOutEntityDestroy(player.getEntityId()));
+        sendPacket(new PacketPlayOutEntityDestroy(player.getId()));
     }
 
     @Override
@@ -1193,11 +1199,6 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public int getEntityId() {
-        return getBukkitPlayer().getEntityId();
-    }
-
-    @Override
     public int getFireTicks() {
         return getBukkitPlayer().getFireTicks();
     }
@@ -1316,7 +1317,7 @@ public class NMSPlayer implements TNLPlayer {
         boolean glowing = getEntityPlayer().glowing;
         getEntityPlayer().glowing = b;
         for (TNLPlayer all : players) {
-            sendPacket(new PacketPlayOutEntityMetadata(getEntityId(), getEntityPlayer().getDataWatcher(), true));
+            sendPacket(new PacketPlayOutEntityMetadata(getId(), getEntityPlayer().getDataWatcher(), true));
         }
         getEntityPlayer().glowing = glowing;
     }
@@ -1794,5 +1795,10 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public int hashCode() {
         return Objects.hash(bukkitPlayer, optionScoreboard, optionTeam, virtualStorage, permissionManager);
+    }
+
+    @Override
+    public int getId() {
+        return getEntityPlayer().getId();
     }
 }

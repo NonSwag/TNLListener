@@ -209,7 +209,7 @@ public class PacketListener implements Listener {
             } else if (event.getPacket() instanceof PacketPlayOutEntityStatus) {
                 int id = ((Objects<Integer>) event.getPacketField("a")).getOrDefault(-1);
                 byte b = ((Objects<Byte>) event.getPacketField("b")).getOrDefault((byte) -1);
-                if (event.getPlayer().getEntityId() == id) {
+                if (event.getPlayer().getId() == id) {
                     if (b >= 24 && b < 28) {
                         event.setPacketField("b", (byte) 28);
                     }

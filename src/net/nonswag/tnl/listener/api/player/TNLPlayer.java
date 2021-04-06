@@ -1,6 +1,9 @@
 package net.nonswag.tnl.listener.api.player;
 
+import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
+import net.nonswag.tnl.listener.api.entity.TNLEntity;
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.ChatComponent;
 import net.nonswag.tnl.listener.api.message.Language;
 import net.nonswag.tnl.listener.api.message.MessageKey;
@@ -10,6 +13,7 @@ import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
+import net.nonswag.tnl.listener.api.version.ServerVersion;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -36,7 +40,7 @@ import java.util.*;
  * TNLPlayer is a more net.minecraft.server based player
  **/
 
-public interface TNLPlayer {
+public interface TNLPlayer extends TNLEntity {
 
     @Nullable
     Entity getVehicle();
@@ -489,8 +493,6 @@ public interface TNLPlayer {
 
     boolean teleport(@Nonnull Entity entity, @Nonnull PlayerTeleportEvent.TeleportCause teleportCause);
 
-    int getEntityId();
-
     int getFireTicks();
 
     int getMaxFireTicks();
@@ -642,4 +644,38 @@ public interface TNLPlayer {
     void uninject();
 
     void inject();
+
+    @Nullable
+    static TNLPlayer cast(@Nonnull String name) {
+        Player player = Bukkit.getPlayer(name);
+        if (player != null) {
+            return cast(player);
+        }
+        return null;
+    }
+
+    @Nullable
+    static TNLPlayer cast(@Nonnull UUID uniqueId) {
+        Player player = Bukkit.getPlayer(uniqueId);
+        if (player != null) {
+            return cast(player);
+        }
+        return null;
+    }
+
+    @Nonnull
+    static TNLPlayer cast(@Nonnull Player player) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+            return net.nonswag.tnl.listener.api.player.v1_16.R3.NMSPlayer.cast(player);
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
+            return net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer.cast(player);
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
+            return net.nonswag.tnl.listener.api.player.v1_7.R4.NMSPlayer.cast(player);
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+            return net.nonswag.tnl.listener.api.player.v1_7.R1.NMSPlayer.cast(player);
+        } else {
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            throw new IllegalStateException();
+        }
+    }
 }

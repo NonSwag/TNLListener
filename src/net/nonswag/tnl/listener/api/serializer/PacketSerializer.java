@@ -2,7 +2,6 @@ package net.nonswag.tnl.listener.api.serializer;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.server.v1_15_R1.PacketDataSerializer;
 
 import javax.annotation.Nonnull;
 import java.io.DataInputStream;
@@ -82,11 +81,6 @@ public class PacketSerializer {
             }
             output.writeByte(part);
         } while(value != 0);
-    }
-
-    @Nonnull
-    public PacketDataSerializer serialized() {
-        return new PacketDataSerializer(buf);
     }
 
     public byte[] toArray() {

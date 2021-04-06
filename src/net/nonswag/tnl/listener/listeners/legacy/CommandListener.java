@@ -18,12 +18,12 @@ public class CommandListener implements Listener {
         TNLPlayer player = TNLListener.getInstance().getPlayer(event.getPlayer());
         if (command.equalsIgnoreCase("/reload") || command.equalsIgnoreCase("/rl") || command.equalsIgnoreCase("/spigot")) {
             event.setCancelled(true);
-            player.sendMessage(MessageKey.DISABLED_COMMAND, new Placeholder("command", command.toLowerCase()));
+            player.sendMessage(MessageKey.DISABLED_COMMAND, new Placeholder("command", command.toLowerCase().replaceFirst("/", "")));
         } else {
             if (Settings.BETTER_COMMANDS.getValue()) {
                 if (Bukkit.getServer().getHelpMap().getHelpTopic(command) == null) {
                     event.setCancelled(true);
-                    player.sendMessage(MessageKey.UNKNOWN_COMMAND, new Placeholder("command", command.toLowerCase()));
+                    player.sendMessage(MessageKey.UNKNOWN_COMMAND, new Placeholder("command", command.toLowerCase().replaceFirst("/", "")));
                 }
             }
         }

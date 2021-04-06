@@ -43,6 +43,15 @@ public class Placeholder {
             }
         }
 
+        public static void updateValue(@Nonnull Placeholder placeholder) {
+            if (PLACEHOLDERS.containsKey(placeholder.getPlaceholder())) {
+                PLACEHOLDERS.put(placeholder.getPlaceholder(), placeholder.getObject().toString());
+                Logger.debug.println("§aUpdated static placeholder §8'§6" + placeholder.getPlaceholder() + "§8'", "§aChanged value to §8'§6" + placeholder.getObject().toString() + "§8'");
+            } else {
+                Logger.error.println("§cA static placeholder named §8'§4" + placeholder + "§8'§c is not registered");
+            }
+        }
+
         @Nullable
         public static Placeholder valueOf(@Nonnull String placeholder) {
             if (isRegistered(placeholder)) {

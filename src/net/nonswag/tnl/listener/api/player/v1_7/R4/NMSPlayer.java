@@ -199,6 +199,12 @@ public class NMSPlayer implements TNLPlayer {
         return bukkitPlayer;
     }
 
+    @Nonnull
+    @Override
+    public Entity getBukkitEntity() {
+        return getBukkitPlayer();
+    }
+
     @Override
     public long getFirstPlayed() {
         return getBukkitPlayer().getFirstPlayed();
@@ -526,10 +532,10 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void disguise(@Nonnull Generic<?> entity, @Nonnull TNLPlayer receiver) {
         if (!this.equals(receiver) && entity.getParameter() instanceof EntityLiving) {
-            receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getEntityId()));
+            receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getId()));
             ((EntityLiving) entity.getParameter()).setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
             ((EntityLiving) entity.getParameter()).world = getWorldServer();
-            Reflection.setField(entity, Entity.class, "id", this.getEntityId());
+            Reflection.setField(entity, Entity.class, "id", this.getId());
             receiver.sendPacket(new PacketPlayOutSpawnEntityLiving(((EntityLiving) entity.getParameter())));
         }
     }
@@ -922,7 +928,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void hidePlayer(@Nonnull TNLPlayer player) {
-        sendPacket(new PacketPlayOutEntityDestroy(player.getEntityId()));
+        sendPacket(new PacketPlayOutEntityDestroy(player.getId()));
     }
 
     @Override
@@ -1118,11 +1124,6 @@ public class NMSPlayer implements TNLPlayer {
     @Nonnull
     public List<Entity> getNearbyEntities(double v, double v1, double v2) {
         return getBukkitPlayer().getNearbyEntities(v, v1, v2);
-    }
-
-    @Override
-    public int getEntityId() {
-        return getBukkitPlayer().getEntityId();
     }
 
     @Override
@@ -1720,5 +1721,10 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public int hashCode() {
         return Objects.hash(bukkitPlayer, optionScoreboard, optionTeam, virtualStorage, permissionManager);
+    }
+
+    @Override
+    public int getId() {
+        return getEntityPlayer().getId();
     }
 }

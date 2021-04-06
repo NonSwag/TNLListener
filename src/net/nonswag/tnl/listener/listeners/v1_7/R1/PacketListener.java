@@ -87,7 +87,7 @@ public class PacketListener implements Listener {
         } else if (event.isOutgoing()) {
            if (event.getPacket() instanceof PacketPlayOutEntityStatus) {
                int id = ((Objects<Integer>) event.getPacketField("a")).getOrDefault(-1);
-               if (event.getPlayer().getEntityId() == id) {
+               if (event.getPlayer().getId() == id) {
                    event.setPacketField("b", (byte) 28);
                }
            } else if (event.getPacket() instanceof PacketPlayOutChat) {

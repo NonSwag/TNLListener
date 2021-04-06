@@ -93,12 +93,12 @@ public class TNLListener {
         try {
             if (getVersion().equals(ServerVersion.v1_16_5)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.PacketListener());
-                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.updated.CommandListener());
-                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.updated.InteractListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.CommandListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.InteractListener());
             } else if (getVersion().equals(ServerVersion.v1_15_2)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15.R1.PacketListener());
-                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.updated.CommandListener());
-                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.updated.InteractListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.CommandListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.InteractListener());
             } else if (getVersion().equals(ServerVersion.v1_7_10)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R4.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.legacy.CommandListener());

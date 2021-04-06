@@ -1,7 +1,11 @@
 package net.nonswag.tnl.listener.api.item;
 
+import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.api.version.ServerVersion;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -113,4 +117,24 @@ public interface TNLItem {
     @Nonnull
     TNLItem setBreakable();
 
+    @Nonnull
+    static TNLItem create(@Nonnull ItemStack itemStack) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+            return new net.nonswag.tnl.listener.api.item.v1_16.R3.NMSItem(itemStack);
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
+            return new net.nonswag.tnl.listener.api.item.v1_15.R1.NMSItem(itemStack);
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
+            return new net.nonswag.tnl.listener.api.item.v1_7.R4.NMSItem(itemStack);
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+            return new net.nonswag.tnl.listener.api.item.v1_7.R1.NMSItem(itemStack);
+        } else {
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            throw new IllegalStateException();
+        }
+    }
+
+    @Nonnull
+    static TNLItem create(@Nonnull Material material) {
+        return create(new ItemStack(material));
+    }
 }

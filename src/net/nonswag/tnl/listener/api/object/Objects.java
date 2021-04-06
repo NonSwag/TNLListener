@@ -34,12 +34,17 @@ public class Objects<V> {
     }
 
     @Nonnull
-    public V nonnull() {
+    public V nonnull(@Nullable String message) {
         if (hasValue()) {
             assert getValue() != null;
             return getValue();
         }
-        throw new NullPointerException();
+        throw new NullPointerException(message);
+    }
+
+    @Nonnull
+    public V nonnull() {
+        return nonnull(null);
     }
 
     public boolean hasValue() {
