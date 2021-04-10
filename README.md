@@ -3,10 +3,10 @@
 TNLListener is mainly a bukkit based plugin for simplifying the work with packets for many versions of minecraft
 
 Compatible versions:
-    - 1.7.2/10
-    - 1.15.2
-    - 1.16.4
-    - (more versions are planned)
+<br>- 1.7.2/10
+<br>- 1.15.2
+<br>- 1.16.4
+<br>- (more versions are planned)
 
 Features:
     - Reflection API
