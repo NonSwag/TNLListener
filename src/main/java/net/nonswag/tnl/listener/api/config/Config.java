@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.api.file;
+package net.nonswag.tnl.listener.api.config;
 
 import javax.annotation.Nonnull;
 import java.io.File;

@@ -1,7 +1,6 @@
 package net.nonswag.tnl.listener.api.config;
 
 import com.google.gson.*;
-import net.nonswag.tnl.listener.api.file.Config;
 import net.nonswag.tnl.listener.api.file.FileCreator;
 import net.nonswag.tnl.listener.api.logger.Logger;
 

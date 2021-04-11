@@ -65,10 +65,10 @@ public class Skin {
         try {
             URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + player);
             InputStreamReader reader = new InputStreamReader(url.openStream());
-            String uuid = JsonParser.parseReader(reader).getAsJsonObject().get("id").getAsString();
+            String uuid = new JsonParser().parse(reader).getAsJsonObject().get("id").getAsString();
             URL url1 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid + "?unsigned=false");
             InputStreamReader reader1 = new InputStreamReader(url1.openStream());
-            JsonObject property = JsonParser.parseReader(reader1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
+            JsonObject property = new JsonParser().parse(reader1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
             skin.setValue(property.get("value").getAsString());
             skin.setValue(property.get("signature").getAsString());
         } catch (Exception ignored) {
