@@ -2,7 +2,7 @@ package net.nonswag.tnl.listener.api.player.v1_7.R1;
 
 import net.minecraft.server.v1_7_R1.*;
 import net.minecraft.util.io.netty.channel.*;
-import net.nonswag.tnl.listener.Loader;
+import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
@@ -215,7 +215,7 @@ public class NMSPlayer implements TNLPlayer {
         if (Bukkit.isPrimaryThread()) {
             getPlayerConnection().sendPacket((Packet) packet);
         } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().sendPacket((Packet) packet));
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getPlayerConnection().sendPacket((Packet) packet));
         }
     }
 
@@ -293,7 +293,7 @@ public class NMSPlayer implements TNLPlayer {
         if (Bukkit.isPrimaryThread()) {
             getPlayerConnection().disconnect(kickMessage);
         } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().disconnect(kickMessage));
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getPlayerConnection().disconnect(kickMessage));
         }
     }
 
@@ -572,7 +572,7 @@ public class NMSPlayer implements TNLPlayer {
                 DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
                 dataOutputStream.writeUTF("Connect");
                 dataOutputStream.writeUTF(server.getName());
-                sendPluginMessage(Loader.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
+                sendPluginMessage(Bootstrap.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
                 sendMessage("%prefix% §aConnecting you to server §6" + server.getName());
             } else {
                 sendMessage("%prefix% §cThe server §4" + server.getName() + "§c is Offline");

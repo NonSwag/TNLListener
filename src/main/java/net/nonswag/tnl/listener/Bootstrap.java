@@ -1,7 +1,5 @@
 package net.nonswag.tnl.listener;
 
-import net.nonswag.tnl.listener.api.config.minecraft.OperatorsJson;
-import net.nonswag.tnl.listener.api.config.minecraft.ServerProperties;
 import net.nonswag.tnl.listener.api.holograms.UpdateRunnable;
 import net.nonswag.tnl.listener.api.message.Message;
 import net.nonswag.tnl.listener.api.settings.Settings;
@@ -12,16 +10,16 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
 
-public class Loader extends JavaPlugin {
+public class Bootstrap extends JavaPlugin {
 
-    private static Loader instance = null;
+    private static Bootstrap instance = null;
 
-    public Loader() {
+    public Bootstrap() {
         setInstance(this);
     }
 
     @Override
-    public void onEnable() {
+    public void onLoad() {
         try {
             Bukkit.getPluginManager().callEvent(new SettingsInitializeEvent());
             Settings.init();
@@ -32,22 +30,25 @@ public class Loader extends JavaPlugin {
             System.exit(1);
             return;
         }
+        TNLListener.getInstance().load();
+    }
+
+    @Override
+    public void onEnable() {
         TNLListener.getInstance().enable();
         Holograms.getInstance().enable();
     }
 
     @Override
     public void onDisable() {
-        ServerProperties.getInstance().save();
-        OperatorsJson.getInstance().save();
         UpdateRunnable.stop();
     }
 
-    private static void setInstance(@Nonnull Loader instance) {
-        Loader.instance = instance;
+    private static void setInstance(@Nonnull Bootstrap instance) {
+        Bootstrap.instance = instance;
     }
 
-    public static Loader getInstance() {
+    public static Bootstrap getInstance() {
         return instance;
     }
 }

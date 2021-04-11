@@ -4,4 +4,3 @@ author: "NonSwag"
 api-version: "1.13"
 website: "https://www.thenextlvl.net/"
 main: net.nonswag.tnl.listener.Loader
-load: POSTWORLD

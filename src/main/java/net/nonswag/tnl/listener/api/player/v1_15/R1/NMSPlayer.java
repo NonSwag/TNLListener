@@ -2,7 +2,7 @@ package net.nonswag.tnl.listener.api.player.v1_15.R1;
 
 import io.netty.channel.*;
 import net.minecraft.server.v1_15_R1.*;
-import net.nonswag.tnl.listener.Loader;
+import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
 import net.nonswag.tnl.listener.api.bossbar.v1_15.R1.NMSBossBar;
@@ -240,7 +240,7 @@ public class NMSPlayer implements TNLPlayer {
         if (Bukkit.isPrimaryThread()) {
             getPlayerConnection().sendPacket((Packet<?>) packet);
         } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getPlayerConnection().sendPacket((Packet<?>) packet));
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getPlayerConnection().sendPacket((Packet<?>) packet));
         }
     }
 
@@ -313,7 +313,7 @@ public class NMSPlayer implements TNLPlayer {
                 getPlayerConnection().disconnect(kickMessage);
             }
         } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> {
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> {
                 if (!getPlayerConnection().processedDisconnect) {
                     getPlayerConnection().disconnect(kickMessage);
                 }
@@ -444,7 +444,7 @@ public class NMSPlayer implements TNLPlayer {
         if (Bukkit.isPrimaryThread()) {
             getCraftPlayer().setCooldown(material, i);
         } else {
-            Bukkit.getScheduler().runTask(Loader.getInstance(), () -> getCraftPlayer().setCooldown(material, i));
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getCraftPlayer().setCooldown(material, i));
         }
     }
 
@@ -687,7 +687,7 @@ public class NMSPlayer implements TNLPlayer {
                 DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
                 dataOutputStream.writeUTF("Connect");
                 dataOutputStream.writeUTF(server.getName());
-                sendPluginMessage(Loader.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
+                sendPluginMessage(Bootstrap.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
                 sendMessage("%prefix% §aConnecting you to server §6" + server.getName());
             } else {
                 sendMessage("%prefix% §cThe server §4" + server.getName() + "§c is Offline");

@@ -3,7 +3,7 @@ package net.nonswag.tnl.listener.api.player.v1_15.R1;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_15_R1.*;
-import net.nonswag.tnl.listener.Loader;
+import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.Skin;
 import net.nonswag.tnl.listener.api.player.TNLFakePlayer;
@@ -79,7 +79,7 @@ public class NMSFakePlayer implements TNLFakePlayer<MinecraftServer, WorldServer
         for (EnumItemSlot slot : EnumItemSlot.values()) {
             receiver.sendPacket(new PacketPlayOutEntityEquipment(getPlayer().getId(), slot, getPlayer().getEquipment(slot)));
         }
-        Bukkit.getScheduler().runTaskLater(Loader.getInstance(), () -> hideTablistName(receiver), 10);
+        Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> hideTablistName(receiver), 10);
     }
 
     @Override

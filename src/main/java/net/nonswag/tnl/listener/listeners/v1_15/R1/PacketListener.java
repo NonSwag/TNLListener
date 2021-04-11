@@ -2,7 +2,7 @@ package net.nonswag.tnl.listener.listeners.v1_15.R1;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_15_R1.*;
-import net.nonswag.tnl.listener.Loader;
+import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.message.MessageKey;
@@ -148,10 +148,10 @@ public class PacketListener implements Listener {
                     if (signMenu.getResponse().hasValue()) {
                         boolean success = signMenu.getResponse().nonnull().test(event.getPlayer(), ((PacketPlayInUpdateSign) event.getPacket()).c());
                         if (!success && signMenu.isReopenOnFail()) {
-                            Bukkit.getScheduler().runTaskLater(Loader.getInstance(), () -> event.getPlayer().openVirtualSignEditor(signMenu), 2);
+                            Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> event.getPlayer().openVirtualSignEditor(signMenu), 2);
                         }
                     }
-                    Bukkit.getScheduler().runTask(Loader.getInstance(), () -> TNLListener.getInstance().getSignHashMap().remove(event.getPlayer().getUniqueId()));
+                    Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> TNLListener.getInstance().getSignHashMap().remove(event.getPlayer().getUniqueId()));
                     event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
@@ -172,7 +172,7 @@ public class PacketListener implements Listener {
                 Bukkit.getPluginManager().callEvent(interactEvent);
                 event.setCancelled(interactEvent.isCancelled());
                 if (interactEvent.isCancelled()) {
-                    Bukkit.getScheduler().runTask(Loader.getInstance(), () -> {
+                    Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> {
                         interactEvent.getBlock().getState().update();
                         for (BlockFace blockFace : BlockFace.values()) {
                             Block b = interactEvent.getBlock().getRelative(blockFace).getLocation().getBlock();

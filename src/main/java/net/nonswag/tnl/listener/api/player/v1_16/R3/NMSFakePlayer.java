@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.server.v1_16_R3.*;
-import net.nonswag.tnl.listener.Loader;
+import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.Skin;
 import net.nonswag.tnl.listener.api.player.TNLFakePlayer;
@@ -84,7 +84,7 @@ public class NMSFakePlayer implements TNLFakePlayer<MinecraftServer, WorldServer
             equipment.add(new Pair<>(slot, getPlayer().getEquipment(slot)));
         }
         receiver.sendPacket(new PacketPlayOutEntityEquipment(getPlayer().getId(), equipment));
-        Bukkit.getScheduler().runTaskLater(Loader.getInstance(), () -> hideTablistName(receiver), 10);
+        Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> hideTablistName(receiver), 10);
     }
 
     @Override

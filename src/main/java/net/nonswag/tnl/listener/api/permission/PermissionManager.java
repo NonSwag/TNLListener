@@ -1,6 +1,6 @@
 package net.nonswag.tnl.listener.api.permission;
 
-import net.nonswag.tnl.listener.Loader;
+import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.api.packet.TNLEntityStatus;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.permissions.PermissionAttachment;
@@ -19,7 +19,7 @@ public class PermissionManager implements Permissions {
 
     public PermissionManager(@Nonnull TNLPlayer player) {
         this.player = player;
-        this.attachment = player.getBukkitPlayer().addAttachment(Loader.getInstance());
+        this.attachment = player.getBukkitPlayer().addAttachment(Bootstrap.getInstance());
     }
 
     @Nonnull

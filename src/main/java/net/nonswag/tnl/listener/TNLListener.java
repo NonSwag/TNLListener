@@ -13,7 +13,7 @@ import net.nonswag.tnl.listener.api.version.ServerVersion;
 import net.nonswag.tnl.listener.listeners.JoinListener;
 import net.nonswag.tnl.listener.listeners.KickListener;
 import net.nonswag.tnl.listener.listeners.QuitListener;
-import net.nonswag.tnl.listener.listeners.WorldChangeListener;
+import net.nonswag.tnl.listener.listeners.WorldListener;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -60,9 +60,15 @@ public class TNLListener {
         }
     }
 
+    protected void load() {
+        if (Settings.DELETE_OLD_LOGS.getValue()) {
+            deleteOldLogs();
+        }
+    }
+
     protected void enable() {
-        CommandManager commandManager = new CommandManager(Loader.getInstance());
-        EventManager eventManager = new EventManager(Loader.getInstance());
+        CommandManager commandManager = new CommandManager(Bootstrap.getInstance());
+        EventManager eventManager = new EventManager(Bootstrap.getInstance());
         new Thread(() -> {
             for (String server : Settings.SERVERS.getValue()) {
                 if (Settings.getConfig().has("server-" + server)) {
@@ -89,12 +95,9 @@ public class TNLListener {
             }
             Settings.getConfig().save();
         }, "server-loader").start();
-        Bukkit.getMessenger().registerOutgoingPluginChannel(Loader.getInstance(), "BungeeCord");
-        if (Settings.DELETE_OLD_LOGS.getValue()) {
-            deleteOldLogs();
-        }
+        Bukkit.getMessenger().registerOutgoingPluginChannel(Bootstrap.getInstance(), "BungeeCord");
         if (Settings.AUTO_UPDATER.getValue()) {
-            new PluginUpdate(Loader.getInstance()).downloadUpdate();
+            new PluginUpdate(Bootstrap.getInstance()).downloadUpdate();
         }
         try {
             if (getVersion().equals(ServerVersion.v1_16_5)) {
@@ -113,7 +116,7 @@ public class TNLListener {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.legacy.CommandListener());
             }
             Logger.info.println("§aLoading §6TNLListener §8(§7" + getVersion().name().replace("_", ".") + "§8)");
-            eventManager.registerListener(new WorldChangeListener());
+            eventManager.registerListener(new WorldListener());
             eventManager.registerListener(new JoinListener());
             eventManager.registerListener(new KickListener());
             eventManager.registerListener(new QuitListener());
@@ -145,10 +148,6 @@ public class TNLListener {
     @Nonnull
     public String getServerName() {
         return serverName;
-    }
-
-    public void setServerName(@Nonnull String serverName) {
-        ServerProperties.getInstance().setValue("server-name", serverName);
     }
 
     @Nullable

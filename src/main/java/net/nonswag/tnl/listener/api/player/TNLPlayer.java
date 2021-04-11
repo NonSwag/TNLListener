@@ -11,6 +11,7 @@ import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.packet.TNLEntityDestroy;
+import net.nonswag.tnl.listener.api.packet.TNLGameStateChange;
 import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
@@ -279,6 +280,14 @@ public interface TNLPlayer extends TNLEntity {
     void disconnect(@Nonnull MessageKey messageKey, @Nonnull String append, @Nonnull Placeholder... placeholders);
 
     void disconnect(@Nonnull String kickMessage);
+
+    default void sendDemoScreen() {
+        sendPacket(TNLGameStateChange.create(5, 0));
+    }
+
+    default void hideNameTag(@Nonnull TNLPlayer... players) {
+        throw new UnsupportedOperationException("This feature is in development");
+    }
 
     <EnumTeamPush> void setCollision(@Nonnull EnumTeamPush collision);
 
