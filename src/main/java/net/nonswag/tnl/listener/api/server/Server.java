@@ -3,6 +3,7 @@ package net.nonswag.tnl.listener.api.server;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.serializer.PacketSerializer;
 
@@ -14,14 +15,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Objects;
 
 public class Server {
-
-    @Nonnull
-    private static final HashMap<String, Server> servers = new HashMap<>();
 
     @Nonnull
     private final String name;
@@ -40,7 +36,6 @@ public class Server {
     public Server(@Nonnull String name, @Nonnull InetSocketAddress inetSocketAddress) {
         this.name = name;
         this.inetSocketAddress = inetSocketAddress;
-        servers.put(this.getName(), this);
         this.update(System.currentTimeMillis());
     }
 
@@ -139,7 +134,7 @@ public class Server {
 
     @Nullable
     public static Server wrap(@Nonnull String name) {
-        return servers.get(name);
+        return TNLListener.getInstance().getServerHashMap().get(name);
     }
 
     @Nonnull
@@ -170,9 +165,5 @@ public class Server {
     @Override
     public int hashCode() {
         return Objects.hash(name, inetSocketAddress, online, playerCount, maxPlayerCount);
-    }
-
-    public static Collection<Server> getServers() {
-        return servers.values();
     }
 }

@@ -420,6 +420,16 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
+    public void exitCombat() {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
+    @Override
+    public void enterCombat() {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
+    @Override
     @Nullable
     public Location getBedSpawnLocation() {
         return getBukkitPlayer().getBedSpawnLocation();

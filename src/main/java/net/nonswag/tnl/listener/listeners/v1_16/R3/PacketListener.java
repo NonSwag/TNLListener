@@ -68,9 +68,7 @@ public class PacketListener implements Listener {
                 }
             } else if (event.getPacket() instanceof PacketPlayInBlockDig) {
                 PlayerDamageBlockEvent.BlockDamageType damageType = PlayerDamageBlockEvent.BlockDamageType.fromString(((PacketPlayInBlockDig) event.getPacket()).d().name());
-                if (damageType.equals(PlayerDamageBlockEvent.BlockDamageType.STOP_DESTROY_BLOCK)
-                        || damageType.equals(PlayerDamageBlockEvent.BlockDamageType.START_DESTROY_BLOCK)
-                        || damageType.equals(PlayerDamageBlockEvent.BlockDamageType.ABORT_DESTROY_BLOCK)) {
+                if (!damageType.equals(PlayerDamageBlockEvent.BlockDamageType.UNKNOWN)) {
                     BlockPosition position = ((PacketPlayInBlockDig) event.getPacket()).b();
                     EnumDirection againstBlock = ((PacketPlayInBlockDig) event.getPacket()).c();
                     Block block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
@@ -92,8 +90,6 @@ public class PacketListener implements Listener {
                                     rel.getState().update(true, false);
                                 }
                             });
-                        } else if (blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.DROP_ITEM) || blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.DROP_ALL_ITEMS)) {
-                            event.getPlayer().updateInventory();
                         }
                     }
                 }

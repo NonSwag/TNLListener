@@ -307,6 +307,10 @@ public interface TNLPlayer extends TNLEntity {
 
     int getSleepTicks();
 
+    void exitCombat();
+
+    void enterCombat();
+
     void setDisplayName(@Nonnull String s);
 
     void setBedSpawnLocation(@Nonnull Location location);

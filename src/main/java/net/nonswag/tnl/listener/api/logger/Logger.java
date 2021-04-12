@@ -39,7 +39,7 @@ public class Logger {
     @Nonnull
     protected final String prefix;
 
-    protected Logger(@Nonnull String name, @Nonnull String prefix) {
+    public Logger(@Nonnull String name, @Nonnull String prefix) {
         this.name = name;
         this.prefix = Color.replace(prefix);
     }
@@ -77,11 +77,10 @@ public class Logger {
                 if (value instanceof Throwable) {
                     ((Throwable) value).printStackTrace();
                 } else {
-                    String string = value.toString() + "§r";
                     if (getPrefix().isEmpty()) {
-                        System.out.println(Color.replace(ChatComponent.getText(string)));
+                        System.out.println(Color.replace(ChatComponent.getText(value.toString() + "§r")));
                     } else {
-                        System.out.println(Color.replace(ChatComponent.getText(prefix, new Placeholder("thread", Thread.currentThread().getName()), new Placeholder("time", new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()))) + " " + ChatComponent.getText(string)));
+                        System.out.println(Color.replace(ChatComponent.getText(prefix, new Placeholder("thread", Thread.currentThread().getName()), new Placeholder("time", new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()))) + " " + ChatComponent.getText(value.toString() + "§r")));
                     }
                 }
             }

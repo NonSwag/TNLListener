@@ -38,6 +38,9 @@ public class Holograms {
     private long updateTime = 5000L;
 
     protected Holograms() {
+    }
+
+    protected void load() {
         if (!getSaves().getJsonElement().getAsJsonObject().has("update-time")) {
             getSaves().getJsonElement().getAsJsonObject().addProperty("update-time", updateTime);
         } else {
@@ -45,10 +48,14 @@ public class Holograms {
         }
     }
 
-    public void enable() {
+    protected void enable() {
         unloadAll();
         UpdateRunnable.start();
         loadAll();
+    }
+
+    protected void disable() {
+        UpdateRunnable.stop();
     }
 
     @Nonnull
@@ -135,7 +142,7 @@ public class Holograms {
                             replace("%world%", player.getWorld().getName() + "").
                             replace("%world_alias%", player.getWorldAlias() + "");
                     if (s.contains("%status_") || s.contains("%online_") || s.contains("%max_online_") || s.contains("%players_")) {
-                        for (Server server : Server.getServers()) {
+                        for (Server server : TNLListener.getInstance().getServers()) {
                             if (s.contains("%status_" + server.getName() + "%")) {
                                 s = s.replace("%status_" + server.getName() + "%", server.isOnline() ? "Online" : "Offline");
                             }
@@ -187,7 +194,7 @@ public class Holograms {
                             replace("%world%", player.getWorld().getName() + "").
                             replace("%world_alias%", player.getWorldAlias() + "");
                     if (s.contains("%status_") || s.contains("%online_") || s.contains("%max_online_") || s.contains("%players_")) {
-                        for (Server server : Server.getServers()) {
+                        for (Server server : TNLListener.getInstance().getServers()) {
                             if (s.contains("%status_" + server.getName() + "%")) {
                                 s = s.replace("%status_" + server.getName() + "%", server.isOnline() ? "Online" : "Offline");
                             }

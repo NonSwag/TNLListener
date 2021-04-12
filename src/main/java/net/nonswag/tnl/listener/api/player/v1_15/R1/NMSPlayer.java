@@ -459,6 +459,16 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
+    public void exitCombat() {
+        getEntityPlayer().exitCombat();
+    }
+
+    @Override
+    public void enterCombat() {
+        getEntityPlayer().enterCombat();
+    }
+
+    @Override
     @Nullable
     public Location getBedSpawnLocation() {
         return getBukkitPlayer().getBedSpawnLocation();

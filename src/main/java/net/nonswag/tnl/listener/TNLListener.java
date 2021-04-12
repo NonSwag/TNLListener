@@ -24,10 +24,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class TNLListener {
 
@@ -39,6 +36,8 @@ public class TNLListener {
     private final HashMap<Player, TNLPlayer> playerHashMap = new HashMap<>();
     @Nonnull
     private final HashMap<UUID, SignMenu> signHashMap = new HashMap<>();
+    @Nonnull
+    private final HashMap<String, Server> serverHashMap = new HashMap<>();
     @Nonnull
     private final ServerVersion version;
     @Nonnull
@@ -69,32 +68,31 @@ public class TNLListener {
     protected void enable() {
         CommandManager commandManager = new CommandManager(Bootstrap.getInstance());
         EventManager eventManager = new EventManager(Bootstrap.getInstance());
-        new Thread(() -> {
-            for (String server : Settings.SERVERS.getValue()) {
-                if (Settings.getConfig().has("server-" + server)) {
-                    String value = Settings.getConfig().getString("server-" + server);
-                    if (value != null && !value.isEmpty()) {
-                        if (value.equalsIgnoreCase("host:port")) {
-                            Logger.error.println("§cYou have to setup the server §8'§4" + server + "§8'§c correctly");
-                        } else {
-                            try {
-                                Server s = new Server(server, new InetSocketAddress(value.split(":")[0], Integer.parseInt(value.split(":")[1])));
-                                Logger.info.println("§aInitialized new server §8'§6" + s.toString() + "§8'");
-                            } catch (Exception e) {
-                                Logger.error.println("§cFailed to load server §8'§4" + server + "§8'", "§cThe ip-address format is §8'§4host:port§8' (§4example localhost:25565§8)", e);
-                            }
-                        }
+        for (String server : Settings.SERVERS.getValue()) {
+            if (Settings.getConfig().has("server-" + server)) {
+                String value = Settings.getConfig().getString("server-" + server);
+                if (value != null && !value.isEmpty()) {
+                    if (value.equalsIgnoreCase("host:port")) {
+                        Logger.error.println("§cYou have to setup the server §8'§4" + server + "§8'§c correctly");
                     } else {
-                        Settings.getConfig().setValue("server-" + server, "host:port");
-                        Logger.info.println("§aFound new server §8'§6" + server + "§8'");
+                        try {
+                            Server s = new Server(server, new InetSocketAddress(value.split(":")[0], Integer.parseInt(value.split(":")[1])));
+                            getServerHashMap().put(s.getName(), s);
+                            Logger.info.println("§aInitialized new server §8'§6" + s.toString() + "§8'");
+                        } catch (Exception e) {
+                            Logger.error.println("§cFailed to load server §8'§4" + server + "§8'", "§cThe ip-address format is §8'§4host:port§8' (§4example localhost:25565§8)", e);
+                        }
                     }
                 } else {
                     Settings.getConfig().setValue("server-" + server, "host:port");
                     Logger.info.println("§aFound new server §8'§6" + server + "§8'");
                 }
+            } else {
+                Settings.getConfig().setValue("server-" + server, "host:port");
+                Logger.info.println("§aFound new server §8'§6" + server + "§8'");
             }
-            Settings.getConfig().save();
-        }, "server-loader").start();
+        }
+        Settings.getConfig().save();
         Bukkit.getMessenger().registerOutgoingPluginChannel(Bootstrap.getInstance(), "BungeeCord");
         if (Settings.AUTO_UPDATER.getValue()) {
             new PluginUpdate(Bootstrap.getInstance()).downloadUpdate();
@@ -138,6 +136,16 @@ public class TNLListener {
     @Nonnull
     public HashMap<Player, TNLPlayer> getPlayerHashMap() {
         return playerHashMap;
+    }
+
+    @Nonnull
+    public HashMap<String, Server> getServerHashMap() {
+        return serverHashMap;
+    }
+
+    @Nonnull
+    public Collection<Server> getServers() {
+        return getServerHashMap().values();
     }
 
     @Nonnull

@@ -1,6 +1,5 @@
 package net.nonswag.tnl.listener;
 
-import net.nonswag.tnl.listener.api.holograms.UpdateRunnable;
 import net.nonswag.tnl.listener.api.message.Message;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.events.MessagesInitializeEvent;
@@ -12,7 +11,7 @@ import javax.annotation.Nonnull;
 
 public class Bootstrap extends JavaPlugin {
 
-    private static Bootstrap instance = null;
+    protected static Bootstrap instance = null;
 
     public Bootstrap() {
         setInstance(this);
@@ -20,6 +19,12 @@ public class Bootstrap extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        TNLListener.getInstance().load();
+        Holograms.getInstance().load();
+    }
+
+    @Override
+    public void onEnable() {
         try {
             Bukkit.getPluginManager().callEvent(new SettingsInitializeEvent());
             Settings.init();
@@ -30,18 +35,13 @@ public class Bootstrap extends JavaPlugin {
             System.exit(1);
             return;
         }
-        TNLListener.getInstance().load();
-    }
-
-    @Override
-    public void onEnable() {
         TNLListener.getInstance().enable();
-        Holograms.getInstance().enable();
+        Bukkit.getScheduler().runTaskLater(this, () -> Holograms.getInstance().enable(), 20);
     }
 
     @Override
     public void onDisable() {
-        UpdateRunnable.stop();
+        Holograms.getInstance().disable();
     }
 
     private static void setInstance(@Nonnull Bootstrap instance) {
