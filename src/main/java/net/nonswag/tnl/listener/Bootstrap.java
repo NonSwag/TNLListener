@@ -42,6 +42,7 @@ public class Bootstrap extends JavaPlugin {
     @Override
     public void onDisable() {
         Holograms.getInstance().disable();
+        TNLListener.getInstance().disable();
     }
 
     private static void setInstance(@Nonnull Bootstrap instance) {

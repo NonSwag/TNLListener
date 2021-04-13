@@ -296,8 +296,8 @@ public class NMSPlayer implements TNLPlayer {
         if (component != null) {
             disconnect(component.getText(placeholders) + append);
         } else {
-            Logger.error.println("§cUnknown component§8: §4" + languageKey.toString());
-            disconnect("§cUnknown component§8: §4" + languageKey.toString());
+            Logger.error.println("§cUnknown component§8: §4" + languageKey);
+            disconnect("§cUnknown component§8: §4" + languageKey);
         }
     }
 

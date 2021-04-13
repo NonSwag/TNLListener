@@ -83,7 +83,7 @@ public class Holograms {
     }
 
     public void loadAll(@Nonnull TNLPlayer player) {
-        for (Hologram hologram : getHologramHashMap().values()) {
+        for (Hologram hologram : cachedValues()) {
             load(hologram, player);
         }
     }
@@ -281,7 +281,7 @@ public class Holograms {
     }
 
     public void unloadAll(@Nonnull TNLPlayer player) {
-        for (Hologram hologram : getHologramHashMap().values()) {
+        for (Hologram hologram : cachedValues()) {
             unload(hologram, player);
         }
     }

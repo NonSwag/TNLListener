@@ -137,15 +137,15 @@ public class Hologram {
             hologram.addProperty("darkness", this.getDarkness());
             hologram.addProperty("line-distance", this.getLineDistance());
             hologram.addProperty("position", getLocation().getWorld().getName() + ", " + getLocation().getX() + ", " + getLocation().getY() + ", " + getLocation().getZ());
-            if (!hologram.has("lines")) {
-                hologram.add("lines", new JsonArray());
-            }
-            JsonArray jsonArray = hologram.get("lines").getAsJsonArray();
+            JsonArray jsonArray = new JsonArray();
             for (int i = 0; i < this.getLines().size(); i++) {
-                if (this.getLines().get(i) != null && !this.getLines().get(i).isEmpty()) {
+                if (this.getLines().get(i) != null) {
                     jsonArray.add(this.getLines().get(i));
+                } else {
+                    jsonArray.add("");
                 }
             }
+            hologram.add("lines", jsonArray);
             Holograms.getInstance().save(this);
             Holograms.getInstance().getSaves().save();
         } else {

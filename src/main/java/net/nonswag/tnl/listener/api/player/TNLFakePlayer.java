@@ -1,6 +1,5 @@
 package net.nonswag.tnl.listener.api.player;
 
-import com.mojang.authlib.GameProfile;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
@@ -27,24 +26,11 @@ public interface TNLFakePlayer<S, W, P> {
     TNLPlayer[] getReceivers();
 
     @Nonnull
-    GameProfile getProfile();
-
-    @Nonnull
     Skin getSkin();
-
-    void setServer(@Nonnull S server);
-
-    void setWorldServer(@Nonnull W worldServer);
-
-    void setPlayer(@Nonnull P player);
-
-    void setName(@Nonnull String name);
 
     void setLocation(@Nonnull Location location);
 
     void setReceivers(@Nonnull TNLPlayer... receivers);
-
-    void setProfile(@Nonnull GameProfile profile);
 
     void setSkin(@Nonnull Skin skin);
 

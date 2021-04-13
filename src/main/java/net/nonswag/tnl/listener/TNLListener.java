@@ -78,7 +78,7 @@ public class TNLListener {
                         try {
                             Server s = new Server(server, new InetSocketAddress(value.split(":")[0], Integer.parseInt(value.split(":")[1])));
                             getServerHashMap().put(s.getName(), s);
-                            Logger.info.println("§aInitialized new server §8'§6" + s.toString() + "§8'");
+                            Logger.info.println("§aInitialized new server §8'§6" + s + "§8'");
                         } catch (Exception e) {
                             Logger.error.println("§cFailed to load server §8'§4" + server + "§8'", "§cThe ip-address format is §8'§4host:port§8' (§4example localhost:25565§8)", e);
                         }
@@ -120,6 +120,16 @@ public class TNLListener {
             eventManager.registerListener(new QuitListener());
         } catch (Throwable t) {
             Logger.error.println("§cFailed to register listener", t);
+        }
+        for (Player all : Bukkit.getOnlinePlayers()) {
+            TNLPlayer.cast(all).inject();
+        }
+    }
+
+    protected void disable() {
+        for (TNLPlayer all : getOnlinePlayers()) {
+            Holograms.getInstance().unloadAll(all);
+            all.uninject();
         }
     }
 
@@ -197,12 +207,15 @@ public class TNLListener {
     public void deleteOldLogs() {
         File file = new File("logs/");
         if (file.exists() && file.isDirectory()) {
-            for (File all : file.listFiles()) {
-                if (all.isFile() && all.getName().endsWith(".log.gz")) {
-                    if (!all.delete()) {
-                        Logger.error.println("§cFailed to delete file §8'§4" + all.getAbsolutePath() + "§8'");
-                    } else {
-                        Logger.debug.println("§aDeleted old log file §8'§6" + all.getAbsolutePath() + "§8'");
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File all : files) {
+                    if (all.isFile() && all.getName().endsWith(".log.gz")) {
+                        if (!all.delete()) {
+                            Logger.error.println("§cFailed to delete file §8'§4" + all.getAbsolutePath() + "§8'");
+                        } else {
+                            Logger.debug.println("§aDeleted old log file §8'§6" + all.getAbsolutePath() + "§8'");
+                        }
                     }
                 }
             }

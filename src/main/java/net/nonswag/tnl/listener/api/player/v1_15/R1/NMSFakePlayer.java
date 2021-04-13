@@ -21,19 +21,17 @@ import java.util.UUID;
 public class NMSFakePlayer implements TNLFakePlayer<MinecraftServer, WorldServer, EntityPlayer> {
 
     @Nonnull
-    private String name;
+    private final String name;
     @Nonnull
     private Location location;
     @Nonnull
     private TNLPlayer[] receivers;
     @Nonnull
-    private MinecraftServer server;
+    private final MinecraftServer server;
     @Nonnull
-    private WorldServer worldServer;
+    private final WorldServer worldServer;
     @Nonnull
-    private GameProfile profile;
-    @Nonnull
-    private EntityPlayer player;
+    private final EntityPlayer player;
     @Nonnull
     private Skin skin;
 
@@ -42,23 +40,24 @@ public class NMSFakePlayer implements TNLFakePlayer<MinecraftServer, WorldServer
         this.location = location;
         this.receivers = receivers;
         this.worldServer = ((CraftWorld) Objects.requireNonNull(getLocation().getWorld())).getHandle();
-        this.profile = new GameProfile(UUID.randomUUID(), getName());
         this.server = ((CraftServer) Bukkit.getServer()).getServer();
-        this.player = new EntityPlayer(getServer(), getWorldServer(), getProfile(), new PlayerInteractManager(getWorldServer()));
+        this.player = new EntityPlayer(getServer(), getWorldServer(), new GameProfile(UUID.randomUUID(), getName()), new PlayerInteractManager(getWorldServer()));
         this.player.setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
         this.skin = new Skin("", "");
+        getPlayer().ping = 32;
     }
 
     @Override
     public void setSkin(@Nonnull Skin skin) {
         this.skin = skin;
-        this.profile.getProperties().put("textures", new Property("textures", getSkin().getValue(), getSkin().getSignature()));
+        getPlayer().getProfile().getProperties().put("textures", new Property("textures", getSkin().getValue(), getSkin().getSignature()));
+        getPlayer().getDataWatcher().set(DataWatcherRegistry.a.a(16), (byte) 127);
     }
 
     @Override
     public void setSkin(@Nonnull String player) {
         setSkin(Skin.getSkin(player));
-        Logger.warn.println("Please use the properties '" + getSkin().toString() + "' instead of the name '" + player + "'");
+        Logger.warn.println("Please use the properties '" + getSkin() + "' instead of the name '" + player + "'");
     }
 
     @Override
@@ -70,8 +69,6 @@ public class NMSFakePlayer implements TNLFakePlayer<MinecraftServer, WorldServer
 
     @Override
     public void spawn(@Nonnull TNLPlayer receiver) {
-        getPlayer().getDataWatcher().set(DataWatcherRegistry.a.a(16), (byte) 127);
-        getPlayer().ping = 32;
         receiver.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, getPlayer()));
         receiver.sendPacket(new PacketPlayOutNamedEntitySpawn(getPlayer()));
         receiver.sendPacket(new PacketPlayOutEntityMetadata(getPlayer().getId(), getPlayer().getDataWatcher(), true));
@@ -79,7 +76,7 @@ public class NMSFakePlayer implements TNLFakePlayer<MinecraftServer, WorldServer
         for (EnumItemSlot slot : EnumItemSlot.values()) {
             receiver.sendPacket(new PacketPlayOutEntityEquipment(getPlayer().getId(), slot, getPlayer().getEquipment(slot)));
         }
-        Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> hideTablistName(receiver), 10);
+        Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> hideTablistName(receiver), 20);
     }
 
     @Override
@@ -158,34 +155,8 @@ public class NMSFakePlayer implements TNLFakePlayer<MinecraftServer, WorldServer
 
     @Nonnull
     @Override
-    public GameProfile getProfile() {
-        return profile;
-    }
-
-    @Nonnull
-    @Override
     public Skin getSkin() {
         return skin;
-    }
-
-    @Override
-    public void setServer(@Nonnull MinecraftServer server) {
-        this.server = server;
-    }
-
-    @Override
-    public void setWorldServer(@Nonnull WorldServer worldServer) {
-        this.worldServer = worldServer;
-    }
-
-    @Override
-    public void setPlayer(@Nonnull EntityPlayer player) {
-        this.player = player;
-    }
-
-    @Override
-    public void setName(@Nonnull String name) {
-        this.name = name;
     }
 
     @Override
@@ -196,10 +167,5 @@ public class NMSFakePlayer implements TNLFakePlayer<MinecraftServer, WorldServer
     @Override
     public void setReceivers(@Nonnull TNLPlayer... receivers) {
         this.receivers = receivers;
-    }
-
-    @Override
-    public void setProfile(@Nonnull GameProfile profile) {
-        this.profile = profile;
     }
 }

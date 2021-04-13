@@ -70,7 +70,7 @@ public class Skin {
             InputStreamReader reader1 = new InputStreamReader(url1.openStream());
             JsonObject property = new JsonParser().parse(reader1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
             skin.setValue(property.get("value").getAsString());
-            skin.setValue(property.get("signature").getAsString());
+            skin.setSignature(property.get("signature").getAsString());
         } catch (Exception ignored) {
         }
         return skin;
