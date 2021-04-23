@@ -12,7 +12,7 @@ public interface TNLArmorStand extends TNLEntity {
 
     @Nonnull
     static TNLArmorStand create(@Nonnull World world, double x, double y, double z, float yaw, float pitch) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
             return new net.nonswag.tnl.listener.api.entity.v1_16.R3.NMSArmorStand(world, x, y, z, yaw, pitch);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return new net.nonswag.tnl.listener.api.entity.v1_15.R1.NMSArmorStand(world, x, y, z, yaw, pitch);

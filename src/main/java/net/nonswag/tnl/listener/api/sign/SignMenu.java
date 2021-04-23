@@ -12,8 +12,6 @@ public class SignMenu {
     @Nonnull
     private final Location location;
     @Nonnull
-    private final TNLPlayer viewer;
-    @Nonnull
     private final String[] lines;
     @Nonnull
     private final Objects<BiPredicate<TNLPlayer, String[]>> response = new Objects<>();
@@ -21,20 +19,14 @@ public class SignMenu {
     private Type type = Type.DARK_OAK_WALL_SIGN;
     private boolean reopenOnFail = false;
 
-    public SignMenu(@Nonnull Location location, @Nonnull TNLPlayer viewer, @Nonnull String... lines) {
+    public SignMenu(@Nonnull Location location, @Nonnull String... lines) {
         this.location = location;
-        this.viewer = viewer;
         this.lines = lines;
     }
 
     @Nonnull
     public Location getLocation() {
         return location;
-    }
-
-    @Nonnull
-    public TNLPlayer getViewer() {
-        return viewer;
     }
 
     @Nonnull
@@ -62,8 +54,10 @@ public class SignMenu {
         return this;
     }
 
-    public void setReopenOnFail(boolean reopenOnFail) {
+    @Nonnull
+    public SignMenu setReopenOnFail(boolean reopenOnFail) {
         this.reopenOnFail = reopenOnFail;
+        return this;
     }
 
     public boolean isReopenOnFail() {

@@ -78,9 +78,9 @@ public class Logger {
                     ((Throwable) value).printStackTrace();
                 } else {
                     if (getPrefix().isEmpty()) {
-                        System.out.println(Color.replace(ChatComponent.getText(value.toString() + "§r")));
+                        System.out.println(Color.replace(ChatComponent.getText(value + "§r")));
                     } else {
-                        System.out.println(Color.replace(ChatComponent.getText(prefix, new Placeholder("thread", Thread.currentThread().getName()), new Placeholder("time", new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()))) + " " + ChatComponent.getText(value.toString() + "§r")));
+                        System.out.println(Color.replace(ChatComponent.getText(prefix, new Placeholder("thread", Thread.currentThread().getName()), new Placeholder("time", new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()))) + " " + ChatComponent.getText(value + "§r")));
                     }
                 }
             }

@@ -4,6 +4,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_16_R3.*;
 import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.conversation.Conversation;
 import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
@@ -32,6 +33,9 @@ public class PacketListener implements Listener {
                 if (message.length() <= 0 || Color.Minecraft.unColorize(message.replace(" ", ""), '&').isEmpty()) {
                     event.setCancelled(true);
                 } else {
+                    if (Conversation.test(event, event.getPlayer(), message)) {
+                        return;
+                    }
                     PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), message);
                     Bukkit.getPluginManager().callEvent(chatEvent);
                     event.setCancelled(chatEvent.isCancelled());
@@ -158,6 +162,11 @@ public class PacketListener implements Listener {
                     }
                     Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> TNLListener.getInstance().getSignHashMap().remove(event.getPlayer().getUniqueId()));
                     event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
+                }
+            } else if (event.getPacket() instanceof PacketPlayInPickItem) {
+                PlayerItemPickEvent pickEvent = new PlayerItemPickEvent(event.getPlayer(), ((PacketPlayInPickItem) event.getPacket()).b());
+                if (pickEvent.callEvent()) {
+                    event.setCancelled(true);
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
                 BlockPosition position = ((PacketPlayInUseItem) event.getPacket()).c().getBlockPosition();

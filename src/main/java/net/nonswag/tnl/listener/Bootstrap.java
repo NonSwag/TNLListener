@@ -19,8 +19,13 @@ public class Bootstrap extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        TNLListener.getInstance().load();
-        Holograms.getInstance().load();
+        try {
+            TNLListener.getInstance().load();
+            Holograms.getInstance().load();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     @Override

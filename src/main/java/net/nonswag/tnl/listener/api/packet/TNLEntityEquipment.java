@@ -16,7 +16,7 @@ public abstract class TNLEntityEquipment {
 
     @Nonnull
     public static Object create(int id, @Nonnull SlotType slotType, @Nonnull ItemStack item) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             List<com.mojang.datafixers.util.Pair<net.minecraft.server.v1_16_R3.EnumItemSlot, net.minecraft.server.v1_16_R3.ItemStack>> items = new ArrayList<>();
             items.add(new com.mojang.datafixers.util.Pair<>((net.minecraft.server.v1_16_R3.EnumItemSlot) slotType.toNMS(), org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack.asNMSCopy(item)));
             return new net.minecraft.server.v1_16_R3.PacketPlayOutEntityEquipment(id, items);

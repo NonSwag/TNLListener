@@ -2,6 +2,7 @@ package net.nonswag.tnl.listener;
 
 import net.nonswag.tnl.listener.api.command.CommandManager;
 import net.nonswag.tnl.listener.api.config.minecraft.ServerProperties;
+import net.nonswag.tnl.listener.api.conversation.Conversation;
 import net.nonswag.tnl.listener.api.event.EventManager;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
@@ -10,10 +11,7 @@ import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
-import net.nonswag.tnl.listener.listeners.JoinListener;
-import net.nonswag.tnl.listener.listeners.KickListener;
-import net.nonswag.tnl.listener.listeners.QuitListener;
-import net.nonswag.tnl.listener.listeners.WorldListener;
+import net.nonswag.tnl.listener.listeners.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -37,6 +35,8 @@ public class TNLListener {
     @Nonnull
     private final HashMap<UUID, SignMenu> signHashMap = new HashMap<>();
     @Nonnull
+    private final HashMap<UUID, Conversation> conversationHashMap = new HashMap<>();
+    @Nonnull
     private final HashMap<String, Server> serverHashMap = new HashMap<>();
     @Nonnull
     private final ServerVersion version;
@@ -55,7 +55,7 @@ public class TNLListener {
         }
         this.version = version;
         if (getVersion().equals(ServerVersion.UNKNOWN)) {
-            System.exit(1);
+            throw new RuntimeException("Your server version could not be detected: " + Bukkit.getVersion());
         }
     }
 
@@ -98,7 +98,7 @@ public class TNLListener {
             new PluginUpdate(Bootstrap.getInstance()).downloadUpdate();
         }
         try {
-            if (getVersion().equals(ServerVersion.v1_16_5)) {
+            if (getVersion().equals(ServerVersion.v1_16_4) || getVersion().equals(ServerVersion.v1_16_5)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.CommandListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.InteractListener());
@@ -128,6 +128,7 @@ public class TNLListener {
 
     protected void disable() {
         for (TNLPlayer all : getOnlinePlayers()) {
+            all.stopConversation();
             Holograms.getInstance().unloadAll(all);
             all.uninject();
         }
@@ -234,5 +235,10 @@ public class TNLListener {
     @Nonnull
     public HashMap<UUID, SignMenu> getSignHashMap() {
         return signHashMap;
+    }
+
+    @Nonnull
+    public HashMap<UUID, Conversation> getConversationHashMap() {
+        return conversationHashMap;
     }
 }

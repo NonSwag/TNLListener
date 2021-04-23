@@ -4,6 +4,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.conversation.Conversation;
 import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
@@ -32,6 +33,9 @@ public class PacketListener implements Listener {
                 if (message.length() <= 0 || Color.Minecraft.unColorize(message.replace(" ", ""), '&').isEmpty()) {
                     event.setCancelled(true);
                 } else {
+                    if (Conversation.test(event, event.getPlayer(), message)) {
+                        return;
+                    }
                     PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), message);
                     Bukkit.getPluginManager().callEvent(chatEvent);
                     event.setCancelled(chatEvent.isCancelled());
@@ -97,6 +101,11 @@ public class PacketListener implements Listener {
                     if (!Settings.CHAT_COMPLETER.getValue() && !event.getPlayer().getPermissionManager().hasPermission(Settings.TAB_COMPLETE_BYPASS_PERMISSION.getValue())) {
                         event.setCancelled(true);
                     }
+                }
+            } else if (event.getPacket() instanceof PacketPlayInPickItem) {
+                PlayerItemPickEvent pickEvent = new PlayerItemPickEvent(event.getPlayer(), ((PacketPlayInPickItem) event.getPacket()).b());
+                if (pickEvent.callEvent()) {
+                    event.setCancelled(true);
                 }
             } else if (event.getPacket() instanceof PacketPlayInBlockPlace) {
                 org.bukkit.inventory.ItemStack itemStack = null;

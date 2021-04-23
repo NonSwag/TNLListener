@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.serializer.PacketSerializer;
 
 import javax.annotation.Nonnull;
@@ -24,7 +23,8 @@ public class Server {
     @Nonnull
     private final InetSocketAddress inetSocketAddress;
 
-    private boolean online = false;
+    @Nonnull
+    private Status status = Status.OFFLINE;
     private int playerCount = 0;
     private int maxPlayerCount = 0;
     private long lastUpdateTime = 0;
@@ -36,7 +36,7 @@ public class Server {
     public Server(@Nonnull String name, @Nonnull InetSocketAddress inetSocketAddress) {
         this.name = name;
         this.inetSocketAddress = inetSocketAddress;
-        this.update(System.currentTimeMillis());
+        this.update();
     }
 
     @Nonnull
@@ -50,21 +50,21 @@ public class Server {
     }
 
     public int getPlayerCount() {
-        this.update(System.currentTimeMillis());
+        this.update();
         return playerCount;
     }
 
     public int getMaxPlayerCount() {
-        this.update(System.currentTimeMillis());
+        this.update();
         return maxPlayerCount;
     }
 
-    public long getLastUpdateTime() {
+    private long getLastUpdateTime() {
         return lastUpdateTime;
     }
 
-    private void setOnline(boolean online) {
-        this.online = online;
+    public void setStatus(@Nonnull Status status) {
+        this.status = status;
     }
 
     private void setPlayerCount(int playerCount) {
@@ -75,17 +75,19 @@ public class Server {
         this.maxPlayerCount = maxPlayerCount;
     }
 
-    public void setLastUpdateTime(long lastUpdateTime) {
+    private void setLastUpdateTime(long lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
     }
 
-    public boolean isOnline() {
-        this.update(System.currentTimeMillis());
-        return online;
+    @Nonnull
+    public Status getStatus() {
+        this.update();
+        return status;
     }
 
-    public void update(long time) {
-        if (time <= getLastUpdateTime()) {
+    public void update() {
+        long time = System.currentTimeMillis();
+        if (time - getLastUpdateTime() < 1000) {
             return;
         }
         setLastUpdateTime(time);
@@ -93,18 +95,31 @@ public class Server {
             Socket socket;
             try {
                 socket = new Socket();
+                socket.setSoTimeout(1500);
                 socket.connect(getInetSocketAddress(), 1500);
-                setOnline(true);
-                try {
-                    JsonElement jsonElement = sendHandshake(socket);
-                    JsonObject players = jsonElement.getAsJsonObject().get("players").getAsJsonObject();
-                    setMaxPlayerCount(players.get("max").getAsInt());
-                    setPlayerCount(players.get("online").getAsInt());
-                } catch (IOException e) {
-                    Logger.error.println(e);
+                if (socket.isConnected()) {
+                    try {
+                        JsonElement jsonElement = sendHandshake(socket);
+                        if (jsonElement.isJsonObject()) {
+                            JsonObject jsonObject = jsonElement.getAsJsonObject();
+                            if (jsonObject.has("players") && jsonObject.get("players").isJsonObject()) {
+                                JsonObject players = jsonObject.get("players").getAsJsonObject();
+                                if (players.has("max") && players.has("online")) {
+                                    setMaxPlayerCount(players.get("max").getAsInt());
+                                    setPlayerCount(players.get("online").getAsInt());
+                                    setStatus(Status.ONLINE);
+                                    return;
+                                }
+                            }
+                        }
+                    } catch (Exception ignored) {
+                        setStatus(Status.OFFLINE);
+                    }
+                    socket.close();
                 }
+                setStatus(Status.STARTING);
             } catch (Exception ignored) {
-                setOnline(false);
+                setStatus(Status.OFFLINE);
                 setPlayerCount(0);
                 setMaxPlayerCount(0);
             }
@@ -113,23 +128,26 @@ public class Server {
 
     @Nonnull
     private JsonElement sendHandshake(@Nonnull Socket socket) throws IOException {
-        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-        DataInputStream input = new DataInputStream(socket.getInputStream());
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        DataOutputStream handshake = new DataOutputStream(buffer);
-        handshake.writeByte(0x00);
-        PacketSerializer.writeVarInt(handshake, 754);
-        PacketSerializer.writeString(handshake, getInetSocketAddress().getHostName());
-        handshake.writeShort(getInetSocketAddress().getPort());
-        PacketSerializer.writeVarInt(handshake, 1);
-        byte[] handshakeMessage = buffer.toByteArray();
-        PacketSerializer.writeVarInt(output, handshakeMessage.length);
-        output.write(handshakeMessage);
-        output.writeByte(0x01);
-        output.writeByte(0x00);
-        byte[] in = new byte[PacketSerializer.readVarInt(input)];
-        input.readFully(in);
-        return new JsonParser().parse(new String(in).substring(3));
+        if (socket.isConnected()) {
+            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+            DataInputStream input = new DataInputStream(socket.getInputStream());
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            DataOutputStream handshake = new DataOutputStream(buffer);
+            handshake.writeByte(0x00);
+            PacketSerializer.writeVarInt(handshake, 754);
+            PacketSerializer.writeString(handshake, getInetSocketAddress().getHostName());
+            handshake.writeShort(getInetSocketAddress().getPort());
+            PacketSerializer.writeVarInt(handshake, 1);
+            byte[] handshakeMessage = buffer.toByteArray();
+            PacketSerializer.writeVarInt(output, handshakeMessage.length);
+            output.write(handshakeMessage);
+            output.writeByte(0x01);
+            output.writeByte(0x00);
+            byte[] in = new byte[PacketSerializer.readVarInt(input)];
+            input.readFully(in);
+            return new JsonParser().parse(new String(in).substring(3));
+        }
+        return new JsonObject();
     }
 
     @Nullable
@@ -148,9 +166,10 @@ public class Server {
         return "Server{" +
                 "name='" + name + '\'' +
                 ", inetSocketAddress=" + inetSocketAddress +
-                ", online=" + online +
+                ", status=" + status +
                 ", playerCount=" + playerCount +
                 ", maxPlayerCount=" + maxPlayerCount +
+                ", lastUpdateTime=" + lastUpdateTime +
                 '}';
     }
 
@@ -159,11 +178,29 @@ public class Server {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Server server = (Server) o;
-        return online == server.online && playerCount == server.playerCount && maxPlayerCount == server.maxPlayerCount && name.equals(server.name) && inetSocketAddress.equals(server.inetSocketAddress);
+        return playerCount == server.playerCount && maxPlayerCount == server.maxPlayerCount && lastUpdateTime == server.lastUpdateTime && name.equals(server.name) && inetSocketAddress.equals(server.inetSocketAddress) && status == server.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, inetSocketAddress, online, playerCount, maxPlayerCount);
+        return Objects.hash(name, inetSocketAddress, status, playerCount, maxPlayerCount, lastUpdateTime);
+    }
+
+    public enum Status {
+        ONLINE,
+        OFFLINE,
+        STARTING;
+
+        public boolean isStarting() {
+            return equals(STARTING);
+        }
+
+        public boolean isOnline() {
+            return equals(ONLINE);
+        }
+
+        public boolean isOffline() {
+            return equals(OFFLINE);
+        }
     }
 }

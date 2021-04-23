@@ -144,7 +144,7 @@ public class Holograms {
                     if (s.contains("%status_") || s.contains("%online_") || s.contains("%max_online_") || s.contains("%players_")) {
                         for (Server server : TNLListener.getInstance().getServers()) {
                             if (s.contains("%status_" + server.getName() + "%")) {
-                                s = s.replace("%status_" + server.getName() + "%", server.isOnline() ? "Online" : "Offline");
+                                s = s.replace("%status_" + server.getName() + "%", server.getStatus().isOnline() ? "Online" : (server.getStatus().isOffline() ? "Offline" : "Starting"));
                             }
                             if (s.contains("%online_" + server.getName() + "%")) {
                                 s = s.replace("%online_" + server.getName() + "%", server.getPlayerCount() + "");
@@ -196,7 +196,7 @@ public class Holograms {
                     if (s.contains("%status_") || s.contains("%online_") || s.contains("%max_online_") || s.contains("%players_")) {
                         for (Server server : TNLListener.getInstance().getServers()) {
                             if (s.contains("%status_" + server.getName() + "%")) {
-                                s = s.replace("%status_" + server.getName() + "%", server.isOnline() ? "Online" : "Offline");
+                                s = s.replace("%status_" + server.getName() + "%", server.getStatus().isOnline() ? "Online" : (server.getStatus().isOffline() ? "Offline" : "Starting"));
                             }
                             if (s.contains("%online_" + server.getName() + "%")) {
                                 s = s.replace("%online_" + server.getName() + "%", server.getPlayerCount() + "");

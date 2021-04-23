@@ -11,7 +11,7 @@ public abstract class TNLGameStateChange {
     @Nonnull
     public static Object create(@Nonnull int id, float value) {
         Object packet;
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             packet = new net.minecraft.server.v1_16_R3.PacketPlayOutGameStateChange(new net.minecraft.server.v1_16_R3.PacketPlayOutGameStateChange.a(id), value);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             packet = new net.minecraft.server.v1_15_R1.PacketPlayOutGameStateChange(id, value);

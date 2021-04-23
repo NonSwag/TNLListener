@@ -2,6 +2,7 @@ package net.nonswag.tnl.listener.listeners.v1_7.R4;
 
 import net.minecraft.server.v1_7_R4.*;
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.conversation.Conversation;
 import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
@@ -27,6 +28,9 @@ public class PacketListener implements Listener {
                 if (message.length() <= 0 || Color.Minecraft.unColorize(message.replace(" ", ""), '&').isEmpty()) {
                     event.setCancelled(true);
                 } else {
+                    if (Conversation.test(event, event.getPlayer(), message)) {
+                        return;
+                    }
                     PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), message);
                     Bukkit.getPluginManager().callEvent(chatEvent);
                     event.setCancelled(chatEvent.isCancelled());

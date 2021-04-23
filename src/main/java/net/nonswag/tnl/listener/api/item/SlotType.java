@@ -16,7 +16,7 @@ public enum SlotType {
 
     @Nonnull
     public Object toNMS() {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
             if (equals(MAIN_HAND)) {
                 return net.minecraft.server.v1_16_R3.EnumItemSlot.MAINHAND;
             } else if (equals(OFF_HAND)) {

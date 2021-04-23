@@ -49,8 +49,6 @@ import org.bukkit.util.Vector;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.net.InetSocketAddress;
 import java.util.*;
 
@@ -687,25 +685,6 @@ public class NMSPlayer implements TNLPlayer {
     @Nonnull
     public EntityPlayer getEntityPlayer() {
         return getCraftPlayer().getHandle();
-    }
-
-    @Override
-    public void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server) {
-        try {
-            if (server.isOnline()) {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-                dataOutputStream.writeUTF("Connect");
-                dataOutputStream.writeUTF(server.getName());
-                sendPluginMessage(Bootstrap.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
-                sendMessage("%prefix% §aConnecting you to server §6" + server.getName());
-            } else {
-                sendMessage("%prefix% §cThe server §4" + server.getName() + "§c is Offline");
-            }
-        } catch (Exception e) {
-            Logger.error.println(e);
-            sendMessage("%prefix% §cFailed to connect you to server §4" + server.getName());
-        }
     }
 
     @Override

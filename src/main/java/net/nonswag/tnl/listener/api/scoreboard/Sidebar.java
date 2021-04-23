@@ -46,7 +46,7 @@ public interface Sidebar<S, O> {
 
     @Nonnull
     static Sidebar<?, ?> create(@Nonnull TNLPlayer player) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             return new net.nonswag.tnl.listener.api.scoreboard.v1_16.R3.NMSSidebar(player);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return new net.nonswag.tnl.listener.api.scoreboard.v1_15.R1.NMSSidebar(player);

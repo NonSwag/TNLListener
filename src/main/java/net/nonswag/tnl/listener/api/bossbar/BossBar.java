@@ -48,7 +48,7 @@ public interface BossBar<CBB> {
 
     @Nonnull
     static BossBar<?> create(@Nonnull String id, @Nonnull Object text, @Nonnull BarColor color, @Nonnull BarStyle style, double progress, @Nonnull BarFlag... barFlags) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             return new net.nonswag.tnl.listener.api.bossbar.v1_16.R3.NMSBossBar(id, text, color, style, progress, barFlags);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return new net.nonswag.tnl.listener.api.bossbar.v1_15.R1.NMSBossBar(id, text, color, style, progress, barFlags);

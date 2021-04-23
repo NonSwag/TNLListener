@@ -119,7 +119,7 @@ public interface TNLItem {
 
     @Nonnull
     static TNLItem create(@Nonnull ItemStack itemStack) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             return new net.nonswag.tnl.listener.api.item.v1_16.R3.NMSItem(itemStack);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return new net.nonswag.tnl.listener.api.item.v1_15.R1.NMSItem(itemStack);

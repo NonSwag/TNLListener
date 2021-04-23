@@ -1,7 +1,9 @@
 package net.nonswag.tnl.listener.api.player;
 
+import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.BossBar;
+import net.nonswag.tnl.listener.api.conversation.Conversation;
 import net.nonswag.tnl.listener.api.entity.TNLEntity;
 import net.nonswag.tnl.listener.api.file.FileCreator;
 import net.nonswag.tnl.listener.api.logger.Logger;
@@ -40,6 +42,8 @@ import org.bukkit.util.Vector;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -281,6 +285,23 @@ public interface TNLPlayer extends TNLEntity {
 
     void disconnect(@Nonnull String kickMessage);
 
+    @Nullable
+    default Conversation getConversation() {
+        return TNLListener.getInstance().getConversationHashMap().get(getUniqueId());
+    }
+
+    default void startConversation(@Nonnull Conversation conversation) {
+        TNLListener.getInstance().getConversationHashMap().put(getUniqueId(), conversation);
+    }
+
+    default void stopConversation() {
+        TNLListener.getInstance().getConversationHashMap().remove(getUniqueId());
+    }
+
+    default boolean isInConversation() {
+        return TNLListener.getInstance().getConversationHashMap().containsKey(getUniqueId());
+    }
+
     default void sendDemoScreen() {
         sendPacket(TNLGameStateChange.create(5, 0));
     }
@@ -372,7 +393,23 @@ public interface TNLPlayer extends TNLEntity {
 
     void sendActionbar(@Nonnull String actionbar);
 
-    void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server);
+    default void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server) {
+        try {
+            if (server.getStatus().isOnline()) {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+                dataOutputStream.writeUTF("Connect");
+                dataOutputStream.writeUTF(server.getName());
+                sendPluginMessage(Bootstrap.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
+                sendMessage("%prefix% §aConnecting you to server §6" + server.getName());
+            } else {
+                sendMessage("%prefix% §cThe server §4" + server.getName() + "§c is Offline");
+            }
+        } catch (Exception e) {
+            Logger.error.println(e);
+            sendMessage("%prefix% §cFailed to connect you to server §4" + server.getName());
+        }
+    }
 
     default void loadInventory(@Nonnull String id) {
         File file = new File(new File("plugins/Listener/Inventories/"), getBukkitPlayer().getUniqueId() + ".yml");
@@ -725,7 +762,7 @@ public interface TNLPlayer extends TNLEntity {
 
     @Nonnull
     static TNLPlayer cast(@Nonnull Player player) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             return net.nonswag.tnl.listener.api.player.v1_16.R3.NMSPlayer.cast(player);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer.cast(player);

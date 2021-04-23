@@ -17,7 +17,7 @@ public abstract class TNLEntitySpawn {
 
     @Nonnull
     public static Object create(@Nonnull Entity entity) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             return new net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity(((org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity) entity).getHandle());
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return new net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntity(((org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity) entity).getHandle());

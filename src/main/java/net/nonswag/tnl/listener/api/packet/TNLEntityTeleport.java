@@ -14,7 +14,7 @@ public abstract class TNLEntityTeleport {
     @Nonnull
     public static Object create(int id, double x, double y, double z, float yaw, float pitch) {
         final Object packet;
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             packet = new net.minecraft.server.v1_16_R3.PacketPlayOutEntityTeleport();
             Reflection.setField(packet, "b", x);
             Reflection.setField(packet, "c", y);
