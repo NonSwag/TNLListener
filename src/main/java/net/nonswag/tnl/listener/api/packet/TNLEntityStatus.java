@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
 public abstract class TNLEntityStatus {
 
     @Nonnull
-    public static Object create(@Nonnull int id, byte value) {
+    public static Object create(int id, byte value) {
         Object packet;
         if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             packet = new net.minecraft.server.v1_16_R3.PacketPlayOutEntityStatus();

@@ -3,7 +3,7 @@ package net.nonswag.tnl.listener.api.reflection;
 import com.google.gson.JsonObject;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Objects;
-import net.nonswag.tnl.listener.api.object.Set;
+import net.nonswag.tnl.listener.api.object.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -53,8 +53,8 @@ public class Reflection {
             modifiers.setAccessible(true);
             modifiers.setInt(field, field.getModifiers() & 0xFFFFFFEF);
             field.set(null, value);
-            modifiers.setAccessible(!modifiers.isAccessible());
-            field.setAccessible(!field.isAccessible());
+            modifiers.setAccessible(false);
+            field.setAccessible(false);
         } catch (IllegalAccessException | NoSuchFieldException e) {
             Logger.error.println(e);
         }
@@ -89,16 +89,16 @@ public class Reflection {
         JsonObject fields = new JsonObject();
         for (String field : getFields(clazz.getClass())) {
             Objects<?> o = getField(clazz, field);
-            if (o.getValue() instanceof Set) {
-                Set<?, ?> set = (Set<?, ?>) o.getValue();
-                if ((set.getValue() instanceof String)) {
-                    fields.addProperty(set.getKey().toString(), ((String) set.getValue()));
-                } else if ((set.getValue() instanceof Number)) {
-                    fields.addProperty(set.getKey().toString(), ((Number) set.getValue()));
-                } else if ((set.getValue() instanceof Boolean)) {
-                    fields.addProperty(set.getKey().toString(), ((Boolean) set.getValue()));
-                } else if ((set.getValue() instanceof Character)) {
-                    fields.addProperty(set.getKey().toString(), ((Character) set.getValue()));
+            if (o.getValue() instanceof Pair) {
+                Pair<?, ?> pair = (Pair<?, ?>) o.getValue();
+                if ((pair.getValue() instanceof String)) {
+                    fields.addProperty(pair.getKey().toString(), ((String) pair.getValue()));
+                } else if ((pair.getValue() instanceof Number)) {
+                    fields.addProperty(pair.getKey().toString(), ((Number) pair.getValue()));
+                } else if ((pair.getValue() instanceof Boolean)) {
+                    fields.addProperty(pair.getKey().toString(), ((Boolean) pair.getValue()));
+                } else if ((pair.getValue() instanceof Character)) {
+                    fields.addProperty(pair.getKey().toString(), ((Character) pair.getValue()));
                 }
             } else {
                 fields.addProperty(field, o.hasValue() ? o.nonnull().toString() : "");

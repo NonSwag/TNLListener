@@ -36,6 +36,12 @@ public interface TNLArmorStand extends TNLEntity {
         return create(location.getWorld(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
     }
 
+    void setX(double x);
+
+    void setY(double y);
+
+    void setZ(double z);
+
     void updateSize();
 
     boolean doAITick();

@@ -1,6 +1,5 @@
 package net.nonswag.tnl.listener;
 
-import net.nonswag.tnl.listener.api.command.CommandManager;
 import net.nonswag.tnl.listener.api.config.minecraft.ServerProperties;
 import net.nonswag.tnl.listener.api.conversation.Conversation;
 import net.nonswag.tnl.listener.api.event.EventManager;
@@ -11,12 +10,16 @@ import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
-import net.nonswag.tnl.listener.listeners.*;
+import net.nonswag.tnl.listener.listeners.JoinListener;
+import net.nonswag.tnl.listener.listeners.KickListener;
+import net.nonswag.tnl.listener.listeners.QuitListener;
+import net.nonswag.tnl.listener.listeners.WorldListener;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Team;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,14 +62,7 @@ public class TNLListener {
         }
     }
 
-    protected void load() {
-        if (Settings.DELETE_OLD_LOGS.getValue()) {
-            deleteOldLogs();
-        }
-    }
-
     protected void enable() {
-        CommandManager commandManager = new CommandManager(Bootstrap.getInstance());
         EventManager eventManager = new EventManager(Bootstrap.getInstance());
         for (String server : Settings.SERVERS.getValue()) {
             if (Settings.getConfig().has("server-" + server)) {
@@ -91,6 +87,9 @@ public class TNLListener {
                 Settings.getConfig().setValue("server-" + server, "host:port");
                 Logger.info.println("§aFound new server §8'§6" + server + "§8'");
             }
+        }
+        if (Settings.DELETE_OLD_LOGS.getValue()) {
+            deleteOldLogs();
         }
         Settings.getConfig().save();
         Bukkit.getMessenger().registerOutgoingPluginChannel(Bootstrap.getInstance(), "BungeeCord");
@@ -122,8 +121,10 @@ public class TNLListener {
             Logger.error.println("§cFailed to register listener", t);
         }
         for (Player all : Bukkit.getOnlinePlayers()) {
-            TNLPlayer.cast(all).inject();
+            TNLPlayer player = TNLPlayer.cast(all);
+            player.inject();
         }
+        updateTeams();
     }
 
     protected void disable() {
@@ -240,5 +241,27 @@ public class TNLListener {
     @Nonnull
     public HashMap<UUID, Conversation> getConversationHashMap() {
         return conversationHashMap;
+    }
+
+    public void updateTeams() {
+        for (TNLPlayer all : getOnlinePlayers()) {
+            all.updateTeam();
+        }
+    }
+
+    public void setCollisions(@Nonnull org.bukkit.scoreboard.Team.OptionStatus collision) {
+        for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
+            for (Team team : all.getScoreboard().getTeams()) {
+                team.setOption(Team.Option.COLLISION_RULE, collision);
+            }
+        }
+    }
+
+    public void setNameTagVisibility(@Nonnull org.bukkit.scoreboard.Team.OptionStatus nameTagVisibility) {
+        for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
+            for (Team team : all.getScoreboard().getTeams()) {
+                team.setOption(Team.Option.NAME_TAG_VISIBILITY, nameTagVisibility);
+            }
+        }
     }
 }

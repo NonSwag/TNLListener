@@ -102,27 +102,28 @@ public class Server {
                         JsonElement jsonElement = sendHandshake(socket);
                         if (jsonElement.isJsonObject()) {
                             JsonObject jsonObject = jsonElement.getAsJsonObject();
-                            if (jsonObject.has("players") && jsonObject.get("players").isJsonObject()) {
-                                JsonObject players = jsonObject.get("players").getAsJsonObject();
-                                if (players.has("max") && players.has("online")) {
-                                    setMaxPlayerCount(players.get("max").getAsInt());
-                                    setPlayerCount(players.get("online").getAsInt());
-                                    setStatus(Status.ONLINE);
-                                    return;
+                            if (jsonObject.has("players")) {
+                                if (jsonObject.get("players").isJsonObject()) {
+                                    JsonObject players = jsonObject.get("players").getAsJsonObject();
+                                    if (players.has("max") && players.has("online")) {
+                                        setMaxPlayerCount(players.get("max").getAsInt());
+                                        setPlayerCount(players.get("online").getAsInt());
+                                        setStatus(Status.ONLINE);
+                                        return;
+                                    }
                                 }
                             }
                         }
                     } catch (Exception ignored) {
-                        setStatus(Status.OFFLINE);
                     }
                     socket.close();
                 }
                 setStatus(Status.STARTING);
             } catch (Exception ignored) {
                 setStatus(Status.OFFLINE);
-                setPlayerCount(0);
-                setMaxPlayerCount(0);
             }
+            setPlayerCount(0);
+            setMaxPlayerCount(0);
         }, "update thread").start();
     }
 
@@ -145,7 +146,11 @@ public class Server {
             output.writeByte(0x00);
             byte[] in = new byte[PacketSerializer.readVarInt(input)];
             input.readFully(in);
-            return new JsonParser().parse(new String(in).substring(3));
+            for (int i = 0; i < 4; i++) {
+                if (new String(in).substring(i).startsWith("{")) {
+                    return new JsonParser().parse(new String(in).substring(i));
+                }
+            }
         }
         return new JsonObject();
     }

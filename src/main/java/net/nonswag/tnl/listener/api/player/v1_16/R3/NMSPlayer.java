@@ -4,17 +4,13 @@ import io.netty.channel.*;
 import net.minecraft.server.v1_16_R3.*;
 import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.api.bossbar.BossBar;
+import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
 import net.nonswag.tnl.listener.api.bossbar.v1_16.R3.NMSBossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
 import net.nonswag.tnl.listener.api.object.Generic;
-import net.nonswag.tnl.listener.api.permission.PermissionManager;
-import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
-import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
-import net.nonswag.tnl.listener.api.scoreboard.v1_16.R3.NMSSidebar;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.events.PlayerPacketEvent;
@@ -62,18 +58,10 @@ public class NMSPlayer implements TNLPlayer {
     @Nonnull
     private final Player bukkitPlayer;
     @Nonnull
-    private final Scoreboard optionScoreboard = new Scoreboard();
-    @Nonnull
-    private final ScoreboardTeam optionTeam = new ScoreboardTeam(getOptionScoreboard(), "TNLOptionPacket");
-    @Nonnull
     private final HashMap<String, Object> virtualStorage = new HashMap<>();
-    @Nonnull
-    private final Permissions permissionManager;
 
     protected NMSPlayer(@Nonnull Player bukkitPlayer) {
         this.bukkitPlayer = bukkitPlayer;
-        this.permissionManager = new PermissionManager(this);
-        getOptionScoreboard().addPlayerToTeam(getName(), getOptionTeam());
     }
 
     @Nonnull
@@ -151,18 +139,6 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     @Nonnull
-    public Scoreboard getOptionScoreboard() {
-        return optionScoreboard;
-    }
-
-    @Override
-    @Nonnull
-    public ScoreboardTeam getOptionTeam() {
-        return optionTeam;
-    }
-
-    @Override
-    @Nonnull
     public PlayerConnection getPlayerConnection() {
         return getEntityPlayer().playerConnection;
     }
@@ -176,12 +152,6 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public int getPing() {
         return getEntityPlayer().ping;
-    }
-
-    @Override
-    @Nonnull
-    public Permissions getPermissionManager() {
-        return permissionManager;
     }
 
     @Override
@@ -319,15 +289,10 @@ public class NMSPlayer implements TNLPlayer {
         }
     }
 
+    @Nonnull
     @Override
     public String getWorldAlias() {
         return getWorldAlias(getWorld());
-    }
-
-    @Override
-    public <EnumTeamPush> void setCollision(@Nonnull EnumTeamPush collision) {
-        getOptionTeam().setCollisionRule((ScoreboardTeamBase.EnumTeamPush) collision);
-        sendPacket(new PacketPlayOutScoreboardTeam(getOptionTeam(), 0));
     }
 
     @Nonnull
@@ -538,13 +503,11 @@ public class NMSPlayer implements TNLPlayer {
         }
     }
 
-    @Nonnull
     @Override
     public void disguise(@Nonnull Generic<?> entity) {
         disguise(entity, TNLListener.getInstance().getOnlinePlayers());
     }
 
-    @Nonnull
     @Override
     public void disguise(@Nonnull Generic<?> entity, @Nonnull List<TNLPlayer> receivers) {
         for (TNLPlayer receiver : receivers) {
@@ -552,7 +515,6 @@ public class NMSPlayer implements TNLPlayer {
         }
     }
 
-    @Nonnull
     @Override
     public void disguise(@Nonnull Generic<?> entity, @Nonnull TNLPlayer receiver) {
         if (!receiver.getUniqueId().equals(getUniqueId()) && entity.getParameter() instanceof EntityLiving) {
@@ -579,10 +541,9 @@ public class NMSPlayer implements TNLPlayer {
         return bossBars.getOrDefault(uniqueId, new ArrayList<>());
     }
 
-    @Nonnull
     @Override
-    public void sendBossBar(@Nonnull BossBar<?> bossBar, long millis) {
-        NMSBossBar.createBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+    public void sendBossBar(@Nonnull TNLBossBar<?> bossBar, long millis) {
+        TNLBossBar.BOSS_BARS.put(bossBar.getId(), bossBar);
         if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null) {
             hideBossBar(getBossHashMap().get(getBukkitPlayer().getUniqueId()));
         }
@@ -593,17 +554,15 @@ public class NMSPlayer implements TNLPlayer {
                 Thread.sleep(millis);
             } catch (Exception ignored) {
             }
-            if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null
-                    && getBossHashMap().get(getBukkitPlayer().getUniqueId()).equals(bossBar)) {
+            if (getBossHashMap().get(getBukkitPlayer().getUniqueId()) != null && getBossHashMap().get(getBukkitPlayer().getUniqueId()).equals(bossBar)) {
                 hideBossBar(getBossHashMap().get(getBukkitPlayer().getUniqueId()));
             }
         }).start();
     }
 
-    @Nonnull
     @Override
-    public void sendBossBar(@Nonnull BossBar<?> bossBar) {
-        NMSBossBar.createBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+    public void sendBossBar(@Nonnull TNLBossBar<?> bossBar) {
+        TNLBossBar.BOSS_BARS.put(bossBar.getId(), bossBar);
         if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
             sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.ADD, ((NMSBossBar) bossBar).getBossBar().getHandle()));
             List<String> bars = getBossBars(getUniqueId());
@@ -613,10 +572,9 @@ public class NMSPlayer implements TNLPlayer {
         updateBossBar(bossBar);
     }
 
-    @Nonnull
     @Override
-    public void updateBossBar(@Nonnull BossBar<?> bossBar) {
-        NMSBossBar.createBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+    public void updateBossBar(@Nonnull TNLBossBar<?> bossBar) {
+        TNLBossBar.BOSS_BARS.put(bossBar.getId(), bossBar);
         if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
             sendBossBar(bossBar);
         } else {
@@ -628,15 +586,15 @@ public class NMSPlayer implements TNLPlayer {
         }
     }
 
-    @Nonnull
     @Override
-    public void hideBossBar(@Nonnull BossBar<?> bossBar) {
-        NMSBossBar.deleteBossBar(bossBar.getId(), ((NMSBossBar) bossBar));
+    public void hideBossBar(@Nonnull TNLBossBar<?> bossBar) {
+        TNLBossBar<?> bar = TNLBossBar.get(bossBar.getId());
+        if (bar != null) bossBar = bar;
         sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.REMOVE, ((NMSBossBar) bossBar).getBossBar().getHandle()));
         List<String> bars = getBossBars(getUniqueId());
         bars.remove(bossBar.getId());
         getBossBars().put(getUniqueId(), bars);
-        NMSBossBar.removeBossBar(bossBar.getId());
+        TNLBossBar.BOSS_BARS.remove(bossBar.getId());
     }
 
     @Override
@@ -811,7 +769,6 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    @Nonnull
     public <T> void playEffect(@Nonnull Location location, @Nonnull Effect effect, @Nonnull T t) {
         getBukkitPlayer().playEffect(location, effect, t);
     }
@@ -967,11 +924,6 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void setArrowCount(int arrows) {
         getEntityPlayer().setArrowCount(arrows);
-    }
-
-    @Override
-    public void showPlayer(@Nonnull TNLPlayer player) {
-        sendPacket(new PacketPlayOutSpawnEntityLiving(player.getEntityPlayer()));
     }
 
     @Override
@@ -1384,15 +1336,6 @@ public class NMSPlayer implements TNLPlayer {
         return getBukkitPlayer().getTargetBlockExact(i);
     }
 
-    @Nonnull
-    @Override
-    public Sidebar<?, ?> getSidebar() {
-        if (!Sidebar.Storage.getSaves().containsKey(this)) {
-            Sidebar.Storage.getSaves().put(this, new NMSSidebar(this));
-        }
-        return Sidebar.Storage.getSaves().get(this);
-    }
-
     @Override
     public int getRemainingAir() {
         return getBukkitPlayer().getRemainingAir();
@@ -1713,7 +1656,6 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void uninject() {
         try {
-            Sidebar.Storage.getSaves().remove(this);
             Channel channel = getNetworkManager().channel;
             if (channel.pipeline().get(getName() + "-TNLListener") != null) {
                 channel.eventLoop().submit(() -> {
@@ -1725,31 +1667,12 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public String toString() {
-        return "TNLPlayer{" +
-                "bukkitPlayer=" + bukkitPlayer +
-                ", optionScoreboard=" + optionScoreboard +
-                ", optionTeam=" + optionTeam +
-                ", virtualStorage=" + virtualStorage +
-                ", permissionManager=" + permissionManager +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        NMSPlayer player = (NMSPlayer) o;
-        return bukkitPlayer.equals(player.bukkitPlayer) && optionScoreboard.equals(player.optionScoreboard) && optionTeam.equals(player.optionTeam) && virtualStorage.equals(player.virtualStorage) && permissionManager.equals(player.permissionManager);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(bukkitPlayer, optionScoreboard, optionTeam, virtualStorage, permissionManager);
-    }
-
-    @Override
     public int getId() {
         return getEntityPlayer().getId();
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

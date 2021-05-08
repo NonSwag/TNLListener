@@ -7,6 +7,7 @@ import net.nonswag.tnl.listener.api.message.Message;
 import net.nonswag.tnl.listener.api.object.Objects;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.settings.Settings;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerKickEvent;
@@ -30,6 +31,6 @@ public class KickListener implements Listener {
         if (!reason.startsWith(Message.PREFIX.getText()) || !reason.toLowerCase().startsWith("%prefix%")) {
             event.setReason(ChatComponent.getText("%prefix%\n§c" + event.getReason()));
         }
-        TNLListener.getInstance().getPlayerHashMap().remove(event.getPlayer());
+        TNLListener.getInstance().getPlayerHashMap().entrySet().removeIf(entry -> !Bukkit.getOnlinePlayers().contains(entry.getKey()) || !entry.getKey().isOnline());
     }
 }

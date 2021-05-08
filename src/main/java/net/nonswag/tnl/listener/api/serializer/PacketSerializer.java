@@ -7,18 +7,16 @@ import javax.annotation.Nonnull;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class PacketSerializer {
 
     public static void writeString(@Nonnull DataOutputStream outputStream, @Nonnull String value) {
         try {
-            byte[] bytes = value.getBytes(Charset.defaultCharset());
+            byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
             writeVarInt(outputStream, bytes.length);
             outputStream.write(bytes);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
     }
 
@@ -32,8 +30,7 @@ public class PacketSerializer {
                 outputStream.writeByte(value & 0x7F | 0x80);
                 value >>>= 7;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
     }
 
@@ -46,8 +43,7 @@ public class PacketSerializer {
                 if (j > 5) throw new RuntimeException("VarInt too big");
                 if ((k & 0x80) != 128) break;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
         return i;
     }
@@ -80,7 +76,7 @@ public class PacketSerializer {
                 part |= 128;
             }
             output.writeByte(part);
-        } while(value != 0);
+        } while (value != 0);
     }
 
     public byte[] toArray() {

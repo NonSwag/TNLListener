@@ -8,8 +8,13 @@ import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.HashMap;
 
-public interface BossBar<CBB> {
+public interface TNLBossBar<CBB> {
+
+    @Nonnull
+    HashMap<String, TNLBossBar<?>> BOSS_BARS = new HashMap<>();
 
     @Nonnull
     String getId();
@@ -29,25 +34,25 @@ public interface BossBar<CBB> {
     double getProgress();
 
     @Nonnull
-    BossBar<CBB> setText(@Nonnull String text);
+    TNLBossBar<CBB> setText(@Nonnull String text);
 
     @Nonnull
-    BossBar<CBB> setColor(@Nonnull BarColor color);
+    TNLBossBar<CBB> setColor(@Nonnull BarColor color);
 
     @Nonnull
-    BossBar<CBB> setStyle(@Nonnull BarStyle style);
+    TNLBossBar<CBB> setStyle(@Nonnull BarStyle style);
 
     @Nonnull
-    BossBar<CBB> setBarFlags(@Nonnull BarFlag... barFlags);
+    TNLBossBar<CBB> setBarFlags(@Nonnull BarFlag... barFlags);
 
     @Nonnull
-    BossBar<CBB> setProgress(double progress);
+    TNLBossBar<CBB> setProgress(double progress);
 
     @Nonnull
     CBB getBossBar();
 
     @Nonnull
-    static BossBar<?> create(@Nonnull String id, @Nonnull Object text, @Nonnull BarColor color, @Nonnull BarStyle style, double progress, @Nonnull BarFlag... barFlags) {
+    static TNLBossBar<?> create(@Nonnull String id, @Nonnull Object text, @Nonnull BarColor color, @Nonnull BarStyle style, double progress, @Nonnull BarFlag... barFlags) {
         if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             return new net.nonswag.tnl.listener.api.bossbar.v1_16.R3.NMSBossBar(id, text, color, style, progress, barFlags);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
@@ -60,5 +65,10 @@ public interface BossBar<CBB> {
             Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
+    }
+
+    @Nullable
+    static TNLBossBar<?> get(@Nonnull String id) {
+        return BOSS_BARS.get(id);
     }
 }

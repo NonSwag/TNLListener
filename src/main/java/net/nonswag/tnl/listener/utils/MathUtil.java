@@ -132,11 +132,19 @@ public class MathUtil {
         return ((long) value);
     }
 
-    public static double lettersOfDouble(double number, int at) {
+    public static double threeLettersOfDouble(double number) {
         return (Math.round(number * 100d) / 100d);
     }
 
-    public static float lettersOfFloat(float number, int at) {
+    public static float threeLettersOfFloat(float number) {
         return (Math.round(number * 100f) / 100f);
+    }
+
+    public static long threeLettersOfLong(long number) {
+        return (Math.round(number * 100L) / 100L);
+    }
+
+    public static int threeLettersOfInteger(int number) {
+        return (Math.round(number * 100) / 100);
     }
 }

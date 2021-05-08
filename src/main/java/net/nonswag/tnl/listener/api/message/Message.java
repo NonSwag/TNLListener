@@ -19,7 +19,7 @@ public abstract class Message {
     @Nonnull
     public static final ChatComponent LOG_DEBUG = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_DEBUG), "§8[§6%time% §8|§6 Debug §8| §6%thread%§8]§a");
     @Nonnull
-    public static final ChatComponent CHAT_FORMAT = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.CHAT_FORMAT), "§8[§f%world%§8] §f%player% §8» §f%message%");
+    public static final ChatComponent CHAT_FORMAT = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.CHAT_FORMAT), "§8[%color%%world%§8] §f%display_name% §8» %color%%message%");
     @Nonnull
     public static final ChatComponent SERVER_BRAND = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.SERVER_BRAND), "§8» §f%version%§7");
     @Nonnull

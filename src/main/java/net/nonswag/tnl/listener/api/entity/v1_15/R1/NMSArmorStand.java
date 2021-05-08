@@ -26,6 +26,21 @@ public class NMSArmorStand extends EntityArmorStand implements TNLArmorStand {
     }
 
     @Override
+    public void setX(double x) {
+        super.f(x, super.locY(), super.locZ());
+    }
+
+    @Override
+    public void setY(double y) {
+        super.f(super.locX(), y, super.locZ());
+    }
+
+    @Override
+    public void setZ(double z) {
+        super.f(super.locX(), super.locY(), z);
+    }
+
+    @Override
     public <I, S> void setSlot(S slot, I item) {
         super.setSlot(((EnumItemSlot) slot), ((ItemStack) item));
     }
@@ -70,6 +85,7 @@ public class NMSArmorStand extends EntityArmorStand implements TNLArmorStand {
         return super.getDataWatcher();
     }
 
+    @Nonnull
     @Override
     public CraftEntity getBukkitEntity() {
         return super.getBukkitEntity();

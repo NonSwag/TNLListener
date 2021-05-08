@@ -8,6 +8,7 @@
       <w>balaring</w>
       <w>banane</w>
       <w>basedrum</w>
+      <w>beigetreten</w>
       <w>blastfurnace</w>
       <w>blockbuild</w>
       <w>bobber</w>
@@ -17,6 +18,7 @@
       <w>cdoesn</w>
       <w>cfailed</w>
       <w>cgot</w>
+      <w>chestplate</w>
       <w>collidable</w>
       <w>cooldown</w>
       <w>copyclipboard</w>
@@ -25,12 +27,15 @@
       <w>crit</w>
       <w>crosshair</w>
       <w>ctor</w>
+      <w>darauf</w>
       <w>deaktiviert</w>
       <w>derp</w>
       <w>dont</w>
       <w>dragonbreath</w>
       <w>elytra</w>
       <w>ender</w>
+      <w>ersten</w>
+      <w>existiert</w>
       <w>fconnected</w>
       <w>firecharge</w>
       <w>flexi</w>
@@ -44,7 +49,9 @@
       <w>fserver</w>
       <w>galician</w>
       <w>gamemode</w>
+      <w>gekickt</w>
       <w>genkidama</w>
+      <w>gespeichert</w>
       <w>headspin</w>
       <w>hohoho</w>
       <w>hotbar</w>
@@ -52,10 +59,14 @@
       <w>inet</w>
       <w>interactable</w>
       <w>jetpack</w>
+      <w>jetzt</w>
+      <w>kein</w>
+      <w>keine</w>
       <w>keybind</w>
       <w>kickboxer</w>
       <w>kinyarwanda</w>
       <w>knockback</w>
+      <w>konsolen</w>
       <w>kyrgyz</w>
       <w>laby</w>
       <w>labycool</w>
@@ -90,6 +101,7 @@
       <w>pling</w>
       <w>purpur</w>
       <w>purreow</w>
+      <w>rechte</w>
       <w>representer</w>
       <w>reved</w>
       <w>riptiding</w>
@@ -101,6 +113,7 @@
       <w>shona</w>
       <w>sinhala</w>
       <w>softwares</w>
+      <w>spieler</w>
       <w>spiritendo</w>
       <w>stal</w>
       <w>stonecutter</w>
@@ -115,9 +128,12 @@
       <w>turkmen</w>
       <w>undiscover</w>
       <w>uyghur</w>
+      <w>verlassen</w>
       <w>waveover</w>
       <w>weaponsmith</w>
       <w>wololo</w>
+      <w>wurde</w>
+      <w>wurdest</w>
     </words>
   </dictionary>
 </component>

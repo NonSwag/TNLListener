@@ -28,7 +28,7 @@ import java.util.Objects;
  *     "{@link TNLPlayer#getDisplayName() display_name}": "The display name of the player who is reading this",
  *     "{@link TNLPlayer#getLanguage() language}": "The client language of the player who is reading this",
  *     "{@link TNLListener#getServerName() server}": "The name of the current server",
- *     "{@link Server#isOnline() status_$SERVER}": "The status of the server (Online/Offline)",
+ *     "{@link Server#getStatus()} status_$SERVER}": "The status of the server (Online/Offline/Starting)",
  *     "{@link Server#getPlayerCount() online_$SERVER}": "The player count of the server",
  *     "{@link Server#getMaxPlayerCount() max_online_$SERVER}": "The maximum player count of the server",
  *     "{@link Bukkit#getOnlinePlayers() online}": "The player count of this server",

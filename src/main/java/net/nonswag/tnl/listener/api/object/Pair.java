@@ -4,14 +4,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public class Set<K, V> {
+public class Pair<K, V> {
 
     @Nonnull
     private K key;
     @Nullable
     private V value;
 
-    public Set(@Nonnull K key, @Nullable V value) {
+    public Pair(@Nonnull K key, @Nullable V value) {
         this.value = value;
         this.key = key;
     }
@@ -46,8 +46,8 @@ public class Set<K, V> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Set<?, ?> set = (Set<?, ?>) o;
-        return key.equals(set.key) && Objects.equals(value, set.value);
+        Pair<?, ?> pair = (Pair<?, ?>) o;
+        return key.equals(pair.key) && Objects.equals(value, pair.value);
     }
 
     @Override

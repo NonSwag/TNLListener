@@ -48,9 +48,10 @@ public class UpdateRunnable {
     }
 
     public static boolean isRunning() {
-        return getThread() != null && getThread().isAlive() && !getThread().isInterrupted();
+        return getThread().isAlive() && !getThread().isInterrupted();
     }
 
+    @Nonnull
     public static Thread getThread() {
         return thread;
     }

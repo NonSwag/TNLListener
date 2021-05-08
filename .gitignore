@@ -3,4 +3,6 @@
 /target/
 /src/test/
 /src/net/
+/.idea/
 /.gitignore/
+/TNLListener.iml/

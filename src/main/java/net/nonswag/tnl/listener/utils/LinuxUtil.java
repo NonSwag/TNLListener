@@ -1,9 +1,9 @@
 package net.nonswag.tnl.listener.utils;
 
-import com.sun.istack.internal.Nullable;
 import net.nonswag.tnl.listener.api.logger.Logger;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;

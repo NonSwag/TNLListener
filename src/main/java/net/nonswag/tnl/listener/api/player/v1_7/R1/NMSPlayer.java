@@ -4,15 +4,12 @@ import net.minecraft.server.v1_7_R1.*;
 import net.minecraft.util.io.netty.channel.*;
 import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.api.bossbar.BossBar;
+import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
 import net.nonswag.tnl.listener.api.object.Generic;
-import net.nonswag.tnl.listener.api.permission.PermissionManager;
-import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
-import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.events.PlayerPacketEvent;
@@ -53,14 +50,10 @@ import java.util.*;
 public class NMSPlayer implements TNLPlayer {
     
     @Nonnull private final Player bukkitPlayer;
-    @Nonnull private final Scoreboard optionScoreboard = new Scoreboard();
-    @Nonnull private final ScoreboardTeam optionTeam = new ScoreboardTeam(getOptionScoreboard(), "TNLOptionPacket");
     @Nonnull private final HashMap<String, Object> virtualStorage = new HashMap<>();
-    @Nonnull private final Permissions permissionManager;
 
     protected NMSPlayer(@Nonnull Player bukkitPlayer) {
         this.bukkitPlayer = bukkitPlayer;
-        this.permissionManager = new PermissionManager(this);
     }
 
     @Nonnull
@@ -133,18 +126,6 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     @Nonnull
-    public Scoreboard getOptionScoreboard() {
-        return optionScoreboard;
-    }
-
-    @Override
-    @Nonnull
-    public ScoreboardTeam getOptionTeam() {
-        return optionTeam;
-    }
-
-    @Override
-    @Nonnull
     public PlayerConnection getPlayerConnection() {
         return getEntityPlayer().playerConnection;
     }
@@ -158,12 +139,6 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public int getPing() {
         return getEntityPlayer().ping;
-    }
-
-    @Override
-    @Nonnull
-    public Permissions getPermissionManager() {
-        return permissionManager;
     }
 
     @Override
@@ -295,11 +270,7 @@ public class NMSPlayer implements TNLPlayer {
         }
     }
 
-    @Override
-    public <EnumTeamPush> void setCollision(@Nonnull EnumTeamPush collision) {
-        throw new UnsupportedOperationException("method is not supported in this version");
-    }
-
+    @Nonnull
     @Override
     public String getWorldAlias() {
         return getWorldAlias(getWorld());
@@ -495,7 +466,6 @@ public class NMSPlayer implements TNLPlayer {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
-    @Nonnull
     @Override
     public void disguise(@Nonnull Generic<?> entity, @Nonnull List<TNLPlayer> receivers) {
         for (TNLPlayer receiver : receivers) {
@@ -503,7 +473,6 @@ public class NMSPlayer implements TNLPlayer {
         }
     }
 
-    @Nonnull
     @Override
     public void disguise(@Nonnull Generic<?> entity, @Nonnull TNLPlayer receiver) {
         if (!this.equals(receiver) && entity.getParameter() instanceof EntityLiving) {
@@ -515,33 +484,28 @@ public class NMSPlayer implements TNLPlayer {
         }
     }
 
-    @Nonnull
     @Override
     public void disguise(@Nonnull Generic<?> entity) {
         disguise(entity, TNLListener.getInstance().getOnlinePlayers());
     }
 
-    @Nonnull
     @Override
-    public void sendBossBar(@Nonnull BossBar<?> bossBar) {
+    public void sendBossBar(@Nonnull TNLBossBar<?> TNLBossBar) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
-    @Nonnull
     @Override
-    public void sendBossBar(@Nonnull BossBar<?> bossBar, long millis) {
+    public void sendBossBar(@Nonnull TNLBossBar<?> TNLBossBar, long millis) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
-    @Nonnull
     @Override
-    public void updateBossBar(@Nonnull BossBar<?> bossBar) {
+    public void updateBossBar(@Nonnull TNLBossBar<?> TNLBossBar) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
-    @Nonnull
     @Override
-    public void hideBossBar(@Nonnull BossBar<?> bossBar) {
+    public void hideBossBar(@Nonnull TNLBossBar<?> TNLBossBar) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
@@ -696,7 +660,6 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    @Nonnull
     public <T> void playEffect(@Nonnull Location location, @Nonnull Effect effect, @Nonnull T t) {
         getBukkitPlayer().playEffect(location, effect, t);
     }
@@ -845,11 +808,6 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void setArrowCount(int arrows) {
         throw new UnsupportedOperationException("method is not supported in this version");
-    }
-
-    @Override
-    public void showPlayer(@Nonnull TNLPlayer player) {
-        sendPacket(new PacketPlayOutSpawnEntityLiving(player.getEntityPlayer()));
     }
 
     @Override
@@ -1269,12 +1227,6 @@ public class NMSPlayer implements TNLPlayer {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 
-    @Nonnull
-    @Override
-    public Sidebar<?, ?> getSidebar() {
-        throw new UnsupportedOperationException("method is not supported in this version");
-    }
-
     @Override
     public int getRemainingAir() {
         return getBukkitPlayer().getRemainingAir();
@@ -1616,31 +1568,12 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public String toString() {
-        return "NMSPlayer{" +
-                "bukkitPlayer=" + bukkitPlayer +
-                ", optionScoreboard=" + optionScoreboard +
-                ", optionTeam=" + optionTeam +
-                ", virtualStorage=" + virtualStorage +
-                ", permissionManager=" + permissionManager +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        NMSPlayer nmsPlayer = (NMSPlayer) o;
-        return bukkitPlayer.equals(nmsPlayer.bukkitPlayer) && optionScoreboard.equals(nmsPlayer.optionScoreboard) && optionTeam.equals(nmsPlayer.optionTeam) && virtualStorage.equals(nmsPlayer.virtualStorage) && permissionManager.equals(nmsPlayer.permissionManager);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(bukkitPlayer, optionScoreboard, optionTeam, virtualStorage, permissionManager);
-    }
-
-    @Override
     public int getId() {
         return getEntityPlayer().getId();
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

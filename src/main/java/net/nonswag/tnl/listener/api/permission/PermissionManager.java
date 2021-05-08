@@ -7,6 +7,7 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,6 +74,20 @@ public class PermissionManager implements Permissions {
     @Override
     public void updatePermissions() {
         getPlayer().sendPacket(TNLEntityStatus.create(getPlayer().getId(), (byte) 28));
+    }
+
+    @Nullable
+    @Override
+    public String getValue(@Nonnull String value, int index) {
+        for (String permission : getPermissions()) {
+            if (permission.toLowerCase().startsWith(value)) {
+                String[] split = permission.split("\\.");
+                if (split.length >= index) {
+                    return split[index - 1];
+                }
+            }
+        }
+        return null;
     }
 
     @Override

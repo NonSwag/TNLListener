@@ -2,7 +2,7 @@ package net.nonswag.tnl.listener.api.player;
 
 import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.api.bossbar.BossBar;
+import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
 import net.nonswag.tnl.listener.api.conversation.Conversation;
 import net.nonswag.tnl.listener.api.entity.TNLEntity;
 import net.nonswag.tnl.listener.api.file.FileCreator;
@@ -14,8 +14,11 @@ import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.packet.TNLEntityDestroy;
 import net.nonswag.tnl.listener.api.packet.TNLGameStateChange;
+import net.nonswag.tnl.listener.api.packet.TNLPlayerInfo;
+import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
+import net.nonswag.tnl.listener.api.scoreboard.Team;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
@@ -38,6 +41,7 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
 import javax.annotation.Nonnull;
@@ -73,7 +77,7 @@ public interface TNLPlayer extends TNLEntity {
     @Nonnull
     List<org.bukkit.block.Block> getLineOfSight(@Nonnull Set<Material> set, int i);
 
-    @Nonnull
+    @Nullable
     WeatherType getPlayerWeather();
 
     @Nonnull
@@ -84,9 +88,6 @@ public interface TNLPlayer extends TNLEntity {
 
     @Nullable
     org.bukkit.block.Block getTargetBlockExact(int i);
-
-    @Nonnull
-    Sidebar<?, ?> getSidebar();
 
     @Nullable
     TNLPlayer getKiller();
@@ -107,6 +108,54 @@ public interface TNLPlayer extends TNLEntity {
     String getCustomName();
 
     @Nonnull
+    default Sidebar getSidebar() {
+        if (!getVirtualStorage().containsKey("sidebar") || !(getVirtualStorage().get("sidebar") instanceof Sidebar)) {
+            getVirtualStorage().put("sidebar", new Sidebar(this));
+        }
+        return ((Sidebar) getVirtualStorage().get("sidebar"));
+    }
+
+    @Nonnull
+    default Team getTeam() {
+        if (!getVirtualStorage().containsKey("team") || !(getVirtualStorage().get("team") instanceof Team)) {
+            getVirtualStorage().put("team", Team.NONE);
+        }
+        return ((Team) getVirtualStorage().get("team"));
+    }
+
+    default void setTeam(@Nonnull Team team) {
+        getVirtualStorage().put("team", team);
+        updateTeam();
+    }
+
+    default void updateTeam() {
+        getTeam().getTeam().addEntry(getName());
+        setDisplayName(getTeam().getPrefix() + getTeam().getColor() + getName() + getTeam().getSuffix());
+        for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
+            for (org.bukkit.scoreboard.Team team : Team.getScoreboard().getTeams()) {
+                org.bukkit.scoreboard.Team allTeam = all.getScoreboard().getTeam(team.getName());
+                if (allTeam == null) {
+                    allTeam = all.getScoreboard().registerNewTeam(team.getName());
+                }
+                allTeam.setDisplayName(team.getDisplayName());
+                allTeam.setPrefix(team.getPrefix());
+                allTeam.setSuffix(team.getSuffix());
+                allTeam.setColor(team.getColor());
+                for (String entry : team.getEntries()) {
+                    if (!allTeam.hasEntry(entry)) {
+                        allTeam.addEntry(entry);
+                    }
+                }
+                for (org.bukkit.scoreboard.Team.Option option : org.bukkit.scoreboard.Team.Option.values()) {
+                    allTeam.setOption(option, team.getOption(option));
+                }
+                allTeam.setCanSeeFriendlyInvisibles(team.canSeeFriendlyInvisibles());
+                allTeam.setAllowFriendlyFire(team.allowFriendlyFire());
+            }
+        }
+    }
+
+    @Nonnull
     List<MetadataValue> getMetadata(@Nonnull String s);
 
     @Nonnull
@@ -116,7 +165,12 @@ public interface TNLPlayer extends TNLEntity {
     Player getBukkitPlayer();
 
     @Nonnull
-    Permissions getPermissionManager();
+    default Permissions getPermissionManager() {
+        if (!getVirtualStorage().containsKey("permissions") || !(getVirtualStorage().get("permissions") instanceof Permissions)) {
+            getVirtualStorage().put("permissions", new PermissionManager(this));
+        }
+        return ((Permissions) getVirtualStorage().get("permissions"));
+    }
 
     @Nonnull
     String getName();
@@ -156,15 +210,8 @@ public interface TNLPlayer extends TNLEntity {
     <PlayerConnection> PlayerConnection getPlayerConnection();
 
     @Nonnull
-    <ScoreboardTeam> ScoreboardTeam getOptionTeam();
-
-    @Nonnull
-    <Scoreboard> Scoreboard getOptionScoreboard();
-
-    @Nonnull
     HashMap<String, Object> getVirtualStorage();
 
-    @Nonnull
     <T> void playEffect(@Nonnull Location location, @Nonnull Effect effect, @Nonnull T t);
 
     @Nonnull
@@ -187,6 +234,14 @@ public interface TNLPlayer extends TNLEntity {
 
     @Nonnull
     World getWorld();
+
+    @Nonnull
+    default Scoreboard getScoreboard() {
+        if (getBukkitPlayer().getScoreboard().equals(Bukkit.getScoreboardManager().getMainScoreboard())) {
+            getBukkitPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+        }
+        return getBukkitPlayer().getScoreboard();
+    }
 
     @Nonnull
     <WorldServer> WorldServer getWorldServer();
@@ -306,12 +361,6 @@ public interface TNLPlayer extends TNLEntity {
         sendPacket(TNLGameStateChange.create(5, 0));
     }
 
-    default void hideNameTag(@Nonnull TNLPlayer... players) {
-        throw new UnsupportedOperationException("This feature is in development");
-    }
-
-    <EnumTeamPush> void setCollision(@Nonnull EnumTeamPush collision);
-
     boolean setWindowProperty(@Nonnull InventoryView.Property property, int i);
 
     void openInventory(@Nonnull InventoryView inventoryView);
@@ -358,56 +407,9 @@ public interface TNLPlayer extends TNLEntity {
             ItemStack[] contents = getBukkitPlayer().getInventory().getContents();
             inventory.set(id, Arrays.asList(contents));
             inventory.save(file);
-            Bukkit.getPluginManager().callEvent(new InventorySafeEvent(!Bukkit.isPrimaryThread(), this, id));
+            Bukkit.getPluginManager().callEvent(new InventorySafeEvent(this, id));
         } catch (IOException e) {
             Logger.error.println(e);
-        }
-    }
-
-    void hideTabListName(@Nonnull TNLPlayer[] players);
-
-    @Nonnull
-    void disguise(@Nonnull Generic<?> entity, @Nonnull List<TNLPlayer> receivers);
-
-    @Nonnull
-    void disguise(@Nonnull Generic<?> entity, @Nonnull TNLPlayer receiver);
-
-    @Nonnull
-    void disguise(@Nonnull Generic<?> entity);
-
-    @Nonnull
-    void sendBossBar(@Nonnull BossBar<?> bossBar);
-
-    @Nonnull
-    void updateBossBar(@Nonnull BossBar<?> bossBar);
-
-    @Nonnull
-    void hideBossBar(@Nonnull BossBar<?> bossBar);
-
-    @Nonnull
-    void sendBossBar(@Nonnull BossBar<?> bossBar, long millis);
-
-    void sendTitle(@Nonnull Title title);
-
-    void sendTitle(@Nonnull Title.Animation animation);
-
-    void sendActionbar(@Nonnull String actionbar);
-
-    default void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server) {
-        try {
-            if (server.getStatus().isOnline()) {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-                dataOutputStream.writeUTF("Connect");
-                dataOutputStream.writeUTF(server.getName());
-                sendPluginMessage(Bootstrap.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
-                sendMessage("%prefix% §aConnecting you to server §6" + server.getName());
-            } else {
-                sendMessage("%prefix% §cThe server §4" + server.getName() + "§c is Offline");
-            }
-        } catch (Exception e) {
-            Logger.error.println(e);
-            sendMessage("%prefix% §cFailed to connect you to server §4" + server.getName());
         }
     }
 
@@ -428,12 +430,57 @@ public interface TNLPlayer extends TNLEntity {
                 } else {
                     this.getInventory().clear();
                 }
-                Bukkit.getPluginManager().callEvent(new InventoryLoadedEvent(!Bukkit.isPrimaryThread(), this, id));
+                Bukkit.getPluginManager().callEvent(new InventoryLoadedEvent(this, id));
             }
         } catch (Exception e) {
             Logger.error.println(e);
         }
     }
+
+    @Nullable
+    default Inventory getInventory(@Nonnull String id) {
+        throw new UnsupportedOperationException("method is not supported");
+    }
+
+    default void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server) {
+        try {
+            if (server.getStatus().isOnline()) {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+                dataOutputStream.writeUTF("Connect");
+                dataOutputStream.writeUTF(server.getName());
+                sendPluginMessage(Bootstrap.getInstance(), "BungeeCord", byteArrayOutputStream.toByteArray());
+                sendMessage("%prefix% §aConnecting you to server §6" + server.getName());
+            } else {
+                sendMessage("%prefix% §cThe server §4" + server.getName() + "§c is Offline");
+            }
+        } catch (Exception e) {
+            Logger.error.println(e);
+            sendMessage("%prefix% §cFailed to connect you to server §4" + server.getName());
+        }
+    }
+
+    void hideTabListName(@Nonnull TNLPlayer[] players);
+
+    void disguise(@Nonnull Generic<?> entity, @Nonnull List<TNLPlayer> receivers);
+
+    void disguise(@Nonnull Generic<?> entity, @Nonnull TNLPlayer receiver);
+
+    void disguise(@Nonnull Generic<?> entity);
+
+    void sendBossBar(@Nonnull TNLBossBar<?> TNLBossBar);
+
+    void updateBossBar(@Nonnull TNLBossBar<?> TNLBossBar);
+
+    void hideBossBar(@Nonnull TNLBossBar<?> TNLBossBar);
+
+    void sendBossBar(@Nonnull TNLBossBar<?> TNLBossBar, long millis);
+
+    void sendTitle(@Nonnull Title title);
+
+    void sendTitle(@Nonnull Title.Animation animation);
+
+    void sendActionbar(@Nonnull String actionbar);
 
     void setPlayerListName(@Nonnull String s);
 
@@ -533,11 +580,21 @@ public interface TNLPlayer extends TNLEntity {
 
     void setArrowCount(int arrows);
 
-    default void hidePlayer(@Nonnull TNLPlayer player) {
-        sendPacket(TNLEntityDestroy.create(player.getId()));
+    default void hidePlayer(@Nonnull TNLPlayer player, @Nonnull Plugin plugin) {
+        player.getBukkitPlayer().hidePlayer(plugin, player.getBukkitPlayer());
     }
 
-    void showPlayer(@Nonnull TNLPlayer player);
+    default void hidePlayer(@Nonnull TNLPlayer player) {
+        sendPacket(TNLEntityDestroy.create(player));
+    }
+
+    default void showPlayer(@Nonnull TNLPlayer player, @Nonnull Plugin plugin) {
+        player.getBukkitPlayer().showPlayer(plugin, player.getBukkitPlayer());
+    }
+
+    default void showPlayer(@Nonnull TNLPlayer player) {
+        sendPacket(TNLPlayerInfo.create(player, TNLPlayerInfo.Action.ADD_PLAYER));
+    }
 
     boolean isFlying();
 
@@ -775,4 +832,7 @@ public interface TNLPlayer extends TNLEntity {
             throw new IllegalStateException();
         }
     }
+
+    @Override
+    String toString();
 }

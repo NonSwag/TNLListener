@@ -1,10 +1,11 @@
 package net.nonswag.tnl.listener.events;
 
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
-import net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class InventoryLoadedEvent extends Event {
@@ -13,14 +14,10 @@ public class InventoryLoadedEvent extends Event {
     private final TNLPlayer player;
     private final String inventoryId;
 
-    public InventoryLoadedEvent(boolean async, TNLPlayer player, String inventoryId) {
-        super(async);
+    public InventoryLoadedEvent(TNLPlayer player, String inventoryId) {
+        super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.inventoryId = inventoryId;
-    }
-
-    public InventoryLoadedEvent(NMSPlayer player, String inventoryId) {
-        this(false, player, inventoryId);
     }
 
     public TNLPlayer getPlayer() {
@@ -53,6 +50,7 @@ public class InventoryLoadedEvent extends Event {
         return Objects.hash(player, inventoryId);
     }
 
+    @Nonnull
     @Override
     public HandlerList getHandlers() {
         return handlers;

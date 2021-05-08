@@ -122,7 +122,7 @@ public class Holograms {
     }
 
     public void load(@Nonnull Hologram hologram, @Nonnull TNLPlayer player) {
-        if (player.getWorld().equals(hologram.getWorld())) {
+        if (hologram.getLocation() != null && player.getWorld().equals(hologram.getWorld())) {
             for (int line = 0; line < hologram.getLines().size(); line++) {
                 if (hologram.getLines().get((hologram.getLines().size() - 1) - line) == null || hologram.getLines().get((hologram.getLines().size() - 1) - line).isEmpty()) {
                     continue;
@@ -165,8 +165,7 @@ public class Holograms {
                     armorStand.setBasePlate(true);
                     armorStand.setMarker(true);
                     armorStand.setCustomName(s);
-                    player.sendPacket(TNLEntitySpawn.create(armorStand));
-                    player.sendPacket(TNLEntityMetadata.create(armorStand));
+                    player.sendPackets(TNLEntitySpawn.create(armorStand), TNLEntityMetadata.create(armorStand));
                     player.getVirtualStorage().put("hologram=" + hologram.getName() + ",line=" + line + ",darkness=" + darkness, armorStand.getId());
                     player.getVirtualStorage().put("hologram-by-id=" + armorStand.getId(), armorStand);
                 }

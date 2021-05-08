@@ -18,6 +18,9 @@ public class JoinListener implements Listener {
         player.inject();
         player.getPermissionManager().updatePermissions();
         Holograms.getInstance().loadAll(player);
+        if (Settings.CUSTOM_TEAMS.getValue()) {
+            player.updateTeam();
+        }
         if (!Settings.JOIN_MESSAGE.getValue() || Settings.FIRST_JOIN_MESSAGE.getValue()) {
             event.setJoinMessage(null);
             if (player.hasPlayedBefore()) {

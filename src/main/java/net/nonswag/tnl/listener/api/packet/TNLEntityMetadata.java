@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 public abstract class TNLEntityMetadata {
 
     @Nonnull
-    public static Object create(@Nonnull int id, @Nonnull Object dataWatcher) {
+    public static Object create(int id, @Nonnull Object dataWatcher) {
         if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             return new net.minecraft.server.v1_16_R3.PacketPlayOutEntityMetadata(id, (net.minecraft.server.v1_16_R3.DataWatcher) dataWatcher, true);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {

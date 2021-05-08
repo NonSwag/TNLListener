@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 public abstract class TNLGameStateChange {
 
     @Nonnull
-    public static Object create(@Nonnull int id, float value) {
+    public static Object create(int id, float value) {
         Object packet;
         if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             packet = new net.minecraft.server.v1_16_R3.PacketPlayOutGameStateChange(new net.minecraft.server.v1_16_R3.PacketPlayOutGameStateChange.a(id), value);

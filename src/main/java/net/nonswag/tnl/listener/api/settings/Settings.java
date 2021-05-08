@@ -41,6 +41,8 @@ public abstract class Settings {
     @Nonnull
     public static final Setting<Boolean> CUSTOM_ITEM_NAMES = new Setting<>("custom-item-names", true);
     @Nonnull
+    public static final Setting<Boolean> CUSTOM_TEAMS = new Setting<>("custom-teams", true);
+    @Nonnull
     public static final Setting<String> TAB_COMPLETE_BYPASS_PERMISSION = new Setting<>("tab-complete-bypass-permission", "tnl.tab");
     @Nonnull
     public static final Setting<List<String>> SERVERS = new Setting<>("servers", Arrays.asList("example-1", "example-2", "example-3"));

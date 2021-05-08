@@ -20,7 +20,6 @@ public class Bootstrap extends JavaPlugin {
     @Override
     public void onLoad() {
         try {
-            TNLListener.getInstance().load();
             Holograms.getInstance().load();
         } catch (Exception e) {
             e.printStackTrace();

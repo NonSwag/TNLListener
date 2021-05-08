@@ -1,10 +1,11 @@
 package net.nonswag.tnl.listener.api.config;
 
-import com.sun.istack.internal.Nullable;
 import net.nonswag.tnl.listener.api.file.FileCreator;
 import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.api.object.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -111,7 +112,7 @@ public class PropertyConfig implements Config {
     @Nonnull
     public List<String> getStringList(@Nonnull String key) {
         try {
-            return Arrays.asList(getString(key.toLowerCase()).split(", "));
+            return Arrays.asList(new Objects<>(getString(key.toLowerCase())).nonnull().split(", "));
         } catch (Exception ignored) {
             return new ArrayList<>();
         }
@@ -119,7 +120,7 @@ public class PropertyConfig implements Config {
 
     public int getInteger(@Nonnull String key) {
         try {
-            return Integer.parseInt(getString(key.toLowerCase()));
+            return Integer.parseInt(new Objects<>(getString(key.toLowerCase())).nonnull());
         } catch (Exception ignored) {
             return 0;
         }
@@ -127,7 +128,7 @@ public class PropertyConfig implements Config {
 
     public double getDouble(@Nonnull String key) {
         try {
-            return Double.parseDouble(getString(key.toLowerCase()));
+            return Double.parseDouble(new Objects<>(getString(key.toLowerCase())).nonnull());
         } catch (Exception e) {
             return 0D;
         }
@@ -135,7 +136,7 @@ public class PropertyConfig implements Config {
 
     public float getFloat(@Nonnull String key) {
         try {
-            return Float.parseFloat(getString(key.toLowerCase()));
+            return Float.parseFloat(new Objects<>(getString(key.toLowerCase())).nonnull());
         } catch (Exception e) {
             return 0F;
         }
@@ -143,7 +144,7 @@ public class PropertyConfig implements Config {
 
     public short getShort(@Nonnull String key) {
         try {
-            return Short.parseShort(getString(key.toLowerCase()));
+            return Short.parseShort(new Objects<>(getString(key.toLowerCase())).nonnull());
         } catch (Exception e) {
             return 0;
         }
@@ -151,7 +152,7 @@ public class PropertyConfig implements Config {
 
     public byte getByte(@Nonnull String key) {
         try {
-            return Byte.parseByte(getString(key.toLowerCase()));
+            return Byte.parseByte(new Objects<>(getString(key.toLowerCase())).nonnull());
         } catch (Exception e) {
             return 0;
         }
@@ -159,7 +160,7 @@ public class PropertyConfig implements Config {
 
     public long getLong(@Nonnull String key) {
         try {
-            return Long.parseLong(getString(key.toLowerCase()));
+            return Long.parseLong(new Objects<>(getString(key.toLowerCase())).nonnull());
         } catch (Exception e) {
             return 0L;
         }
@@ -168,7 +169,7 @@ public class PropertyConfig implements Config {
     @Nullable
     public Character getCharacter(@Nonnull String key) {
         try {
-            return getString(key.toLowerCase()).charAt(0);
+            return new Objects<>(getString(key.toLowerCase())).nonnull().charAt(0);
         } catch (Exception e) {
             return null;
         }
@@ -177,16 +178,15 @@ public class PropertyConfig implements Config {
     @Nullable
     public char[] getCharacters(@Nonnull String key) {
         try {
-            return getString(key.toLowerCase()).toCharArray();
+            return new Objects<>(getString(key.toLowerCase())).nonnull().toCharArray();
         } catch (Exception e) {
             return null;
         }
     }
 
-    @Nullable
     public boolean getBoolean(@Nonnull String key) {
         try {
-            return Boolean.parseBoolean(getString(key.toLowerCase()));
+            return Boolean.parseBoolean(new Objects<>(getString(key.toLowerCase())).nonnull());
         } catch (Exception e) {
             return false;
         }

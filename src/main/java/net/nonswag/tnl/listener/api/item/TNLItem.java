@@ -1,25 +1,30 @@
 package net.nonswag.tnl.listener.api.item;
 
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.gui.GUIItem;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
-import java.util.List;
+import javax.annotation.Nullable;
+import java.net.URI;
+import java.util.*;
 
 public interface TNLItem {
+
+    @Nonnull
+    default GUIItem toGUIItem() {
+        return new GUIItem(this);
+    }
 
     void setItemStack(@Nonnull ItemStack itemStack);
 
@@ -28,94 +33,276 @@ public interface TNLItem {
     @Nonnull
     ItemStack getItemStack();
 
-    @Nonnull
+    @Nullable
     ItemMeta getItemMeta();
 
     @Nonnull
-    ItemStack build();
+    default ItemStack build() {
+        getItemStack().setItemMeta(getItemMeta());
+        return getItemStack();
+    }
 
     @Nonnull
-    TNLItem setName(@Nonnull String name);
+    default TNLItem setName(@Nullable String name) {
+        if (getItemMeta() != null) {
+            getItemMeta().setDisplayName(name);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem enchant(@Nonnull Enchantment enchantment, int level);
+    default TNLItem enchant(@Nonnull Enchantment enchantment, int level) {
+        if (getItemMeta() != null) {
+            getItemMeta().addEnchant(enchantment, level, true);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setDamage(float damage);
+    default TNLItem unEnchant(@Nonnull Enchantment enchantment) {
+        if (getItemMeta() != null && getItemMeta().hasEnchant(enchantment)) {
+            getItemMeta().removeEnchant(enchantment);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem hideFlag(@Nonnull ItemFlag itemFlag);
+    default TNLItem unEnchant() {
+        if (getItemMeta() != null) {
+            for (Enchantment enchantment : getItemMeta().getEnchants().keySet()) {
+                unEnchant(enchantment);
+            }
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setSkullOwner(@Nonnull OfflinePlayer owner);
+    default TNLItem setDamage(float damage) {
+        if (getItemMeta() instanceof Damageable) {
+            ((Damageable) getItemMeta()).setDamage(((short) damage));
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setSkullOwner(@Nonnull String name);
+    default TNLItem hideFlag(@Nonnull ItemFlag itemFlag) {
+        if (getItemMeta() != null) {
+            getItemMeta().addItemFlags(itemFlag);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setSkullImgURL(@Nonnull String url);
+    default TNLItem setSkullOwner(@Nonnull OfflinePlayer owner) {
+        if (getItemMeta() instanceof SkullMeta) {
+            ((SkullMeta) getItemMeta()).setOwningPlayer(owner);
+        }
+        return this;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Nonnull
+    default TNLItem setSkullOwner(@Nonnull String name) {
+        if (getItemMeta() instanceof SkullMeta) {
+            ((SkullMeta) getItemMeta()).setOwningPlayer(Bukkit.getOfflinePlayer(name));
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setSkullValue(@Nonnull String base64);
+    default TNLItem setSkullImgURL(@Nonnull String url) {
+        try {
+            setSkullValue(Base64.getEncoder().encodeToString(("{\"textures\":{\"SKIN\":{\"url\":\"" + new URI(url) + "\"}}}").getBytes()));
+        } catch (Exception e) {
+            Logger.error.println(e);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setColor(@Nonnull Color color);
+    default TNLItem setSkullValue(@Nonnull String base64) {
+        try {
+            modifyNBT("{SkullOwner:{Id:\"" + new UUID(base64.hashCode(), base64.hashCode()) + "\",Properties:{textures:[{Value:\"" + base64 + "\"}]}}}");
+        } catch (Exception e) {
+            Logger.error.println(e);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem addBannerPattern(@Nonnull Pattern pattern);
+    default TNLItem setColor(@Nonnull Color color) {
+        if (getItemMeta() instanceof PotionMeta) {
+            ((PotionMeta) getItemMeta()).setColor(color);
+        } else if (getItemMeta() instanceof FireworkEffectMeta) {
+            setEffect(FireworkEffect.builder().withColor(color).build());
+        } else if (getItemMeta() instanceof LeatherArmorMeta) {
+            ((LeatherArmorMeta) getItemMeta()).setColor(color);
+        }
+        return this;
+    }
 
     @Nonnull
-    List<Pattern> getBannerPatterns();
+    default TNLItem addBannerPattern(@Nonnull Pattern pattern) {
+        if (getItemMeta() instanceof BannerMeta) {
+            ((BannerMeta) getItemMeta()).addPattern(pattern);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setCustomModelData(int customModelData);
+    default List<Pattern> getBannerPatterns() {
+        if (getItemMeta() instanceof BannerMeta) {
+            ((BannerMeta) getItemMeta()).getPatterns();
+        }
+        return new ArrayList<>();
+    }
+
+    @Nonnull
+    default TNLItem setCustomModelData(int customModelData) {
+        modifyNBT("{CustomModelData:" + customModelData + "}");
+        return this;
+    }
 
     int getCustomModelData();
 
     @Nonnull
     <T> T getNBT();
 
+    @SuppressWarnings("deprecation")
     @Nonnull
-    TNLItem modifyNBT(@Nonnull String nbt);
+    default TNLItem modifyNBT(@Nonnull String nbt) {
+        setItemStack(Bukkit.getUnsafe().modifyItemStack(getItemStack(), nbt));
+        setItemMeta(getItemStack().getItemMeta());
+        return this;
+    }
 
     @Nonnull
-    TNLItem setPower(int power);
+    default TNLItem setPower(int power) {
+        if (getItemMeta() instanceof FireworkMeta) {
+            ((FireworkMeta) getItemMeta()).setPower(power);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setEffect(@Nonnull FireworkEffect effect);
+    default TNLItem setEffect(@Nonnull FireworkEffect effect) {
+        if (getItemMeta() instanceof FireworkEffectMeta) {
+            ((FireworkEffectMeta) getItemMeta()).setEffect(effect);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem addEffects(@Nonnull PotionEffect... effects);
+    default TNLItem addEffects(@Nonnull PotionEffect... effects) {
+        if (getItemMeta() instanceof PotionMeta) {
+            for (PotionEffect effect : effects) {
+                ((PotionMeta) getItemMeta()).addCustomEffect(effect, false);
+            }
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem hideFlags();
+    default TNLItem hideFlags() {
+        if (getItemMeta() != null) {
+            getItemMeta().addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_PLACED_ON, ItemFlag.HIDE_POTION_EFFECTS);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem addAttribute(@Nonnull Attribute attribute, @Nonnull AttributeModifier modifier);
+    default TNLItem addAttribute(@Nonnull Attribute attribute, @Nonnull AttributeModifier modifier) {
+        if (getItemMeta() != null) {
+            getItemMeta().addAttributeModifier(attribute, modifier);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem removeAttributes(@Nonnull Attribute... attributes);
+    default TNLItem removeAttributes(@Nonnull Attribute... attributes) {
+        if (getItemMeta() != null) {
+            for (Attribute attribute : attributes) {
+                getItemMeta().removeAttributeModifier(attribute);
+            }
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem addFlags(@Nonnull ItemFlag... itemFlags);
+    default TNLItem addFlags(@Nonnull ItemFlag... itemFlags) {
+        if (getItemMeta() != null) {
+            getItemMeta().addItemFlags(itemFlags);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem addStoredEnchantment(@Nonnull Enchantment enchantment, int level);
+    default TNLItem addStoredEnchantment(@Nonnull Enchantment enchantment, int level) {
+        if (getItemMeta() instanceof EnchantmentStorageMeta) {
+            ((EnchantmentStorageMeta) getItemMeta()).addStoredEnchant(enchantment, level, true);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setLore(@Nonnull String... lore);
+    default TNLItem removeStoredEnchantment(@Nonnull Enchantment enchantment) {
+        if (getItemMeta() instanceof EnchantmentStorageMeta) {
+            ((EnchantmentStorageMeta) getItemMeta()).removeStoredEnchant(enchantment);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setLore(@Nonnull List<String> lore);
+    default TNLItem setLore(@Nonnull String... lore) {
+        return setLore(Arrays.asList(lore));
+    }
 
     @Nonnull
-    TNLItem setAmount(int amount);
+    default TNLItem setLore(@Nonnull List<String> lore) {
+        if (getItemMeta() != null) {
+            getItemMeta().setLore(lore);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setUnbreakable();
+    default TNLItem removeLore() {
+        if (getItemMeta() != null) {
+            getItemMeta().setLore(null);
+        }
+        return this;
+    }
 
     @Nonnull
-    TNLItem setBreakable();
+    default TNLItem setAmount(int amount) {
+        getItemStack().setAmount(amount);
+        return this;
+    }
+
+    @Nonnull
+    default TNLItem setUnbreakable(boolean unbreakable) {
+        if (getItemMeta() != null) {
+            getItemMeta().setUnbreakable(unbreakable);
+        }
+        return this;
+    }
+
+    @Nonnull
+    default Material getType() {
+        return getItemStack().getType();
+    }
+
+    default boolean isAir() {
+        return TNLItemType.isAir(this);
+    }
+
+    default int getMaxStackSize() {
+        return getItemStack().getMaxStackSize();
+    }
+
+    default int getAmount() {
+        return getItemStack().getAmount();
+    }
 
     @Nonnull
     static TNLItem create(@Nonnull ItemStack itemStack) {

@@ -3,7 +3,7 @@ package net.nonswag.tnl.listener.api.logger;
 import net.nonswag.tnl.listener.api.message.ChatComponent;
 import net.nonswag.tnl.listener.api.message.Message;
 import net.nonswag.tnl.listener.api.message.Placeholder;
-import net.nonswag.tnl.listener.api.object.Set;
+import net.nonswag.tnl.listener.api.object.Pair;
 import net.nonswag.tnl.listener.api.settings.Settings;
 
 import javax.annotation.Nonnull;
@@ -58,12 +58,12 @@ public class Logger {
         println(Placeholder.replace(value, placeholders));
     }
 
-    public void printf(@Nonnull List<Set<Object, Placeholder[]>> values) {
-        for (Set<Object, Placeholder[]> set : values) {
-            if (set.getValue() != null) {
-                printf(set.getKey(), set.getValue());
+    public void printf(@Nonnull List<Pair<Object, Placeholder[]>> values) {
+        for (Pair<Object, Placeholder[]> pair : values) {
+            if (pair.getValue() != null) {
+                printf(pair.getKey(), pair.getValue());
             } else {
-                println(set.getKey());
+                println(pair.getKey());
             }
         }
     }

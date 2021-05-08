@@ -3,6 +3,7 @@ package net.nonswag.tnl.listener.api.permission;
 import org.bukkit.permissions.ServerOperator;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public interface Permissions extends ServerOperator {
@@ -19,4 +20,7 @@ public interface Permissions extends ServerOperator {
     List<String> getPermissions();
 
     void updatePermissions();
+
+    @Nullable
+    String getValue(@Nonnull String value, int index);
 }
