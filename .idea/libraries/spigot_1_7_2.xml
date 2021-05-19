@@ -2,10 +2,12 @@
   <library name="spigot-1.7.2">
     <CLASSES>
       <root url="jar://$USER_HOME$/Desktop/Coding/spigot/1.7.2/spigot-1.7.2.jar!/" />
+      <root url="jar://$USER_HOME$/Desktop/Coding/spigot/1.7.10/spigot-1.7.10.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
       <root url="jar://$USER_HOME$/Desktop/Coding/spigot/1.7.2/spigot-1.7.2.jar!/" />
+      <root url="jar://$USER_HOME$/Desktop/Coding/spigot/1.7.10/spigot-1.7.10.jar!/" />
     </SOURCES>
   </library>
 </component>

@@ -1,6 +1,5 @@
 package net.nonswag.tnl.listener.api.conversation;
 
-import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.event.Cancellable;
 
@@ -33,11 +32,11 @@ public class Conversation {
     }
 
     public static boolean test(@Nonnull Cancellable cancellable, @Nonnull TNLPlayer player, @Nonnull String message) {
-        if (TNLListener.getInstance().getConversationHashMap().containsKey(player.getUniqueId())) {
-            Conversation conversation = TNLListener.getInstance().getConversationHashMap().get(player.getUniqueId());
+        Conversation conversation = player.getConversation();
+        if (player.isInConversation() && conversation != null) {
             cancellable.setCancelled(true);
             if (conversation.getResponse().test(player, message)) {
-                TNLListener.getInstance().getConversationHashMap().remove(player.getUniqueId());
+                player.stopConversation();
             }
             return true;
         }

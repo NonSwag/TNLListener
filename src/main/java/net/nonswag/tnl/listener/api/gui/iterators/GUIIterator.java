@@ -1,4 +1,7 @@
-package net.nonswag.tnl.listener.api.gui;
+package net.nonswag.tnl.listener.api.gui.iterators;
+
+import net.nonswag.tnl.listener.api.gui.GUI;
+import net.nonswag.tnl.listener.api.gui.GUIItem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -12,11 +15,11 @@ public class GUIIterator implements ListIterator<GUIItem> {
     private Boolean lastDirection;
     private int nextIndex;
 
-    GUIIterator(@Nonnull GUI gui) {
+    public GUIIterator(@Nonnull GUI gui) {
         this(gui, 0);
     }
 
-    GUIIterator(@Nonnull GUI gui, int index) {
+    public GUIIterator(@Nonnull GUI gui, int index) {
         this.gui = gui;
         this.nextIndex = index;
     }

@@ -33,11 +33,8 @@ public class PluginUpdate {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             StringBuilder sb = new StringBuilder();
             String line, latestVersion = null;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line.replace(" ", ""));
-            }
+            while ((line = reader.readLine()) != null) sb.append(line.replace(" ", ""));
             reader.close();
-
             Object parse = new JSONParser().parse(sb.toString());
             if (parse instanceof JSONObject) {
                 JSONObject object = ((JSONObject) parse);
@@ -47,9 +44,7 @@ public class PluginUpdate {
                         break;
                     }
                 }
-            } else {
-                return;
-            }
+            } else return;
             if (latestVersion == null) {
                 Logger.error.println("The Plugin '" + plugin + "' is not a (public) plugin by TheNextLvl.net");
             } else {
@@ -74,7 +69,7 @@ public class PluginUpdate {
                 Logger.error.println(e);
             }
         } else {
-            Logger.info.println("§aThe plugin §8'§6" + getPlugin() + "§8'§a is up to date");
+            Logger.debug.println("§aThe plugin §8'§6" + getPlugin() + "§8'§a is up to date");
         }
     }
 

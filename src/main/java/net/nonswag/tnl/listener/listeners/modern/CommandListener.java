@@ -28,9 +28,8 @@ public class CommandListener implements Listener {
         }
         if (Settings.BETTER_COMMANDS.getValue()) {
             command = event.getMessage();
-            command = command.replaceAll(" ", "");
-            command = command.replaceAll("/", "");
-            if (command.equalsIgnoreCase("")) {
+            command = command.replace("/", "");
+            if (command.replace(" ", "").equalsIgnoreCase("")) {
                 event.setCancelled(true);
             } else {
                 if (!event.isCancelled()) {

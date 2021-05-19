@@ -26,9 +26,11 @@ public interface TNLItem {
         return new GUIItem(this);
     }
 
-    void setItemStack(@Nonnull ItemStack itemStack);
+    @Nonnull
+    TNLItem setItemStack(@Nonnull ItemStack itemStack);
 
-    void setItemMeta(@Nonnull ItemMeta itemMeta);
+    @Nonnull
+    TNLItem setItemMeta(@Nonnull ItemMeta itemMeta);
 
     @Nonnull
     ItemStack getItemStack();
@@ -172,7 +174,9 @@ public interface TNLItem {
     @Nonnull
     default TNLItem modifyNBT(@Nonnull String nbt) {
         setItemStack(Bukkit.getUnsafe().modifyItemStack(getItemStack(), nbt));
-        setItemMeta(getItemStack().getItemMeta());
+        if (getItemStack().getItemMeta() != null) {
+            setItemMeta(getItemStack().getItemMeta());
+        }
         return this;
     }
 
@@ -323,5 +327,10 @@ public interface TNLItem {
     @Nonnull
     static TNLItem create(@Nonnull Material material) {
         return create(new ItemStack(material));
+    }
+
+    @Nonnull
+    static TNLItem create(@Nonnull OfflinePlayer player) {
+        return create(Material.PLAYER_HEAD).setSkullOwner(player);
     }
 }

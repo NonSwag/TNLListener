@@ -24,28 +24,20 @@ public class FileDownloader {
             int contentLength = connection.getContentLength();
             if (disposition != null) {
                 int index = disposition.indexOf("filename=");
-                if (index > 0) {
-                    fileName = disposition.substring(index + 10, disposition.length() - 1);
-                }
-            } else {
-                fileName = url.substring(url.lastIndexOf("/") + 1);
-            }
+                if (index > 0) fileName = disposition.substring(index + 10, disposition.length() - 1);
+            } else fileName = url.substring(url.lastIndexOf("/") + 1);
             if (fileName != null) {
                 InputStream inputStream = connection.getInputStream();
                 String saveFilePath = directory + File.separator + fileName;
                 FileOutputStream outputStream = new FileOutputStream(saveFilePath);
                 int bytesRead;
                 byte[] buffer = new byte[4096];
-                Logger.info.println("§aStarting download of file §8'§6" + fileName + "§8'");
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
-                }
+                Logger.debug.println("§aStarting download of file §8'§6" + fileName + "§8'");
+                while ((bytesRead = inputStream.read(buffer)) != -1) outputStream.write(buffer, 0, bytesRead);
                 outputStream.close();
                 inputStream.close();
-                Logger.info.println("§aSuccessfully downloaded file §8'§6" + fileName + "§8'");
-            } else {
-                Logger.error.println("§cNo file was found");
-            }
+                Logger.debug.println("§aSuccessfully downloaded file §8'§6" + fileName + "§8'");
+            } else Logger.debug.println("§cNo file was found");
         } else {
             Logger.error.println("§cNo file was found§8.§c Server replied HTTP code§8: §4" + responseCode);
         }

@@ -1,14 +1,12 @@
 package net.nonswag.tnl.listener;
 
 import net.nonswag.tnl.listener.api.config.minecraft.ServerProperties;
-import net.nonswag.tnl.listener.api.conversation.Conversation;
 import net.nonswag.tnl.listener.api.event.EventManager;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.plugin.PluginUpdate;
 import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.api.settings.Settings;
-import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
 import net.nonswag.tnl.listener.listeners.JoinListener;
 import net.nonswag.tnl.listener.listeners.KickListener;
@@ -32,13 +30,7 @@ public class TNLListener {
     private static final TNLListener instance = new TNLListener();
 
     @Nonnull
-    private final HashMap<World, String> worldAliasHashMap = new HashMap<>();
-    @Nonnull
     private final HashMap<Player, TNLPlayer> playerHashMap = new HashMap<>();
-    @Nonnull
-    private final HashMap<UUID, SignMenu> signHashMap = new HashMap<>();
-    @Nonnull
-    private final HashMap<UUID, Conversation> conversationHashMap = new HashMap<>();
     @Nonnull
     private final HashMap<String, Server> serverHashMap = new HashMap<>();
     @Nonnull
@@ -58,6 +50,11 @@ public class TNLListener {
         }
         this.version = version;
         if (getVersion().equals(ServerVersion.UNKNOWN)) {
+            Logger.error.println("Your server version is not supported §8(§4" + Bukkit.getVersion() + "§8)");
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException ignored) {
+            }
             throw new RuntimeException("Your server version could not be detected: " + Bukkit.getVersion());
         }
     }
@@ -74,28 +71,24 @@ public class TNLListener {
                         try {
                             Server s = new Server(server, new InetSocketAddress(value.split(":")[0], Integer.parseInt(value.split(":")[1])));
                             getServerHashMap().put(s.getName(), s);
-                            Logger.info.println("§aInitialized new server §8'§6" + s + "§8'");
+                            Logger.debug.println("§aInitialized new server §8'§6" + s.getName() + "§8' §8(§7" + s.getInetSocketAddress().getHostString() + ":" + s.getInetSocketAddress().getPort() + "§8)");
                         } catch (Exception e) {
                             Logger.error.println("§cFailed to load server §8'§4" + server + "§8'", "§cThe ip-address format is §8'§4host:port§8' (§4example localhost:25565§8)", e);
                         }
                     }
                 } else {
                     Settings.getConfig().setValue("server-" + server, "host:port");
-                    Logger.info.println("§aFound new server §8'§6" + server + "§8'");
+                    Logger.debug.println("§aFound new server §8'§6" + server + "§8'");
                 }
             } else {
                 Settings.getConfig().setValue("server-" + server, "host:port");
-                Logger.info.println("§aFound new server §8'§6" + server + "§8'");
+                Logger.debug.println("§aFound new server §8'§6" + server + "§8'");
             }
         }
-        if (Settings.DELETE_OLD_LOGS.getValue()) {
-            deleteOldLogs();
-        }
+        if (Settings.DELETE_OLD_LOGS.getValue()) deleteOldLogs();
         Settings.getConfig().save();
         Bukkit.getMessenger().registerOutgoingPluginChannel(Bootstrap.getInstance(), "BungeeCord");
-        if (Settings.AUTO_UPDATER.getValue()) {
-            new PluginUpdate(Bootstrap.getInstance()).downloadUpdate();
-        }
+        if (Settings.AUTO_UPDATER.getValue()) new PluginUpdate(Bootstrap.getInstance()).downloadUpdate();
         try {
             if (getVersion().equals(ServerVersion.v1_16_4) || getVersion().equals(ServerVersion.v1_16_5)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.PacketListener());
@@ -112,7 +105,7 @@ public class TNLListener {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R1.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.legacy.CommandListener());
             }
-            Logger.info.println("§aLoading §6TNLListener §8(§7" + getVersion().name().replace("_", ".") + "§8)");
+            Logger.debug.println("§aLoading §6TNLListener §8(§7" + getVersion().name().replace("_", ".") + "§8)");
             eventManager.registerListener(new WorldListener());
             eventManager.registerListener(new JoinListener());
             eventManager.registerListener(new KickListener());
@@ -124,11 +117,13 @@ public class TNLListener {
             TNLPlayer player = TNLPlayer.cast(all);
             player.inject();
         }
-        updateTeams();
+        if (Settings.CUSTOM_TEAMS.getValue()) updateTeams();
     }
 
     protected void disable() {
         for (TNLPlayer all : getOnlinePlayers()) {
+            all.closeSignMenu();
+            all.closeGUI();
             all.stopConversation();
             Holograms.getInstance().unloadAll(all);
             all.uninject();
@@ -138,11 +133,6 @@ public class TNLListener {
     @Nonnull
     public List<TNLPlayer> getOnlinePlayers() {
         return new ArrayList<>(getPlayerHashMap().values());
-    }
-
-    @Nonnull
-    public HashMap<World, String> getWorldAliasHashMap() {
-        return worldAliasHashMap;
     }
 
     @Nonnull
@@ -172,19 +162,14 @@ public class TNLListener {
 
     @Nullable
     public TNLPlayer getPlayer(@Nonnull CommandSender player) {
-        if (player instanceof Player) {
-            return getPlayerHashMap().get(player);
-        }
+        if (player instanceof Player) return getPlayerHashMap().get(player);
         return null;
     }
 
     @Nullable
     public TNLPlayer getPlayer(@Nullable Entity player) {
-        if (player instanceof Player) {
-            return getPlayerHashMap().get(player);
-        } else {
-            return null;
-        }
+        if (player instanceof Player) return getPlayerHashMap().get(player);
+        else return null;
     }
 
     @Nullable
@@ -227,33 +212,17 @@ public class TNLListener {
     @Nonnull
     public List<String> getWorlds() {
         List<String> worlds = new ArrayList<>();
-        for (World world : Bukkit.getWorlds()) {
-            worlds.add(world.getName());
-        }
+        for (World world : Bukkit.getWorlds()) worlds.add(world.getName());
         return worlds;
     }
 
-    @Nonnull
-    public HashMap<UUID, SignMenu> getSignHashMap() {
-        return signHashMap;
-    }
-
-    @Nonnull
-    public HashMap<UUID, Conversation> getConversationHashMap() {
-        return conversationHashMap;
-    }
-
     public void updateTeams() {
-        for (TNLPlayer all : getOnlinePlayers()) {
-            all.updateTeam();
-        }
+        for (TNLPlayer all : getOnlinePlayers()) all.updateTeam();
     }
 
     public void setCollisions(@Nonnull org.bukkit.scoreboard.Team.OptionStatus collision) {
         for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
-            for (Team team : all.getScoreboard().getTeams()) {
-                team.setOption(Team.Option.COLLISION_RULE, collision);
-            }
+            for (Team team : all.getScoreboard().getTeams()) team.setOption(Team.Option.COLLISION_RULE, collision);
         }
     }
 

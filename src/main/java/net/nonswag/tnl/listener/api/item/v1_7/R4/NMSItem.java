@@ -25,14 +25,18 @@ public class NMSItem implements TNLItem {
         this(new ItemStack(material));
     }
 
+    @Nonnull
     @Override
-    public void setItemStack(@Nonnull ItemStack itemStack) {
+    public TNLItem setItemStack(@Nonnull ItemStack itemStack) {
         this.itemStack = itemStack;
+        return this;
     }
 
+    @Nonnull
     @Override
-    public void setItemMeta(@Nonnull ItemMeta itemMeta) {
+    public TNLItem setItemMeta(@Nonnull ItemMeta itemMeta) {
         this.itemMeta = itemMeta;
+        return this;
     }
 
     @Override

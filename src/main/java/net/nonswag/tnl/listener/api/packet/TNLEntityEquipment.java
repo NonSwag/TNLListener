@@ -33,6 +33,22 @@ public abstract class TNLEntityEquipment {
     }
 
     @Nonnull
+    public static Object create(@Nonnull TNLEntity entity) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+            List<com.mojang.datafixers.util.Pair<net.minecraft.server.v1_16_R3.EnumItemSlot, net.minecraft.server.v1_16_R3.ItemStack>> items = new ArrayList<>();
+            if (entity.getBukkitEntity() instanceof org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity) {
+                for (net.minecraft.server.v1_16_R3.EnumItemSlot slot : net.minecraft.server.v1_16_R3.EnumItemSlot.values()) {
+                    items.add(new com.mojang.datafixers.util.Pair<>(slot, ((org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity) entity.getBukkitEntity()).getHandle().getEquipment(slot)));
+                }
+            }
+            return new net.minecraft.server.v1_16_R3.PacketPlayOutEntityEquipment(entity.getId(), items);
+        } else {
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            throw new IllegalStateException();
+        }
+    }
+
+    @Nonnull
     public static Object create(@Nonnull Entity entity, @Nonnull SlotType slotType, @Nonnull ItemStack item) {
         return create(entity.getEntityId(), slotType, item);
     }

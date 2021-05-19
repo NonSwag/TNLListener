@@ -81,7 +81,7 @@ public class PlayerPacketEvent<Packet> extends Event implements Cancellable {
         if (!getPacketFields().isEmpty()) {
             List<String> strings = new ArrayList<>();
             for (String field : getPacketFields()) {
-                strings.add("§8(§7field§8: §6" + field + " §8-> '§6" + ((Objects<Object>) getPacketField(field)).getOrDefault("-/-").toString() + "§8')");
+                strings.add("§8(§7field§8: §6" + field + " §8-> '§6" + getPacketField(field, Object.class).getOrDefault("-/-") + "§8')");
             }
             getPlayer().disconnect("§cFailed to write Packet\n§4" + getPacketName() + "\n\n" + String.join("\n", strings).replace("null", "-/-"));
         } else {
@@ -97,6 +97,11 @@ public class PlayerPacketEvent<Packet> extends Event implements Cancellable {
     @Nonnull
     public Objects<?> getPacketField(@Nonnull String field) {
         return Reflection.getField(packet, field);
+    }
+
+    @Nonnull
+    public <T> Objects<T> getPacketField(@Nonnull String field, @Nonnull Class<? extends T> clazz) {
+        return (Objects<T>) Reflection.getField(packet, field);
     }
 
     @Nonnull

@@ -2,11 +2,13 @@ package net.nonswag.tnl.listener.api.entity.v1_15.R1;
 
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.api.entity.TNLArmorStand;
+import net.nonswag.tnl.listener.api.item.TNLItem;
 import net.nonswag.tnl.listener.api.object.Objects;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 
 import javax.annotation.Nonnull;
 
@@ -78,6 +80,36 @@ public class NMSArmorStand extends EntityArmorStand implements TNLArmorStand {
     @Override
     public void setCustomName(@Nonnull String customName) {
         super.setCustomName(new ChatMessage(customName));
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setInvisible(!visible);
+    }
+
+    @Override
+    public void setGravity(boolean gravity) {
+        super.setNoGravity(!gravity);
+    }
+
+    @Override
+    public void setHelmet(@Nonnull TNLItem item) {
+        super.setSlot(EnumItemSlot.HEAD, CraftItemStack.asNMSCopy(item.build()));
+    }
+
+    @Override
+    public void setChestplate(@Nonnull TNLItem item) {
+        super.setSlot(EnumItemSlot.CHEST, CraftItemStack.asNMSCopy(item.build()));
+    }
+
+    @Override
+    public void setLeggings(@Nonnull TNLItem item) {
+        super.setSlot(EnumItemSlot.LEGS, CraftItemStack.asNMSCopy(item.build()));
+    }
+
+    @Override
+    public void setBoots(@Nonnull TNLItem item) {
+        super.setSlot(EnumItemSlot.FEET, CraftItemStack.asNMSCopy(item.build()));
     }
 
     @Override

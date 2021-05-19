@@ -3,7 +3,7 @@ package net.nonswag.tnl.listener.api.object;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class Objects<V> {
+public class Objects<V> implements Cloneable {
 
     @Nonnull
     public static final Objects<?> EMPTY = new Objects<>();

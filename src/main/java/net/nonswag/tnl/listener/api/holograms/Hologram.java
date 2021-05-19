@@ -4,7 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.nonswag.tnl.listener.Holograms;
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.holograms.event.InteractEvent;
+import net.nonswag.tnl.listener.api.holograms.event.SendEvent;
+import net.nonswag.tnl.listener.api.holograms.event.UpdateEvent;
 import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.api.math.Range;
 import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.server.Server;
@@ -18,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * <blockquote><pre>
@@ -35,25 +40,38 @@ import java.util.Objects;
  *     "{@link Bukkit#getMaxPlayers() max_online}": "The maximum player count of this server",
  *     "{@link TNLPlayer#getWorld() world}": "The name of this world",
  *     "{@link TNLPlayer#getWorldAlias() world_alias}": "The alias of this world",
- *     "{@link World#getPlayerCount() players_$WORLD}": "The player count of the world"
+ *     "{@link World#getPlayers() players_$WORLD}": "The player count of the world"
  * ]
  * </pre></blockquote>
  */
 
 public class Hologram {
 
-    @Nonnull private final String name;
-    @Nonnull private final List<String> lines = new ArrayList<>();
-    @Nullable private Location location;
+    @Nonnull
+    private final String name;
+    @Nonnull
+    private final List<String> lines = new ArrayList<>();
+    @Nullable
+    private Location location;
     private double lineDistance = 0.25D;
+    @Range(from = 1, to = 5)
     private int darkness = 1;
+    private final boolean cache;
+    @Nonnull
+    private Consumer<SendEvent> onSend = event -> {};
+    @Nonnull
+    private Consumer<InteractEvent> onInteract = event -> {};
+    @Nonnull
+    private Consumer<UpdateEvent> onUpdate = event -> System.out.println("updating " + event.getHologram().getName());
 
-    public Hologram(@Nonnull String name, boolean cache, String... lines) {
-        this.name = name.toLowerCase();
+    public Hologram(@Nonnull String name, boolean cache, @Nonnull String... lines) {
+        this.name = name;
+        this.cache = cache;
         getLines().addAll(Arrays.asList(lines));
-        if (cache) {
-            Holograms.getInstance().save(this);
-        }
+    }
+
+    public Hologram(@Nonnull String name, @Nonnull String... lines) {
+        this(name, true, lines);
     }
 
     @Nonnull
@@ -66,31 +84,52 @@ public class Hologram {
         return lines;
     }
 
-    public void addLines(String... lines) {
+    @Nonnull
+    public Hologram addLines(String... lines) {
         getLines().addAll(Arrays.asList(lines));
+        return this;
     }
 
-    public void addLines(List<String> lines) {
+    @Nonnull
+    public Hologram addLines(List<String> lines) {
         getLines().addAll(lines);
+        return this;
     }
 
-    public void addLine(String line) {
+    @Nonnull
+    public Hologram addLine(String line) {
         getLines().add(line);
+        return this;
+    }
+
+    @Nonnull
+    public Hologram setLines(String... lines) {
+        getLines().clear();
+        addLines(lines);
+        return this;
     }
 
     public double getLineDistance() {
         return lineDistance;
     }
 
+    @Range(from = 1, to = 5)
     public int getDarkness() {
         return darkness;
     }
 
-    public void setLineDistance(double lineDistance) {
-        this.lineDistance = lineDistance;
+    public boolean isCache() {
+        return cache;
     }
 
-    public void setDarkness(int darkness) {
+    @Nonnull
+    public Hologram setLineDistance(double lineDistance) {
+        this.lineDistance = lineDistance;
+        return this;
+    }
+
+    @Nonnull
+    public Hologram setDarkness(@Range(from = 1, to = 5) int darkness) {
         if (darkness > 5) {
             darkness = 5;
             Logger.error.println(new IllegalArgumentException("The hologram darkness can't be higher then 5"));
@@ -99,10 +138,46 @@ public class Hologram {
             Logger.error.println(new IllegalArgumentException("The hologram darkness can't be lower then 1"));
         }
         this.darkness = darkness;
+        return this;
     }
 
-    public void setLocation(@Nonnull Location location) {
+    @Nonnull
+    public Consumer<SendEvent> onSend() {
+        return onSend;
+    }
+
+    @Nonnull
+    public Consumer<InteractEvent> onInteract() {
+        return onInteract;
+    }
+
+    @Nonnull
+    public Consumer<UpdateEvent> onUpdate() {
+        return onUpdate;
+    }
+
+    @Nonnull
+    public Hologram onSend(@Nonnull Consumer<SendEvent> onSend) {
+        this.onSend = onSend;
+        return this;
+    }
+
+    @Nonnull
+    public Hologram onInteract(@Nonnull Consumer<InteractEvent> onInteract) {
+        this.onInteract = onInteract;
+        return this;
+    }
+
+    @Nonnull
+    public Hologram onUpdate(@Nonnull Consumer<UpdateEvent> onUpdate) {
+        this.onUpdate = onUpdate;
+        return this;
+    }
+
+    @Nonnull
+    public Hologram setLocation(@Nonnull Location location) {
         this.location = location;
+        return this;
     }
 
     @Nullable
@@ -127,33 +202,29 @@ public class Hologram {
         return getLocation() == null ? null : getLocation().getWorld();
     }
 
-    public void save() {
+    @Nonnull
+    public Hologram save() {
         if (getLocation() != null) {
             JsonObject jsonObject = Holograms.getInstance().getSaves().getJsonElement().getAsJsonObject();
-            if (!jsonObject.has(this.getName())) {
-                jsonObject.add(this.getName(), new JsonObject());
-            }
+            if (!jsonObject.has(this.getName())) jsonObject.add(this.getName(), new JsonObject());
             JsonObject hologram = jsonObject.get(this.getName()).getAsJsonObject();
             hologram.addProperty("darkness", this.getDarkness());
             hologram.addProperty("line-distance", this.getLineDistance());
-            hologram.addProperty("position", getLocation().getWorld().getName() + ", " + getLocation().getX() + ", " + getLocation().getY() + ", " + getLocation().getZ());
+            hologram.addProperty("position", (getWorld() != null ? getWorld().getName() : "world") + ", " + getX() + ", " + getY() + ", " + getZ());
             JsonArray jsonArray = new JsonArray();
             for (int i = 0; i < this.getLines().size(); i++) {
-                if (this.getLines().get(i) != null) {
-                    jsonArray.add(this.getLines().get(i));
-                } else {
-                    jsonArray.add("");
-                }
+                if (this.getLines().get(i) != null) jsonArray.add(this.getLines().get(i));
+                else jsonArray.add("");
             }
             hologram.add("lines", jsonArray);
             Holograms.getInstance().save(this);
             Holograms.getInstance().getSaves().save();
-        } else {
-            throw new NullPointerException("Location can't be null");
-        }
+        } else throw new NullPointerException("Location can't be null");
+        return this;
     }
 
-    public void delete() {
+    @Nonnull
+    public Hologram delete() {
         JsonObject jsonObject = Holograms.getInstance().getSaves().getJsonElement().getAsJsonObject();
         if (jsonObject.has(this.getName())) {
             jsonObject.remove(this.getName());
@@ -161,50 +232,73 @@ public class Hologram {
             Holograms.getInstance().getSaves().save();
         }
         this.unloadAll();
+        return this;
     }
 
-    public void updateAll() {
+    @Nonnull
+    public Hologram updateAll() {
         Holograms.getInstance().updateAll(this);
+        return this;
     }
 
-    public void update(TNLPlayer player) {
+    @Nonnull
+    public Hologram update(TNLPlayer player) {
         Holograms.getInstance().update(this, player);
+        return this;
     }
 
-    public void teleport(Location location, TNLPlayer player) {
+    @Nonnull
+    public Hologram teleport(Location location, TNLPlayer player) {
         Holograms.getInstance().teleport(this, location, player);
+        return this;
     }
 
-    public void teleportAll(Location location) {
+    @Nonnull
+    public Hologram teleportAll(Location location) {
         Holograms.getInstance().teleportAll(this, location);
+        return this;
     }
 
-    public void teleportAll(double offsetX, double offsetY, double offsetZ) {
+    @Nonnull
+    public Hologram teleportAll(double offsetX, double offsetY, double offsetZ) {
         Holograms.getInstance().teleportAll(this, offsetX, offsetY, offsetZ);
+        return this;
     }
 
-    public void teleport(double offsetX, double offsetY, double offsetZ, TNLPlayer player) {
+    @Nonnull
+    public Hologram teleport(double offsetX, double offsetY, double offsetZ, TNLPlayer player) {
         Holograms.getInstance().teleport(this, offsetX, offsetY, offsetZ, player);
+        return this;
     }
 
-    public void load(TNLPlayer player) {
+    @Nonnull
+    public Hologram load(TNLPlayer player) {
         Holograms.getInstance().load(this, player);
+        return this;
     }
 
-    public void loadAll() {
+    @Nonnull
+    public Hologram loadAll() {
         Holograms.getInstance().loadAll(this);
+        return this;
     }
 
-    public void unload(TNLPlayer player) {
+    @Nonnull
+    public Hologram unload(TNLPlayer player) {
         Holograms.getInstance().unload(this, player);
+        return this;
     }
 
-    public void unloadAll() {
+    @Nonnull
+    public Hologram unloadAll() {
         Holograms.getInstance().unloadAll(this);
+        return this;
     }
 
-    public void reloadAll() {
+    @Nonnull
+    public Hologram reloadAll() {
         Holograms.getInstance().reloadAll(this);
+        return this;
     }
 
     @Override
@@ -215,6 +309,9 @@ public class Hologram {
                 ", location=" + location +
                 ", lineDistance=" + lineDistance +
                 ", darkness=" + darkness +
+                ", cache=" + cache +
+                ", onSend=" + onSend +
+                ", onInteract=" + onInteract +
                 '}';
     }
 
@@ -223,11 +320,11 @@ public class Hologram {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Hologram hologram = (Hologram) o;
-        return Double.compare(hologram.lineDistance, lineDistance) == 0 && darkness == hologram.darkness && name.equals(hologram.name) && lines.equals(hologram.lines) && Objects.equals(location, hologram.location);
+        return Double.compare(hologram.lineDistance, lineDistance) == 0 && darkness == hologram.darkness && cache == hologram.cache && name.equals(hologram.name) && lines.equals(hologram.lines) && Objects.equals(location, hologram.location) && onSend.equals(hologram.onSend) && onInteract.equals(hologram.onInteract);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, lines, location, lineDistance, darkness);
+        return Objects.hash(name, lines, location, lineDistance, darkness, cache, onSend, onInteract);
     }
 }

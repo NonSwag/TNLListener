@@ -18,7 +18,7 @@ public enum TNLItemType {
     }
 
     public static boolean isAir(@Nullable GUIItem item) {
-        return item == null || isAir(item.getBuilder().getType());
+        return item == null || !item.getBuilder().hasValue() || isAir(item.getBuilder().nonnull().getType());
     }
 
     public static boolean isAir(@Nullable TNLItem item) {

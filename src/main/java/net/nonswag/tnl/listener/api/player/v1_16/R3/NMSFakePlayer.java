@@ -60,7 +60,7 @@ public class NMSFakePlayer implements TNLFakePlayer<MinecraftServer, WorldServer
     @Override
     public void setSkin(@Nonnull String player) {
         setSkin(Skin.getSkin(player));
-        Logger.warn.println("Please use the properties '" + getSkin() + "' instead of the name '" + player + "'");
+        Logger.warn.println("Please use the properties §8'§6" + getSkin() + "§8'§a instead of the name §8'§6" + player + "§8'");
     }
 
     @Override

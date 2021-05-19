@@ -29,9 +29,8 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="tuinity-1.15.2" level="project" />
+    <orderEntry type="library" name="spigot-1.15.2" level="project" />
     <orderEntry type="library" name="spigot-1.7.2" level="project" />
-    <orderEntry type="library" name="spigot-1.7.10" level="project" />
-    <orderEntry type="library" name="purpurclip-1.16.5" level="project" />
+    <orderEntry type="library" name="spigot-1.16.5" level="project" />
   </component>
 </module>

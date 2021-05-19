@@ -1,38 +1,80 @@
 package net.nonswag.tnl.listener.api.gui;
 
+import net.nonswag.tnl.listener.api.gui.iterators.InteractionIterator;
 import net.nonswag.tnl.listener.api.item.TNLItem;
+import net.nonswag.tnl.listener.api.object.Objects;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.*;
 
-public class GUIItem {
+public class GUIItem implements Iterable<Interaction>, Cloneable {
 
     @Nonnull
-    private final TNLItem builder;
+    private final Objects<TNLItem> builder = new Objects<>();
     @Nonnull
-    private Interaction interaction = Interaction.EMPTY;
+    private final List<Interaction> interactions = new ArrayList<>();
 
     public GUIItem(@Nonnull ItemStack itemStack) {
         this(TNLItem.create(itemStack));
     }
 
     public GUIItem(@Nonnull TNLItem builder) {
-        this.builder = builder;
+        getBuilder().setValue(builder);
     }
 
     @Nonnull
-    public Interaction getInteraction() {
-        return interaction;
+    public List<Interaction> interactions() {
+        return new ArrayList<>(interactions);
     }
 
     @Nonnull
-    public GUIItem setInteraction(@Nonnull Interaction interaction) {
-        this.interaction = interaction;
+    private List<Interaction> getInteractions() {
+        return interactions;
+    }
+
+    @Nonnull
+    public GUIItem addInteractions(@Nonnull Interaction... interactions) {
+        for (Interaction interaction : interactions) {
+            if (!getInteractions().contains(interaction)) {
+                getInteractions().add(interaction);
+            }
+        }
         return this;
     }
 
     @Nonnull
-    public TNLItem getBuilder() {
+    public GUIItem removeInteractions(@Nonnull Interaction... interactions) {
+        getInteractions().removeAll(Arrays.asList(interactions));
+        return this;
+    }
+
+    @Nullable
+    public Interaction getInteraction(@Nonnull Interaction.Type type) {
+        for (Interaction interaction : this) {
+            for (Interaction.Type interactionType : interaction) {
+                if (type.comparable(interactionType)) {
+                    return interaction;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nonnull
+    public Objects<TNLItem> getBuilder() {
         return builder;
+    }
+
+    @Nonnull
+    @Override
+    public Iterator<Interaction> iterator() {
+        return new InteractionIterator(this);
+    }
+
+    @Nonnull
+    public ListIterator<Interaction> iterator(int i) {
+        return new InteractionIterator(this, i);
     }
 }

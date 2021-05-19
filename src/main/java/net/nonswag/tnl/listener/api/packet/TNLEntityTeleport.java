@@ -50,7 +50,17 @@ public abstract class TNLEntityTeleport {
     }
 
     @Nonnull
+    public static Object create(int id, @Nonnull Location location) {
+        return create(id, location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+    }
+
+    @Nonnull
     public static Object create(@Nonnull TNLEntity entity, @Nonnull Location location) {
         return create(entity.getId(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+    }
+
+    @Nonnull
+    public static Object create(@Nonnull TNLEntity entity) {
+        return create(entity, entity.getBukkitEntity().getLocation());
     }
 }

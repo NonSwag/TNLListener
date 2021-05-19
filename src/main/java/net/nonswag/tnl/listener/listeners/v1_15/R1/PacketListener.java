@@ -5,6 +5,9 @@ import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.conversation.Conversation;
+import net.nonswag.tnl.listener.api.gui.GUI;
+import net.nonswag.tnl.listener.api.gui.GUIItem;
+import net.nonswag.tnl.listener.api.gui.Interaction;
 import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
@@ -63,7 +66,7 @@ public class PacketListener implements Listener {
                         }
                     }
                 } else {
-                    PlayerInteractAtEntityEvent interactEvent = new PlayerInteractAtEntityEvent(event.getPlayer(), ((PacketPlayInUseEntity) event.getPacket()).getEntityId());
+                    PlayerInteractAtEntityEvent interactEvent = new PlayerInteractAtEntityEvent(event.getPlayer(), event.getPacketField("a", Integer.class).nonnull());
                     Bukkit.getPluginManager().callEvent(interactEvent);
                     if (interactEvent.isCancelled()) {
                         event.setCancelled(true);
@@ -104,7 +107,8 @@ public class PacketListener implements Listener {
                 }
             } else if (event.getPacket() instanceof PacketPlayInPickItem) {
                 PlayerItemPickEvent pickEvent = new PlayerItemPickEvent(event.getPlayer(), ((PacketPlayInPickItem) event.getPacket()).b());
-                if (pickEvent.callEvent()) {
+                Bukkit.getPluginManager().callEvent(pickEvent);
+                if (pickEvent.isCancelled()) {
                     event.setCancelled(true);
                 }
             } else if (event.getPacket() instanceof PacketPlayInBlockPlace) {
@@ -151,17 +155,38 @@ public class PacketListener implements Listener {
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInUpdateSign) {
-                if (TNLListener.getInstance().getSignHashMap().containsKey(event.getPlayer().getUniqueId())) {
+                SignMenu signMenu = event.getPlayer().getSignMenu();
+                if (signMenu != null) {
                     event.setCancelled(true);
-                    SignMenu signMenu = TNLListener.getInstance().getSignHashMap().get(event.getPlayer().getUniqueId());
                     if (signMenu.getResponse().hasValue()) {
-                        boolean success = signMenu.getResponse().nonnull().test(event.getPlayer(), ((PacketPlayInUpdateSign) event.getPacket()).c());
-                        if (!success && signMenu.isReopenOnFail()) {
-                            Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> event.getPlayer().openVirtualSignEditor(signMenu), 2);
+                        Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> {
+                            boolean success = signMenu.getResponse().nonnull().test(event.getPlayer(), ((PacketPlayInUpdateSign) event.getPacket()).c());
+                            if (!success && signMenu.isReopenOnFail()) {
+                                Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> event.getPlayer().openVirtualSignEditor(signMenu), 2);
+                            }
+                        });
+                    }
+                    event.getPlayer().getVirtualStorage().remove("current-sign");
+                    event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
+                }
+            } else if (event.getPacket() instanceof PacketPlayInWindowClick) {
+                GUI gui = event.getPlayer().getGUI();
+                if (gui != null) {
+                    PacketPlayInWindowClick packet = (PacketPlayInWindowClick) event.getPacket();
+                    if (packet.c() <= gui.getSize()) {
+                        event.setCancelled(true);
+                        event.getPlayer().updateGUI();
+                        event.getPlayer().updateInventory();
+                        event.getPlayer().sendPacket(new PacketPlayOutSetSlot(-1, -1, ItemStack.a));
+                        GUIItem item = gui.getItem(packet.c());
+                        Interaction.Type type = Interaction.Type.fromNMS(packet.d(), packet.g().name());
+                        if (item != null && type != null) {
+                            Interaction interaction = item.getInteraction(type);
+                            if (interaction != null) {
+                                Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> interaction.getAction().accept(event.getPlayer()));
+                            }
                         }
                     }
-                    Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> TNLListener.getInstance().getSignHashMap().remove(event.getPlayer().getUniqueId()));
-                    event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
                 BlockPosition position = ((PacketPlayInUseItem) event.getPacket()).c().getBlockPosition();

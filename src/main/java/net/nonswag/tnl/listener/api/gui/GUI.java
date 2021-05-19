@@ -1,22 +1,20 @@
 package net.nonswag.tnl.listener.api.gui;
 
+import net.nonswag.tnl.listener.api.gui.iterators.GUIIterator;
 import net.nonswag.tnl.listener.api.item.TNLItem;
 import net.nonswag.tnl.listener.api.item.TNLItemType;
+import net.nonswag.tnl.listener.api.math.Range;
 import net.nonswag.tnl.listener.api.object.Pair;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.checkerframework.common.value.qual.IntRange;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
-public class GUI implements Iterable<GUIItem> {
+public class GUI implements Iterable<GUIItem>, Cloneable {
 
     @Nonnull
     private final HashMap<Integer, GUIItem> contentHashMap = new HashMap<>();
@@ -27,21 +25,21 @@ public class GUI implements Iterable<GUIItem> {
     private final int size;
     private int maxStackSize;
 
-    public GUI(@IntRange(from = 0, to = 6) int rows, @Nonnull String title) {
+    public GUI(@Range(from = 0, to = 6) int rows, @Nonnull String title) {
         this(rows, 64, title);
     }
 
-    public GUI(@IntRange(from = 0, to = 6) int rows, int maxStackSize, @Nonnull String title) {
+    public GUI(@Range(from = 0, to = 6)  int rows, int maxStackSize, @Nonnull String title) {
         this.size = rows * 9;
         this.title = title;
         this.maxStackSize = maxStackSize;
     }
 
-    public GUI(@IntRange(from = 0, to = 6) int rows, int maxStackSize) {
+    public GUI(@Range(from = 0, to = 6)  int rows, int maxStackSize) {
         this(rows, maxStackSize, "§8» §4§lUnnamed§c§lGUI");
     }
 
-    public GUI(@IntRange(from = 0, to = 6) int rows) {
+    public GUI(@Range(from = 0, to = 6)  int rows) {
         this(rows, "§8» §4§lUnnamed§c§lGUI");
     }
 
@@ -72,78 +70,102 @@ public class GUI implements Iterable<GUIItem> {
         return maxStackSize;
     }
 
-    public void setMaxStackSize(int maxStackSize) {
+    @Nonnull
+    public GUI setMaxStackSize(int maxStackSize) {
         this.maxStackSize = maxStackSize;
+        return this;
     }
 
     @Nullable
     public GUIItem getItem(int slot) {
-        return getContentHashMap().getOrDefault(slot, null);
+        return getContentHashMap().get(slot);
     }
 
-    public void setItem(int slot, @Nullable GUIItem item) throws IndexOutOfBoundsException {
-        if (item != null && !item.getBuilder().isAir()) {
-            if (slot >= 0 && slot < getSize()) {
-                getContentHashMap().put(slot, item);
-            } else {
-                throw new IndexOutOfBoundsException("Slot '" + slot + "' is outside the gui");
-            }
-        } else {
-            getContentHashMap().remove(slot);
-        }
+    @Nonnull
+    public GUI setItem(int slot, @Nullable GUIItem item) throws IllegalArgumentException {
+        if (item != null) {
+            if (slot >= 0 && slot < getSize()) getContentHashMap().put(slot, item);
+            else throw new IllegalArgumentException("Slot '" + slot + "' is outside the gui");
+        } else remove(slot);
+        return this;
     }
 
-    public void setItem(int slot, @Nullable TNLItem item) throws IndexOutOfBoundsException {
-        setItem(slot, item == null ? null : item.toGUIItem());
+    @Nonnull
+    public GUI setItem(int slot, @Nullable TNLItem item) throws IllegalArgumentException {
+        return setItem(slot, item == null ? null : item.toGUIItem());
     }
 
-    public void setItem(int slot, @Nullable ItemStack itemStack) throws IndexOutOfBoundsException {
-        setItem(slot, itemStack == null ? null : TNLItem.create(itemStack));
+    @Nonnull
+    public GUI setItem(int slot, @Nullable ItemStack itemStack) throws IllegalArgumentException {
+        return setItem(slot, itemStack == null ? null : TNLItem.create(itemStack));
     }
 
-    public void setItem(int slot, @Nullable Material material) throws IndexOutOfBoundsException {
-        setItem(slot, material == null ? null : new ItemStack(material));
+    @Nonnull
+    public GUI setItem(int slot, @Nullable Material material) throws IllegalArgumentException {
+        return setItem(slot, material == null ? null : new ItemStack(material));
     }
 
-    public void addItems(@Nonnull GUIItem... items) {
+    @Nonnull
+    public GUI addItem(@Nonnull GUIItem item) {
+        return addItems(item);
+    }
+
+    @Nonnull
+    public GUI addItems(@Nonnull GUIItem... items) {
         items:
         for (@Nullable GUIItem item : items) {
             for (int slot = 0; slot < getSize(); slot++) {
                 if (TNLItemType.isAir(getItem(slot))) {
-                    setItem(slot, items[slot]);
+                    setItem(slot, item);
                     continue items;
                 }
             }
             break;
         }
+        return this;
     }
 
-    public void removeItems(@Nonnull GUIItem... items) {
-        for (@Nullable GUIItem item : items) {
-            if (item != null) {
-                remove(item);
-            }
-        }
+    @Nonnull
+    public GUI removeItems(@Nonnull GUIItem... items) {
+        for (@Nullable GUIItem item : items) if (item != null) remove(item);
+        return this;
+    }
+
+    @Nonnull
+    public GUI removeItem(@Nonnull GUIItem item) {
+        return removeItems(item);
     }
 
     @Nonnull
     public GUIItem[] getContents() {
         GUIItem[] items = new GUIItem[getSize()];
+        for (int i = 0; i < getSize(); i++) items[i] = getItem(i);
+        return items;
+    }
+
+    @Nonnull
+    public List<ItemStack> items() {
+        List<ItemStack> items = new ArrayList<>();
         for (int i = 0; i < getSize(); i++) {
-            items[i] = getItem(i);
+            GUIItem item = getItem(i);
+            if (item != null && item.getBuilder().hasValue()) items.add(item.getBuilder().nonnull().build());
+            else items.add(new ItemStack(Material.AIR));
         }
         return items;
     }
 
-    public void setContents(@Nonnull GUIItem[] items) {
+    @Nonnull
+    public GUI setContents(@Nonnull GUIItem[] items) {
         clear();
-        for (int i = 0; i < getSize() && i < items.length; i++) {
+        for (int i = 0; i < items.length; i++) {
             setItem(i, items[i]);
         }
+        return this;
     }
 
     public boolean contains(@Nonnull GUIItem item) {
-        return contains(item.getBuilder());
+        if (item.getBuilder().hasValue()) return contains(item.getBuilder().nonnull());
+        return contains(Material.AIR);
     }
 
     public boolean contains(@Nonnull TNLItem item) {
@@ -152,7 +174,9 @@ public class GUI implements Iterable<GUIItem> {
 
     public boolean contains(@Nonnull Material material) {
         for (@Nullable GUIItem content : getContents()) {
-            if (TNLItemType.isAir(material) && TNLItemType.isAir(content) || (content != null && material.equals(content.getBuilder().getType()))) {
+            if (TNLItemType.isAir(material) && TNLItemType.isAir(content)
+                    || (content != null && content.getBuilder().hasValue()
+                    && material.equals(content.getBuilder().nonnull().getType()))) {
                 return true;
             }
         }
@@ -165,29 +189,24 @@ public class GUI implements Iterable<GUIItem> {
 
     public boolean contains(@Nonnull ItemStack itemStack, boolean ignoreAmount) {
         for (@Nullable GUIItem content : getContents()) {
-            if (TNLItemType.isAir(itemStack) && TNLItemType.isAir(content)) {
-                return true;
-            } else {
+            if (TNLItemType.isAir(itemStack) && TNLItemType.isAir(content)) return true;
+            else {
                 if (ignoreAmount) {
-                    if (content != null) {
+                    if (content != null && content.getBuilder().hasValue()) {
                         ItemStack clone = itemStack.clone();
-                        clone.setAmount(content.getBuilder().getAmount());
-                        if (clone.equals(content.getBuilder().build())) {
-                            return true;
-                        }
+                        clone.setAmount(content.getBuilder().nonnull().getAmount());
+                        if (clone.equals(content.getBuilder().nonnull().build())) return true;
                     }
-                } else {
-                    if (content != null && itemStack.equals(content.getBuilder().build())) {
-                        return true;
-                    }
-                }
+                } else if (content != null && content.getBuilder().hasValue()
+                        && itemStack.equals(content.getBuilder().nonnull().build())) return true;
             }
         }
         return false;
     }
 
     public boolean containsAtLeast(@Nonnull GUIItem item, int amount) {
-        return containsAtLeast(item.getBuilder(), amount);
+        if (item.getBuilder().hasValue()) return containsAtLeast(item.getBuilder().nonnull(), amount);
+        else return containsAtLeast(new ItemStack(Material.AIR), amount);
     }
 
     public boolean containsAtLeast(@Nonnull TNLItem item, int amount) {
@@ -197,16 +216,12 @@ public class GUI implements Iterable<GUIItem> {
     public boolean containsAtLeast(@Nonnull Material material, int amount) {
         int finalAmount = 0;
         for (@Nullable GUIItem content : getContents()) {
-            if (TNLItemType.isAir(material) && TNLItemType.isAir(content)) {
-                return true;
-            } else {
-                if (content != null) {
-                    if (material.equals(content.getBuilder().getType())) {
-                        if (content.getBuilder().getAmount() >= amount) {
-                            return true;
-                        } else {
-                            finalAmount += content.getBuilder().getAmount();
-                        }
+            if (TNLItemType.isAir(material) && TNLItemType.isAir(content)) return true;
+            else {
+                if (content != null && content.getBuilder().hasValue()) {
+                    if (material.equals(content.getBuilder().nonnull().getType())) {
+                        if (content.getBuilder().nonnull().getAmount() >= amount) return true;
+                        else finalAmount += content.getBuilder().nonnull().getAmount();
                     }
                 }
             }
@@ -217,18 +232,14 @@ public class GUI implements Iterable<GUIItem> {
     public boolean containsAtLeast(@Nonnull ItemStack itemStack, int amount) {
         int finalAmount = 0;
         for (@Nullable GUIItem content : getContents()) {
-            if (TNLItemType.isAir(itemStack) && TNLItemType.isAir(content)) {
-                return true;
-            } else {
-                if (content != null) {
+            if (TNLItemType.isAir(itemStack) && TNLItemType.isAir(content)) return true;
+            else {
+                if (content != null && content.getBuilder().hasValue()) {
                     ItemStack clone = itemStack.clone();
-                    clone.setAmount(content.getBuilder().getAmount());
-                    if (clone.equals(content.getBuilder().build())) {
-                        if (clone.getAmount() >= amount) {
-                            return true;
-                        } else {
-                            finalAmount += clone.getAmount();
-                        }
+                    clone.setAmount(content.getBuilder().nonnull().getAmount());
+                    if (clone.equals(content.getBuilder().nonnull().build())) {
+                        if (clone.getAmount() >= amount) return true;
+                        else finalAmount += clone.getAmount();
                     }
                 }
             }
@@ -238,7 +249,8 @@ public class GUI implements Iterable<GUIItem> {
 
     @Nonnull
     public HashMap<Integer, GUIItem> all(@Nonnull GUIItem item) {
-        return all(item.getBuilder());
+        if (item.getBuilder().hasValue()) return all(item.getBuilder().nonnull());
+        else return all(Material.AIR);
     }
 
     @Nonnull
@@ -251,7 +263,9 @@ public class GUI implements Iterable<GUIItem> {
         HashMap<Integer, GUIItem> items = new HashMap<>();
         GUIItem[] contents = getContents();
         for (int i = 0; i < getSize(); i++) {
-            if (TNLItemType.isAir(contents[i]) && TNLItemType.isAir(material) || (contents[i] != null && contents[i].getBuilder().getType().equals(material))) {
+            if (TNLItemType.isAir(contents[i]) && TNLItemType.isAir(material)
+                    || (contents[i] != null && contents[i].getBuilder().hasValue()
+                    && contents[i].getBuilder().nonnull().getType().equals(material))) {
                 items.put(i, contents[i]);
             }
         }
@@ -268,19 +282,20 @@ public class GUI implements Iterable<GUIItem> {
         HashMap<Integer, GUIItem> items = new HashMap<>();
         GUIItem[] contents = getContents();
         for (int slot = 0; slot < getSize(); slot++) {
-            if (TNLItemType.isAir(contents[slot]) && TNLItemType.isAir(itemStack.getType())) {
-                items.put(slot, contents[slot]);
+            GUIItem content = contents[slot];
+            if (TNLItemType.isAir(content) && TNLItemType.isAir(itemStack.getType())) {
+                items.put(slot, content);
             } else {
-                if (itemStack.getType().equals(contents[slot].getBuilder().getType())) {
+                if (itemStack.getType().equals(content.getBuilder().hasValue() ? content.getBuilder().nonnull().getType() : null)) {
                     if (ignoreAmount) {
                         ItemStack clone = itemStack.clone();
-                        clone.setAmount(contents[slot].getBuilder().getAmount());
-                        if (clone.equals(contents[slot].getBuilder().build())) {
-                            items.put(slot, contents[slot]);
+                        clone.setAmount(content.getBuilder().nonnull().getAmount());
+                        if (clone.equals(content.getBuilder().nonnull().build())) {
+                            items.put(slot, content);
                         }
                     } else {
-                        if (itemStack.equals(contents[slot].getBuilder().build())) {
-                            items.put(slot, contents[slot]);
+                        if (itemStack.equals(content.getBuilder().nonnull().build())) {
+                            items.put(slot, content);
                         }
                     }
                 }
@@ -290,7 +305,8 @@ public class GUI implements Iterable<GUIItem> {
     }
 
     public int first(@Nonnull GUIItem item) {
-        return first(item.getBuilder());
+        if (item.getBuilder().hasValue()) return first(item.getBuilder().nonnull());
+        return first(Material.AIR);
     }
 
     public int first(@Nonnull TNLItem item) {
@@ -300,7 +316,11 @@ public class GUI implements Iterable<GUIItem> {
     public int first(@Nonnull Material material) {
         GUIItem[] contents = getContents();
         for (int slot = 0; slot < getSize(); slot++) {
-            if ((TNLItemType.isAir(contents[slot]) && TNLItemType.isAir(material)) || material.equals(contents[slot].getBuilder().getType())) {
+            GUIItem content = contents[slot];
+            if (TNLItemType.isAir(content) && TNLItemType.isAir(material)) {
+                return slot;
+            }
+            if (content.getBuilder().hasValue() && material.equals(content.getBuilder().nonnull().getType())) {
                 return slot;
             }
         }
@@ -314,18 +334,19 @@ public class GUI implements Iterable<GUIItem> {
     public int first(@Nonnull ItemStack itemStack, boolean ignoreAmount) {
         GUIItem[] contents = getContents();
         for (int slot = 0; slot < getSize(); slot++) {
-            if (TNLItemType.isAir(contents[slot]) && TNLItemType.isAir(itemStack.getType())) {
+            GUIItem content = contents[slot];
+            if (TNLItemType.isAir(content) && TNLItemType.isAir(itemStack.getType())) {
                 return slot;
             } else {
-                if (itemStack.getType().equals(contents[slot].getBuilder().getType())) {
+                if (content.getBuilder().hasValue() && itemStack.getType().equals(content.getBuilder().nonnull().getType())) {
                     if (ignoreAmount) {
                         ItemStack clone = itemStack.clone();
-                        clone.setAmount(contents[slot].getBuilder().getAmount());
-                        if (clone.equals(contents[slot].getBuilder().build())) {
+                        clone.setAmount(content.getBuilder().nonnull().getAmount());
+                        if (clone.equals(content.getBuilder().nonnull().build())) {
                             return slot;
                         }
                     } else {
-                        if (itemStack.equals(contents[slot].getBuilder().build())) {
+                        if (itemStack.equals(content.getBuilder().nonnull().build())) {
                             return slot;
                         }
                     }
@@ -338,7 +359,8 @@ public class GUI implements Iterable<GUIItem> {
     public int firstEmpty() {
         GUIItem[] contents = getContents();
         for (int i = 0; i < contents.length; ++i) {
-            if (contents[i] == null || contents[i].getBuilder().isAir()) {
+            GUIItem content = contents[i];
+            if (content == null || !content.getBuilder().hasValue() || content.getBuilder().nonnull().isAir()) {
                 return i;
             }
         }
@@ -347,7 +369,8 @@ public class GUI implements Iterable<GUIItem> {
 
     @Nonnull
     public Pair<Boolean, Integer> remove(@Nonnull GUIItem item) {
-        return remove(item.getBuilder());
+        if (item.getBuilder().hasValue()) return remove(item.getBuilder().nonnull().getItemStack());
+        return remove(Material.AIR);
     }
 
     @Nonnull
@@ -361,7 +384,10 @@ public class GUI implements Iterable<GUIItem> {
         int amount = 0;
         GUIItem[] contents = getContents();
         for(int i = 0; i < contents.length; i++) {
-            if (contents[i] != null && contents[i].getBuilder().build().equals(item)) {
+            GUIItem content = contents[i];
+            if ((TNLItemType.isAir(item) && TNLItemType.isAir(content))
+                    || (content != null && content.getBuilder().hasValue()
+                    && content.getBuilder().nonnull().build().equals(item))) {
                 remove(i);
                 removed = true;
                 amount++;
@@ -376,7 +402,10 @@ public class GUI implements Iterable<GUIItem> {
         int amount = 0;
         GUIItem[] contents = getContents();
         for(int slot = 0; slot < contents.length; slot++) {
-            if (contents[slot] != null && contents[slot].getBuilder().getType().equals(material)) {
+            GUIItem content = contents[slot];
+            if ((TNLItemType.isAir(material) && TNLItemType.isAir(content))
+                    && (content != null && content.getBuilder().hasValue()
+                    && content.getBuilder().nonnull().getType().equals(material))) {
                 remove(slot);
                 removed = true;
                 amount++;
@@ -385,16 +414,21 @@ public class GUI implements Iterable<GUIItem> {
         return new Pair<>(removed, amount);
     }
 
-    public void remove(int i) {
+    @Nonnull
+    public GUI remove(int i) {
         getContentHashMap().remove(i);
-    }
-
-    public void clear() {
-        getContentHashMap().clear();
+        return this;
     }
 
     @Nonnull
-    public ListIterator<GUIItem> iterator() {
+    public GUI clear() {
+        getContentHashMap().clear();
+        return this;
+    }
+
+    @Nonnull
+    @Override
+    public Iterator<GUIItem> iterator() {
         return new GUIIterator(this);
     }
 
@@ -404,7 +438,8 @@ public class GUI implements Iterable<GUIItem> {
     }
 
     private int firstPartial(@Nonnull GUIItem item) {
-        return firstPartial(item.getBuilder());
+        if (item.getBuilder().hasValue()) return firstPartial(item.getBuilder().nonnull());
+        return firstPartial(Material.AIR);
     }
 
     private int firstPartial(@Nonnull TNLItem item) {
@@ -413,9 +448,12 @@ public class GUI implements Iterable<GUIItem> {
 
     private int firstPartial(@Nonnull ItemStack itemStack) {
         GUIItem[] contents = getContents();
-        for (int slot = 0; slot < contents.length; ++slot) {
+        for (int slot = 0; slot < contents.length; slot++) {
             GUIItem item = contents[slot];
-            if (item != null && item.getBuilder().getAmount() < item.getBuilder().getMaxStackSize() && item.getBuilder().build().equals(itemStack)) {
+            if (TNLItemType.isAir(itemStack) && TNLItemType.isAir(item)) return slot;
+            if (item != null && item.getBuilder().hasValue() && item.getBuilder().nonnull().getAmount()
+                    < item.getBuilder().nonnull().getMaxStackSize()
+                    && item.getBuilder().nonnull().build().equals(itemStack)) {
                 return slot;
             }
         }
@@ -426,7 +464,9 @@ public class GUI implements Iterable<GUIItem> {
         GUIItem[] contents = getContents();
         for(int slot = 0; slot < contents.length; slot++) {
             GUIItem item = contents[slot];
-            if (item != null && item.getBuilder().getType() == material && item.getBuilder().getAmount() < item.getBuilder().getMaxStackSize()) {
+            if (TNLItemType.isAir(material) && TNLItemType.isAir(item)) return slot;
+            if (item != null && item.getBuilder().hasValue() && item.getBuilder().nonnull().getType() == material
+                    && item.getBuilder().nonnull().getAmount() < item.getBuilder().nonnull().getMaxStackSize()) {
                 return slot;
             }
         }

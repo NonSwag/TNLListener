@@ -163,9 +163,11 @@ public class Title {
         @Nonnull
         public static final Design LIGHT = new Design(ChatColor.GREEN, ChatColor.GRAY, ChatColor.GOLD);
         @Nonnull
-        public static final Design DARK = new Design(ChatColor.RED, ChatColor.DARK_GRAY, ChatColor.DARK_RED);
+        public static final Design DARK = new Design(ChatColor.DARK_RED, ChatColor.DARK_GRAY, ChatColor.RED);
         @Nonnull
-        public static final Design OCEAN = new Design(ChatColor.AQUA, ChatColor.GRAY, ChatColor.BLUE);
+        public static final Design BLOODY = new Design(ChatColor.RED, ChatColor.DARK_GRAY, ChatColor.GRAY);
+        @Nonnull
+        public static final Design OCEAN = new Design(ChatColor.DARK_AQUA, ChatColor.GRAY, ChatColor.AQUA);
 
         @Nonnull
         private final ChatColor primaryColor;

@@ -40,7 +40,7 @@ public class Bootstrap extends JavaPlugin {
             return;
         }
         TNLListener.getInstance().enable();
-        Bukkit.getScheduler().runTaskLater(this, () -> Holograms.getInstance().enable(), 20);
+        Holograms.getInstance().enable();
     }
 
     @Override

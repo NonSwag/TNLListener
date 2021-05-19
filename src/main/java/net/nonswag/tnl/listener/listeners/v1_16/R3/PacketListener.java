@@ -3,8 +3,14 @@ package net.nonswag.tnl.listener.listeners.v1_16.R3;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_16_R3.*;
 import net.nonswag.tnl.listener.Bootstrap;
+import net.nonswag.tnl.listener.Holograms;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.conversation.Conversation;
+import net.nonswag.tnl.listener.api.gui.GUI;
+import net.nonswag.tnl.listener.api.gui.GUIItem;
+import net.nonswag.tnl.listener.api.gui.Interaction;
+import net.nonswag.tnl.listener.api.holograms.Hologram;
+import net.nonswag.tnl.listener.api.holograms.event.InteractEvent;
 import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
@@ -33,9 +39,7 @@ public class PacketListener implements Listener {
                 if (message.length() <= 0 || Color.Minecraft.unColorize(message.replace(" ", ""), '&').isEmpty()) {
                     event.setCancelled(true);
                 } else {
-                    if (Conversation.test(event, event.getPlayer(), message)) {
-                        return;
-                    }
+                    if (Conversation.test(event, event.getPlayer(), message)) return;
                     PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), message);
                     Bukkit.getPluginManager().callEvent(chatEvent);
                     event.setCancelled(chatEvent.isCancelled());
@@ -53,20 +57,33 @@ public class PacketListener implements Listener {
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseEntity) {
-                Entity entity = ((PacketPlayInUseEntity) event.getPacket()).a((World) event.getPlayer().getWorldServer());
+                PacketPlayInUseEntity packet = (PacketPlayInUseEntity) event.getPacket();
+                Entity entity = packet.a((World) event.getPlayer().getWorldServer());
                 if (entity != null) {
-                    if (((PacketPlayInUseEntity) event.getPacket()).b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)) {
+                    if (packet.b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)) {
                         EntityDamageByPlayerEvent<Entity> damageEvent = new EntityDamageByPlayerEvent<>(event.getPlayer(), entity);
                         Bukkit.getPluginManager().callEvent(damageEvent);
-                        if (damageEvent.isCancelled()) {
-                            event.setCancelled(true);
-                        }
+                        if (damageEvent.isCancelled()) event.setCancelled(true);
                     }
                 } else {
-                    PlayerInteractAtEntityEvent interactEvent = new PlayerInteractAtEntityEvent(event.getPlayer(), ((PacketPlayInUseEntity) event.getPacket()).getEntityId());
-                    Bukkit.getPluginManager().callEvent(interactEvent);
-                    if (interactEvent.isCancelled()) {
-                        event.setCancelled(true);
+                    Objects<Integer> id = event.getPacketField("a", Integer.class);
+                    if (id.hasValue()) {
+                        InteractEvent.Type type = packet.b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK) ?
+                                InteractEvent.Type.LEFT_CLICK : InteractEvent.Type.RIGHT_CLICK;
+                        for (Hologram hologram : Holograms.getInstance().cachedValues()) {
+                            for (Integer integer : Holograms.getInstance().getIds(hologram, event.getPlayer())) {
+                                if (integer.equals(id.nonnull())) {
+                                    Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> {
+                                        InteractEvent interactEvent = new InteractEvent(event.getPlayer(), hologram, type);
+                                        hologram.onInteract().accept(interactEvent);
+                                    });
+                                    return;
+                                }
+                            }
+                        }
+                        PlayerInteractAtEntityEvent interactEvent = new PlayerInteractAtEntityEvent(event.getPlayer(), id.nonnull());
+                        Bukkit.getPluginManager().callEvent(interactEvent);
+                        if (interactEvent.isCancelled()) event.setCancelled(true);
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInBlockDig) {
@@ -126,9 +143,7 @@ public class PacketListener implements Listener {
                                     || (target.getBlockData() instanceof Waterlogged
                                     && ((Waterlogged) target.getBlockData()).isWaterlogged())
                                     || target.getType().equals(Material.KELP)
-                                    || target.getType().equals(Material.KELP_PLANT))) {
-                                break;
-                            }
+                                    || target.getType().equals(Material.KELP_PLANT))) break;
                         }
                     }
                     if (target != null && (target.getType().equals(Material.WATER)
@@ -150,23 +165,49 @@ public class PacketListener implements Listener {
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInUpdateSign) {
-                if (TNLListener.getInstance().getSignHashMap().containsKey(event.getPlayer().getUniqueId())) {
+                SignMenu signMenu = event.getPlayer().getSignMenu();
+                if (signMenu != null) {
                     event.setCancelled(true);
-                    SignMenu signMenu = TNLListener.getInstance().getSignHashMap().get(event.getPlayer().getUniqueId());
                     if (signMenu.getResponse().hasValue()) {
-                        boolean success = signMenu.getResponse().nonnull().test(event.getPlayer(), ((PacketPlayInUpdateSign) event.getPacket()).c());
-                        if (!success && signMenu.isReopenOnFail()) {
-                            Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> event.getPlayer().openVirtualSignEditor(signMenu), 2);
+                        Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> {
+                            boolean success = signMenu.getResponse().nonnull().test(event.getPlayer(), ((PacketPlayInUpdateSign) event.getPacket()).c());
+                            if (!success && signMenu.isReopenOnFail()) {
+                                Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> event.getPlayer().openVirtualSignEditor(signMenu), 2);
+                            }
+                        });
+                    }
+                    event.getPlayer().getVirtualStorage().remove("current-sign");
+                    event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
+                }
+            } else if (event.getPacket() instanceof PacketPlayInWindowClick) {
+                GUI gui = event.getPlayer().getGUI();
+                if (gui != null) {
+                    event.setCancelled(true);
+                    event.getPlayer().updateGUI();
+                    event.getPlayer().updateInventory();
+                    event.getPlayer().sendPacket(new PacketPlayOutSetSlot(-1, -1, ItemStack.b));
+                    PacketPlayInWindowClick packet = (PacketPlayInWindowClick) event.getPacket();
+                    if (packet.c() <= gui.getSize()) {
+                        GUIItem item = gui.getItem(packet.c());
+                        Interaction.Type type = Interaction.Type.fromNMS(packet.d(), packet.g().name());
+                        if (item != null && type != null) {
+                            Interaction interaction = item.getInteraction(type);
+                            if (interaction != null) {
+                                Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> interaction.getAction().accept(event.getPlayer()));
+                            }
                         }
                     }
-                    Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> TNLListener.getInstance().getSignHashMap().remove(event.getPlayer().getUniqueId()));
-                    event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
+                }
+            } else if (event.getPacket() instanceof PacketPlayInCloseWindow) {
+                GUI gui = event.getPlayer().getGUI();
+                if (gui != null) {
+                    gui.getViewers().remove(event.getPlayer());
+                    event.getPlayer().getVirtualStorage().remove("current-gui");
                 }
             } else if (event.getPacket() instanceof PacketPlayInPickItem) {
                 PlayerItemPickEvent pickEvent = new PlayerItemPickEvent(event.getPlayer(), ((PacketPlayInPickItem) event.getPacket()).b());
-                if (pickEvent.callEvent()) {
-                    event.setCancelled(true);
-                }
+                Bukkit.getPluginManager().callEvent(pickEvent);
+                if (pickEvent.isCancelled()) event.setCancelled(true);
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
                 BlockPosition position = ((PacketPlayInUseItem) event.getPacket()).c().getBlockPosition();
                 Block block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
@@ -178,13 +219,11 @@ public class PacketListener implements Listener {
                 org.bukkit.inventory.ItemStack itemStack;
                 if (((PacketPlayInUseItem) event.getPacket()).b().equals(EnumHand.MAIN_HAND)) {
                     itemStack = event.getPlayer().getInventory().getItemInMainHand();
-                } else {
-                    itemStack = event.getPlayer().getInventory().getItemInOffHand();
-                }
+                } else itemStack = event.getPlayer().getInventory().getItemInOffHand();
                 PlayerInteractEvent interactEvent = new PlayerInteractEvent(event.getPlayer(), block, itemStack);
                 Bukkit.getPluginManager().callEvent(interactEvent);
-                event.setCancelled(interactEvent.isCancelled());
                 if (interactEvent.isCancelled()) {
+                    event.setCancelled(true);
                     Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> {
                         interactEvent.getBlock().getState().update();
                         for (BlockFace blockFace : BlockFace.values()) {
@@ -200,24 +239,24 @@ public class PacketListener implements Listener {
                 Objects<EntityTypes<?>> k = ((Objects<EntityTypes<?>>) event.getPacketField("k"));
                 if (k.hasValue()) {
                     if (Settings.BETTER_TNT.getValue()) {
-                        if (k.nonnull().equals(EntityTypes.TNT)) {
-                            event.setCancelled(true);
-                        }
+                        if (k.nonnull().equals(EntityTypes.TNT)) event.setCancelled(true);
                     }
                     if (Settings.BETTER_FALLING_BLOCKS.getValue()) {
-                        if (k.nonnull().equals(EntityTypes.FALLING_BLOCK)) {
-                            event.setCancelled(true);
-                        }
+                        if (k.nonnull().equals(EntityTypes.FALLING_BLOCK)) event.setCancelled(true);
+                    }
+                }
+            } else if (event.getPacket() instanceof PacketPlayOutCloseWindow) {
+                if (!event.isCancelled()) {
+                    GUI gui = event.getPlayer().getGUI();
+                    if (gui != null) {
+                        gui.getViewers().remove(event.getPlayer());
+                        event.getPlayer().getVirtualStorage().remove("current-gui");
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayOutEntityStatus) {
                 int id = ((Objects<Integer>) event.getPacketField("a")).getOrDefault(-1);
                 byte b = ((Objects<Byte>) event.getPacketField("b")).getOrDefault((byte) -1);
-                if (event.getPlayer().getId() == id) {
-                    if (b >= 24 && b < 28) {
-                        event.setPacketField("b", (byte) 28);
-                    }
-                }
+                if (event.getPlayer().getId() == id) if (b >= 24 && b < 28) event.setPacketField("b", (byte) 28);
             } else if (event.getPacket() instanceof PacketPlayOutChat) {
                 Objects<ChatComponentText> a = (Objects<ChatComponentText>) event.getPacketField("a");
                 if (a.hasValue()) {

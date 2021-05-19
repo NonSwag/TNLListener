@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.utils;
+package net.nonswag.tnl.listener.api.math;
 
 import java.util.Random;
 

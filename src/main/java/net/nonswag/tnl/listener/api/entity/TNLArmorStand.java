@@ -1,6 +1,7 @@
 package net.nonswag.tnl.listener.api.entity;
 
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.item.TNLItem;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
 import org.bukkit.Location;
@@ -33,7 +34,10 @@ public interface TNLArmorStand extends TNLEntity {
 
     @Nonnull
     static TNLArmorStand create(@Nonnull Location location) {
-        return create(location.getWorld(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        if (location.getWorld() != null) {
+            return create(location.getWorld(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        }
+        throw new NullPointerException();
     }
 
     void setX(double x);
@@ -51,8 +55,6 @@ public interface TNLArmorStand extends TNLEntity {
     void setHeadRotation(float f);
 
     void tick();
-
-    void updatePose();
 
     void setInvisible(boolean flag);
 
@@ -95,4 +97,18 @@ public interface TNLArmorStand extends TNLEntity {
     void setCustomName(@Nonnull String customName);
 
     <D> D getDataWatcher();
+
+    void setVisible(boolean visible);
+
+    void setInvulnerable(boolean invulnerable);
+
+    void setGravity(boolean gravity);
+
+    void setHelmet(@Nonnull TNLItem item);
+
+    void setChestplate(@Nonnull TNLItem item);
+
+    void setLeggings(@Nonnull TNLItem item);
+
+    void setBoots(@Nonnull TNLItem item);
 }

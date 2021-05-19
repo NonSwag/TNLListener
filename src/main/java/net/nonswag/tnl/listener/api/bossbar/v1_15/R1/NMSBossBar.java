@@ -1,7 +1,7 @@
 package net.nonswag.tnl.listener.api.bossbar.v1_15.R1;
 
 import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
-import net.nonswag.tnl.listener.utils.MathUtil;
+import net.nonswag.tnl.listener.api.math.MathUtil;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
