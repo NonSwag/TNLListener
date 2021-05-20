@@ -1,36 +1,36 @@
 package net.nonswag.tnl.listener.events;
 
+import net.nonswag.tnl.listener.api.event.TNLEvent;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class InventorySafeEvent extends Event {
+public class InventorySafeEvent extends TNLEvent {
 
-    private static final HandlerList handlers = new HandlerList();
+    @Nonnull
     private final TNLPlayer player;
+    @Nonnull
     private final String inventoryId;
 
-    public InventorySafeEvent(TNLPlayer player, String inventoryId) {
-        super(!Bukkit.isPrimaryThread());
+    public InventorySafeEvent(@Nonnull TNLPlayer player, @Nonnull String inventoryId) {
         this.player = player;
         this.inventoryId = inventoryId;
     }
 
+    @Nonnull
     public TNLPlayer getPlayer() {
         return player;
     }
 
+    @Nonnull
     public String getInventoryId() {
         return inventoryId;
     }
 
     @Override
     public String toString() {
-        return "InventoryLoadEvent{" +
+        return "InventorySafeEvent{" +
                 "player=" + player +
                 ", inventoryId='" + inventoryId + '\'' +
                 '}';
@@ -40,23 +40,13 @@ public class InventorySafeEvent extends Event {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         InventorySafeEvent that = (InventorySafeEvent) o;
-        return Objects.equals(player, that.player) &&
-                Objects.equals(inventoryId, that.inventoryId);
+        return player.equals(that.player) && inventoryId.equals(that.inventoryId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, inventoryId);
-    }
-
-    @Nonnull
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
+        return Objects.hash(super.hashCode(), player, inventoryId);
     }
 }

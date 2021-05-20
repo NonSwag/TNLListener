@@ -1,4 +1,4 @@
-package net.nonswag.tnl.listener.api.conversation;
+package net.nonswag.tnl.listener.api.chat;
 
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.event.Cancellable;

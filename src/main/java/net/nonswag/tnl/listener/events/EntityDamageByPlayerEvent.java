@@ -1,49 +1,30 @@
 package net.nonswag.tnl.listener.events;
 
+import net.nonswag.tnl.listener.api.event.TNLEvent;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
+import org.bukkit.entity.Entity;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class EntityDamageByPlayerEvent<Entity> extends Event implements Cancellable {
+public class EntityDamageByPlayerEvent extends TNLEvent {
 
-    private static final HandlerList handlers = new HandlerList();
+    @Nonnull
     private final TNLPlayer player;
+    @Nonnull
     private final Entity entity;
-    private boolean cancelled = false;
 
-    public EntityDamageByPlayerEvent(TNLPlayer player, Entity entity) {
-        super(!Bukkit.isPrimaryThread());
+    public EntityDamageByPlayerEvent(@Nonnull TNLPlayer player, @Nonnull Entity entity) {
         this.player = player;
         this.entity = entity;
     }
 
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
-
+    @Nonnull
     public TNLPlayer getPlayer() {
         return player;
     }
 
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
-    }
-
+    @Nonnull
     public Entity getEntity() {
         return entity;
     }
@@ -53,7 +34,6 @@ public class EntityDamageByPlayerEvent<Entity> extends Event implements Cancella
         return "EntityDamageByPlayerEvent{" +
                 "player=" + player +
                 ", entity=" + entity +
-                ", cancelled=" + cancelled +
                 '}';
     }
 
@@ -61,12 +41,12 @@ public class EntityDamageByPlayerEvent<Entity> extends Event implements Cancella
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        EntityDamageByPlayerEvent<?> that = (EntityDamageByPlayerEvent<?>) o;
-        return cancelled == that.cancelled && Objects.equals(player, that.player) && Objects.equals(entity, that.entity);
+        EntityDamageByPlayerEvent that = (EntityDamageByPlayerEvent) o;
+        return player.equals(that.player) && entity.equals(that.entity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, entity, cancelled);
+        return Objects.hash(player, entity);
     }
 }

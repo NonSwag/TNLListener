@@ -3,7 +3,6 @@ package net.nonswag.tnl.listener.listeners.modern;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.events.PlayerBottleFillEvent;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,8 +24,7 @@ public class InteractListener implements Listener {
                 e = new PlayerBottleFillEvent(player, itemStack1, event.getBlock());
             }
             if (e != null) {
-                Bukkit.getPluginManager().callEvent(e);
-                event.setCancelled(e.isCancelled());
+                event.setCancelled(!e.call());
                 if (itemStack.getType().equals(Material.GLASS_BOTTLE)) {
                     player.getInventory().setItemInMainHand(e.getItemStack());
                 } else if (itemStack1.getType().equals(Material.GLASS_BOTTLE)) {

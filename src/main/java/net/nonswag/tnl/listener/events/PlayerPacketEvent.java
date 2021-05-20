@@ -1,12 +1,9 @@
 package net.nonswag.tnl.listener.events;
 
+import net.nonswag.tnl.listener.api.event.TNLEvent;
 import net.nonswag.tnl.listener.api.object.Objects;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
-import org.bukkit.Bukkit;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.messaging.PluginChannelDirection;
 
 import javax.annotation.Nonnull;
@@ -14,18 +11,14 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayerPacketEvent<Packet> extends Event implements Cancellable {
+public class PlayerPacketEvent<Packet> extends TNLEvent {
 
-    @Nonnull
-    private static final HandlerList handlers = new HandlerList();
     @Nonnull
     private final TNLPlayer player;
     @Nonnull
     private final Packet packet;
-    private boolean cancelled = false;
 
     public PlayerPacketEvent(@Nonnull TNLPlayer player, @Nonnull Packet packet) {
-        super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.packet = packet;
     }
@@ -110,23 +103,24 @@ public class PlayerPacketEvent<Packet> extends Event implements Cancellable {
     }
 
     @Override
-    @Nonnull
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    @Nonnull
-    public static HandlerList getHandlerList() {
-        return handlers;
+    public String toString() {
+        return "PlayerPacketEvent{" +
+                "player=" + player +
+                ", packet=" + packet +
+                '}';
     }
 
     @Override
-    public boolean isCancelled() {
-        return cancelled;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        PlayerPacketEvent<?> that = (PlayerPacketEvent<?>) o;
+        return player.equals(that.player) && packet.equals(that.packet);
     }
 
     @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
+    public int hashCode() {
+        return java.util.Objects.hash(super.hashCode(), player, packet);
     }
 }

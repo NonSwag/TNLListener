@@ -1,62 +1,29 @@
 package net.nonswag.tnl.listener.events;
 
+import net.nonswag.tnl.listener.api.event.TNLEvent;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
-public class InventoryLoadedEvent extends Event {
+public class InventoryLoadedEvent extends TNLEvent {
 
-    private static final HandlerList handlers = new HandlerList();
+    @Nonnull
     private final TNLPlayer player;
+    @Nonnull
     private final String inventoryId;
 
-    public InventoryLoadedEvent(TNLPlayer player, String inventoryId) {
-        super(!Bukkit.isPrimaryThread());
+    public InventoryLoadedEvent(@Nonnull TNLPlayer player, @Nonnull String inventoryId) {
         this.player = player;
         this.inventoryId = inventoryId;
     }
 
+    @Nonnull
     public TNLPlayer getPlayer() {
         return player;
     }
 
+    @Nonnull
     public String getInventoryId() {
         return inventoryId;
-    }
-
-    @Override
-    public String toString() {
-        return "InventoryLoadEvent{" +
-                "player=" + player +
-                ", inventoryId='" + inventoryId + '\'' +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        InventoryLoadedEvent that = (InventoryLoadedEvent) o;
-        return Objects.equals(player, that.player) &&
-                Objects.equals(inventoryId, that.inventoryId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(player, inventoryId);
-    }
-
-    @Nonnull
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
     }
 }

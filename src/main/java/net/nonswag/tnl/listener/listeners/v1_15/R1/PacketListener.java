@@ -3,16 +3,16 @@ package net.nonswag.tnl.listener.listeners.v1_15.R1;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.Bootstrap;
-import net.nonswag.tnl.listener.TNLListener;
-import net.nonswag.tnl.listener.api.conversation.Conversation;
+import net.nonswag.tnl.listener.Holograms;
+import net.nonswag.tnl.listener.api.event.TNLEvent;
 import net.nonswag.tnl.listener.api.gui.GUI;
 import net.nonswag.tnl.listener.api.gui.GUIItem;
 import net.nonswag.tnl.listener.api.gui.Interaction;
-import net.nonswag.tnl.listener.api.logger.Color;
+import net.nonswag.tnl.listener.api.holograms.Hologram;
+import net.nonswag.tnl.listener.api.holograms.event.InteractEvent;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Objects;
-import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.events.*;
@@ -32,44 +32,34 @@ public class PacketListener implements Listener {
     public void onPacket(PlayerPacketEvent<Packet<?>> event) {
         if (event.isIncoming()) {
             if (event.getPacket() instanceof PacketPlayInChat && Settings.BETTER_CHAT.getValue()) {
-                String message = Color.Minecraft.unColorize(Objects.getOrDefault(((PacketPlayInChat) event.getPacket()).b(), ""), '§');
-                if (message.length() <= 0 || Color.Minecraft.unColorize(message.replace(" ", ""), '&').isEmpty()) {
-                    event.setCancelled(true);
-                } else {
-                    if (Conversation.test(event, event.getPlayer(), message)) {
-                        return;
+                PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), ((PacketPlayInChat) event.getPacket()).b());
+                event.getPlayer().chat(chatEvent);
+                event.setCancelled(!chatEvent.isCommand());
+            } else if (event.getPacket() instanceof PacketPlayInUseEntity) {
+                PacketPlayInUseEntity packet = (PacketPlayInUseEntity) event.getPacket();
+                Entity entity = packet.a((World) event.getPlayer().getWorldServer());
+                if (entity != null) {
+                    TNLEvent entityEvent;
+                    if (packet.b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)) {
+                        entityEvent = new EntityDamageByPlayerEvent(event.getPlayer(), entity.getBukkitEntity());
+                    } else {
+                        entityEvent = new PlayerInteractAtEntityEvent(event.getPlayer(), entity.getBukkitEntity());
                     }
-                    PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), message);
-                    Bukkit.getPluginManager().callEvent(chatEvent);
-                    event.setCancelled(chatEvent.isCancelled());
-                    if (!chatEvent.isCancelled()) {
-                        if (!chatEvent.isCommand()) {
-                            event.setCancelled(true);
-                            for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
-                                if (chatEvent.getFormat() == null) {
-                                    all.sendMessage(MessageKey.CHAT_FORMAT, new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("display_name", event.getPlayer().getDisplayName()), new Placeholder("color", event.getPlayer().getTeam().getColor().toString()), new Placeholder("message", message), new Placeholder("colored_message", Color.Minecraft.colorize(message, '&')), new Placeholder("text", Color.Minecraft.colorize(message, '&')));
-                                } else {
-                                    all.sendMessage(chatEvent.getFormat(), new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("display_name", event.getPlayer().getDisplayName()), new Placeholder("color", event.getPlayer().getTeam().getColor().toString()), new Placeholder("message", message), new Placeholder("colored_message", Color.Minecraft.colorize(message, '&')));
+                    if (!entityEvent.call()) event.setCancelled(true);
+                } else {
+                    Objects<Integer> id = event.getPacketField("a", Integer.class);
+                    if (id.hasValue()) {
+                        InteractEvent.Type type = packet.b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK) ?
+                                InteractEvent.Type.LEFT_CLICK : InteractEvent.Type.RIGHT_CLICK;
+                        for (Hologram hologram : Holograms.getInstance().cachedValues()) {
+                            for (Integer integer : Holograms.getInstance().getIds(hologram, event.getPlayer())) {
+                                if (integer.equals(id.nonnull())) {
+                                    InteractEvent interactEvent = new InteractEvent(event.getPlayer(), hologram, type);
+                                    hologram.onInteract().accept(interactEvent);
+                                    return;
                                 }
                             }
                         }
-                    }
-                }
-            } else if (event.getPacket() instanceof PacketPlayInUseEntity) {
-                Entity entity = ((PacketPlayInUseEntity) event.getPacket()).a((World) event.getPlayer().getWorldServer());
-                if (entity != null) {
-                    if (((PacketPlayInUseEntity) event.getPacket()).b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)) {
-                        EntityDamageByPlayerEvent<Entity> damageEvent = new EntityDamageByPlayerEvent<>(event.getPlayer(), entity);
-                        Bukkit.getPluginManager().callEvent(damageEvent);
-                        if (damageEvent.isCancelled()) {
-                            event.setCancelled(true);
-                        }
-                    }
-                } else {
-                    PlayerInteractAtEntityEvent interactEvent = new PlayerInteractAtEntityEvent(event.getPlayer(), event.getPacketField("a", Integer.class).nonnull());
-                    Bukkit.getPluginManager().callEvent(interactEvent);
-                    if (interactEvent.isCancelled()) {
-                        event.setCancelled(true);
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInBlockDig) {
@@ -84,8 +74,7 @@ public class PacketListener implements Listener {
                         block = new Location(event.getPlayer().getWorld(), position.getX(), position.getY(), position.getZ()).getBlock();
                     }
                     PlayerDamageBlockEvent blockEvent = new PlayerDamageBlockEvent(event.getPlayer(), block, damageType);
-                    Bukkit.getPluginManager().callEvent(blockEvent);
-                    event.setCancelled(blockEvent.isCancelled());
+                    event.setCancelled(!blockEvent.call());
                     if (blockEvent.isCancelled() && blockEvent.isUpdate()) {
                         if (blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.STOP_DESTROY_BLOCK)
                                 || blockEvent.getBlockDamageType().equals(PlayerDamageBlockEvent.BlockDamageType.START_DESTROY_BLOCK)) {
@@ -107,10 +96,7 @@ public class PacketListener implements Listener {
                 }
             } else if (event.getPacket() instanceof PacketPlayInPickItem) {
                 PlayerItemPickEvent pickEvent = new PlayerItemPickEvent(event.getPlayer(), ((PacketPlayInPickItem) event.getPacket()).b());
-                Bukkit.getPluginManager().callEvent(pickEvent);
-                if (pickEvent.isCancelled()) {
-                    event.setCancelled(true);
-                }
+                if (!pickEvent.call()) event.setCancelled(true);
             } else if (event.getPacket() instanceof PacketPlayInBlockPlace) {
                 org.bukkit.inventory.ItemStack itemStack = null;
                 if (((PacketPlayInBlockPlace) event.getPacket()).b().equals(EnumHand.MAIN_HAND)) {
@@ -142,8 +128,7 @@ public class PacketListener implements Listener {
                             || target.getType().equals(Material.KELP)
                             || target.getType().equals(Material.KELP_PLANT))) {
                         PlayerBottleFillEvent e = new PlayerBottleFillEvent(event.getPlayer(), itemStack, target);
-                        Bukkit.getPluginManager().callEvent(e);
-                        if (e.isCancelled()) {
+                        if (!e.call()) {
                             event.setCancelled(true);
                             event.getPlayer().updateInventory();
                         }
@@ -199,13 +184,10 @@ public class PacketListener implements Listener {
                 org.bukkit.inventory.ItemStack itemStack;
                 if (((PacketPlayInUseItem) event.getPacket()).b().equals(EnumHand.MAIN_HAND)) {
                     itemStack = event.getPlayer().getInventory().getItemInMainHand();
-                } else {
-                    itemStack = event.getPlayer().getInventory().getItemInOffHand();
-                }
+                } else itemStack = event.getPlayer().getInventory().getItemInOffHand();
                 PlayerInteractEvent interactEvent = new PlayerInteractEvent(event.getPlayer(), block, itemStack);
-                Bukkit.getPluginManager().callEvent(interactEvent);
-                event.setCancelled(interactEvent.isCancelled());
-                if (interactEvent.isCancelled()) {
+                if (!interactEvent.call()) {
+                    event.setCancelled(true);
                     Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> {
                         interactEvent.getBlock().getState().update();
                         for (BlockFace blockFace : BlockFace.values()) {

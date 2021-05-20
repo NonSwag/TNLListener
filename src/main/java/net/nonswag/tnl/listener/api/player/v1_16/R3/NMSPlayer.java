@@ -357,10 +357,7 @@ public class NMSPlayer implements TNLPlayer {
                     public void channelRead(ChannelHandlerContext channelHandlerContext, Object packetObject) {
                         try {
                             PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(player, ((Packet<?>) packetObject));
-                            Bukkit.getPluginManager().callEvent(event);
-                            if (!event.isCancelled()) {
-                                super.channelRead(channelHandlerContext, event.getPacket());
-                            }
+                            if (event.call()) super.channelRead(channelHandlerContext, event.getPacket());
                         } catch (Exception e) {
                             Logger.error.println(e);
                             uninject();
@@ -371,10 +368,7 @@ public class NMSPlayer implements TNLPlayer {
                     public void write(ChannelHandlerContext channelHandlerContext, Object packetObject, ChannelPromise channelPromise) {
                         try {
                             PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(player, ((Packet<?>) packetObject));
-                            Bukkit.getPluginManager().callEvent(event);
-                            if (!event.isCancelled()) {
-                                super.write(channelHandlerContext, event.getPacket(), channelPromise);
-                            }
+                            if (event.call()) super.write(channelHandlerContext, event.getPacket(), channelPromise);
                         } catch (Exception e) {
                             Logger.error.println(e);
                             uninject();

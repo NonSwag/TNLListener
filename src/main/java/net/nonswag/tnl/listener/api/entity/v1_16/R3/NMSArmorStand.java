@@ -43,38 +43,33 @@ public class NMSArmorStand extends EntityArmorStand implements TNLArmorStand {
     }
 
     @Override
-    public <I, S> void setSlot(S slot, I item) {
-        super.setSlot(((EnumItemSlot) slot), ((ItemStack) item));
+    public void setHeadPose(float x, float y, float z) {
+        super.setHeadPose(new Vector3f(x, y, z));
     }
 
     @Override
-    public <V> void setHeadPose(V vector3f) {
-        super.setHeadPose(((Vector3f) vector3f));
+    public void setBodyPose(float x, float y, float z) {
+        super.setBodyPose(new Vector3f(x, y, z));
     }
 
     @Override
-    public <V> void setBodyPose(V vector3f) {
-        super.setBodyPose(((Vector3f) vector3f));
+    public void setLeftArmPose(float x, float y, float z) {
+        super.setLeftArmPose(new Vector3f(x, y, z));
     }
 
     @Override
-    public <V> void setLeftArmPose(V vector3f) {
-        super.setLeftArmPose(((Vector3f) vector3f));
+    public void setRightArmPose(float x, float y, float z) {
+        super.setRightArmPose(new Vector3f(x, y, z));
     }
 
     @Override
-    public <V> void setRightArmPose(V vector3f) {
-        super.setRightArmPose(((Vector3f) vector3f));
+    public void setLeftLegPose(float x, float y, float z) {
+        super.setLeftLegPose(new Vector3f(x, y, z));
     }
 
     @Override
-    public <V> void setLeftLegPose(V vector3f) {
-        super.setLeftLegPose(((Vector3f) vector3f));
-    }
-
-    @Override
-    public <V> void setRightLegPose(V vector3f) {
-        super.setRightLegPose(((Vector3f) vector3f));
+    public void setRightLegPose(float x, float y, float z) {
+        super.setRightLegPose(new Vector3f(x, y, z));
     }
 
     @Override
@@ -90,6 +85,16 @@ public class NMSArmorStand extends EntityArmorStand implements TNLArmorStand {
     @Override
     public void setGravity(boolean gravity) {
         super.setNoGravity(!gravity);
+    }
+
+    @Override
+    public void setItemInMainHand(@Nonnull TNLItem item) {
+        super.setSlot(EnumItemSlot.MAINHAND, CraftItemStack.asNMSCopy(item.build()), true);
+    }
+
+    @Override
+    public void setItemInOffHand(@Nonnull TNLItem item) {
+        super.setSlot(EnumItemSlot.OFFHAND, CraftItemStack.asNMSCopy(item.build()), true);
     }
 
     @Override

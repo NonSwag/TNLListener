@@ -1,25 +1,22 @@
 package net.nonswag.tnl.listener.events;
 
+import net.nonswag.tnl.listener.api.event.TNLEvent;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
+import org.bukkit.entity.Entity;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
+public class PlayerInteractAtEntityEvent extends TNLEvent {
 
-    @Nonnull private static final HandlerList handlers = new HandlerList();
-    @Nonnull private final TNLPlayer player;
-    private final int entityId;
-    private boolean cancelled = false;
+    @Nonnull
+    private final TNLPlayer player;
+    @Nonnull
+    private final Entity entity;
 
-    public PlayerInteractAtEntityEvent(@Nonnull TNLPlayer player, int entityId) {
-        super(!Bukkit.isPrimaryThread());
+    public PlayerInteractAtEntityEvent(@Nonnull TNLPlayer player, @Nonnull Entity entity) {
         this.player = player;
-        this.entityId = entityId;
+        this.entity = entity;
     }
 
     @Nonnull
@@ -27,35 +24,16 @@ public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
         return player;
     }
 
-    public int getEntityId() {
-        return entityId;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
+    @Nonnull
+    public Entity getEntity() {
+        return entity;
     }
 
     @Override
     public String toString() {
         return "PlayerInteractAtEntityEvent{" +
                 "player=" + player +
-                ", entityId=" + entityId +
-                ", cancelled=" + cancelled +
+                ", entity=" + entity +
                 '}';
     }
 
@@ -63,12 +41,13 @@ public class PlayerInteractAtEntityEvent extends Event implements Cancellable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         PlayerInteractAtEntityEvent that = (PlayerInteractAtEntityEvent) o;
-        return entityId == that.entityId && cancelled == that.cancelled && player.equals(that.player);
+        return player.equals(that.player) && entity.equals(that.entity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, entityId, cancelled);
+        return Objects.hash(super.hashCode(), player, entity);
     }
 }

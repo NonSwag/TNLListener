@@ -45,6 +45,11 @@ public interface TNLItem {
     }
 
     @Nonnull
+    default String getName() {
+        return getItemMeta() != null ? getItemMeta().getDisplayName() : "";
+    }
+
+    @Nonnull
     default TNLItem setName(@Nullable String name) {
         if (getItemMeta() != null) {
             getItemMeta().setDisplayName(name);

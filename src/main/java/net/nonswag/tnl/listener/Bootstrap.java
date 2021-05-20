@@ -4,7 +4,6 @@ import net.nonswag.tnl.listener.api.message.Message;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.events.MessagesInitializeEvent;
 import net.nonswag.tnl.listener.events.SettingsInitializeEvent;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
@@ -30,10 +29,8 @@ public class Bootstrap extends JavaPlugin {
     @Override
     public void onEnable() {
         try {
-            Bukkit.getPluginManager().callEvent(new SettingsInitializeEvent());
-            Settings.init();
-            Bukkit.getPluginManager().callEvent(new MessagesInitializeEvent());
-            Message.init();
+            if (new SettingsInitializeEvent().call()) Settings.init();
+            if (new MessagesInitializeEvent().call()) Message.init();
         } catch (Throwable t) {
             t.printStackTrace();
             System.exit(1);

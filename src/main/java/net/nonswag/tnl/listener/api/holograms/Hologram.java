@@ -62,7 +62,7 @@ public class Hologram {
     @Nonnull
     private Consumer<InteractEvent> onInteract = event -> {};
     @Nonnull
-    private Consumer<UpdateEvent> onUpdate = event -> System.out.println("updating " + event.getHologram().getName());
+    private Consumer<UpdateEvent> onUpdate = event -> {};
 
     public Hologram(@Nonnull String name, boolean cache, @Nonnull String... lines) {
         this.name = name;

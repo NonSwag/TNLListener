@@ -20,7 +20,10 @@ import org.bukkit.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Holograms {
 
@@ -112,12 +115,12 @@ public class Holograms {
 
     public void load(@Nonnull Hologram hologram, @Nonnull TNLPlayer player) {
         if (hologram.getLocation() != null && player.getWorld().equals(hologram.getWorld())) {
+            final List<Object> packets = new ArrayList<>();
+            final List<TNLArmorStand> armorStands = new ArrayList<>();
             for (int line = 0; line < hologram.getLines().size(); line++) {
                 if (hologram.getLines().get((hologram.getLines().size() - 1) - line) == null || hologram.getLines().get((hologram.getLines().size() - 1) - line).isEmpty()) {
                     continue;
                 }
-                final List<Object> packets = new ArrayList<>();
-                final List<TNLArmorStand> armorStands = new ArrayList<>();
                 for (int darkness = 0; darkness < hologram.getDarkness(); darkness++) {
                     TNLArmorStand armorStand = TNLArmorStand.create(player.getWorld(), hologram.getX(), hologram.getY() + (line * hologram.getLineDistance()), hologram.getZ(), hologram.getLocation().getYaw(), hologram.getLocation().getPitch());
                     String s = hologram.getLines().get((hologram.getLines().size() - 1) - line).
@@ -160,6 +163,8 @@ public class Holograms {
                     player.getVirtualStorage().put("hologram-by-id=" + armorStand.getId(), armorStand);
                     armorStands.add(armorStand);
                 }
+            }
+            if (!armorStands.isEmpty()) {
                 SendEvent event = new SendEvent(player, hologram, armorStands);
                 hologram.onSend().accept(event);
                 for (TNLArmorStand armorStand : event.getArmorStands()) {
@@ -173,11 +178,11 @@ public class Holograms {
     }
 
     public void update(@Nonnull Hologram hologram, @Nonnull TNLPlayer player) {
+        final List<TNLArmorStand> armorStands = new ArrayList<>();
         for (int line = 0; line < hologram.getLines().size(); line++) {
             for (int darkness = 0; darkness < hologram.getDarkness(); darkness++) {
                 Objects<Number> id = player.getVirtualStorage().getNumber("hologram=" + hologram.getName() + ",line=" + line + ",darkness=" + darkness);
                 if (id.hasValue()) {
-                    final List<TNLArmorStand> armorStands = new ArrayList<>();
                     Objects<TNLArmorStand> hologramById = player.getVirtualStorage().get("hologram-by-id=" + id.nonnull().intValue(), TNLArmorStand.class);
                     if (hologramById.hasValue()) {
                         TNLArmorStand armorStand = hologramById.nonnull();
@@ -216,12 +221,14 @@ public class Holograms {
                         armorStand.setCustomNameVisible(true);
                         armorStands.add(armorStand);
                     }
-                    UpdateEvent event = new UpdateEvent(player, hologram, armorStands);
-                    hologram.onUpdate().accept(event);
-                    for (TNLArmorStand armorStand : armorStands) {
-                        player.sendPacket(TNLEntityMetadata.create(armorStand));
-                    }
                 }
+            }
+        }
+        if (!armorStands.isEmpty()) {
+            UpdateEvent event = new UpdateEvent(player, hologram, armorStands);
+            hologram.onUpdate().accept(event);
+            for (TNLArmorStand armorStand : armorStands) {
+                player.sendPacket(TNLEntityMetadata.create(armorStand));
             }
         }
     }

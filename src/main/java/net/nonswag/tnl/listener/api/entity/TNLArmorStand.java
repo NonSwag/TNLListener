@@ -50,8 +50,6 @@ public interface TNLArmorStand extends TNLEntity {
 
     boolean doAITick();
 
-    <I, S> void setSlot(S slot, I item);
-
     void setHeadRotation(float f);
 
     void tick();
@@ -78,17 +76,17 @@ public interface TNLArmorStand extends TNLEntity {
 
     boolean isMarker();
 
-    <V> void setHeadPose(V vector3f);
+    void setHeadPose(float x, float y, float z);
 
-    <V> void setBodyPose(V vector3f);
+    void setBodyPose(float x, float y, float z);
 
-    <V> void setLeftArmPose(V vector3f);
+    void setLeftArmPose(float x, float y, float z);
 
-    <V> void setRightArmPose(V vector3f);
+    void setRightArmPose(float x, float y, float z);
 
-    <V> void setLeftLegPose(V vector3f);
+    void setLeftLegPose(float x, float y, float z);
 
-    <V> void setRightLegPose(V vector3f);
+    void setRightLegPose(float x, float y, float z);
 
     boolean isInteractable();
 
@@ -103,6 +101,10 @@ public interface TNLArmorStand extends TNLEntity {
     void setInvulnerable(boolean invulnerable);
 
     void setGravity(boolean gravity);
+
+    void setItemInMainHand(@Nonnull TNLItem item);
+
+    void setItemInOffHand(@Nonnull TNLItem item);
 
     void setHelmet(@Nonnull TNLItem item);
 

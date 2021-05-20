@@ -3,12 +3,13 @@ package net.nonswag.tnl.listener.api.player;
 import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
-import net.nonswag.tnl.listener.api.conversation.Conversation;
+import net.nonswag.tnl.listener.api.chat.Conversation;
 import net.nonswag.tnl.listener.api.entity.TNLEntity;
 import net.nonswag.tnl.listener.api.file.FileCreator;
 import net.nonswag.tnl.listener.api.gui.GUI;
 import net.nonswag.tnl.listener.api.gui.GUIItem;
 import net.nonswag.tnl.listener.api.item.TNLItem;
+import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
 import net.nonswag.tnl.listener.api.object.Generic;
@@ -23,6 +24,7 @@ import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
 import net.nonswag.tnl.listener.events.InventoryLoadedEvent;
 import net.nonswag.tnl.listener.events.InventorySafeEvent;
+import net.nonswag.tnl.listener.events.PlayerChatEvent;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
@@ -195,7 +197,42 @@ public interface TNLPlayer extends TNLEntity, Player {
 
     @Override
     default void chat(@Nonnull String message) {
-        getBukkitPlayer().chat(message);
+        chat(new PlayerChatEvent(this, message));
+    }
+
+    default void chat(@Nonnull PlayerChatEvent event) {
+        String message = Color.Minecraft.unColorize(event.getMessage(), '§');
+        if (message.length() <= 0 || Color.Minecraft.unColorize(message.replace(" ", ""), '&').isEmpty()) {
+            event.setCancelled(true);
+            return;
+        }
+        if (Conversation.test(event, event.getPlayer(), event.getMessage())) return;
+        if (event.call()) {
+            if (!event.isCommand()) {
+                event.setCancelled(true);
+                String[] strings = message.split(" ");
+                for (Player all : Bukkit.getOnlinePlayers()) {
+                    if (message.toLowerCase().contains(all.getName().toLowerCase())) {
+                        for (String string : strings) {
+                            if (string.equalsIgnoreCase("@" + all.getName())) {
+                                message = message.replace(string + " ", "§8(§3" + all.getName() + "§8) §f");
+                                message = message.replace(string, "§8(§3" + all.getName() + "§8) §f");
+                                all.playSound(all.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
+                            }
+                        }
+                    }
+                }
+                for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
+                    if (event.getFormat() == null) {
+                        all.sendMessage(MessageKey.CHAT_FORMAT, new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("display_name", event.getPlayer().getDisplayName()), new Placeholder("color", event.getPlayer().getTeam().getColor().toString()), new Placeholder("message", message), new Placeholder("colored_message", net.nonswag.tnl.listener.api.logger.Color.Minecraft.colorize(message, '&')), new Placeholder("text", net.nonswag.tnl.listener.api.logger.Color.Minecraft.colorize(message, '&')));
+                    } else {
+                        all.sendMessage(event.getFormat(), new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("display_name", event.getPlayer().getDisplayName()), new Placeholder("color", event.getPlayer().getTeam().getColor().toString()), new Placeholder("message", message), new Placeholder("colored_message", Color.Minecraft.colorize(message, '&')));
+                    }
+                }
+            }
+        } else {
+            event.setCancelled(true);
+        }
     }
 
     @Override
@@ -875,7 +912,8 @@ public interface TNLPlayer extends TNLEntity, Player {
 
     @Override
     default void closeInventory() {
-        getBukkitPlayer().closeInventory();
+        if (Bukkit.isPrimaryThread()) getBukkitPlayer().closeInventory();
+        else Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().closeInventory());
     }
 
     @Deprecated
@@ -2057,7 +2095,7 @@ public interface TNLPlayer extends TNLEntity, Player {
             ItemStack[] contents = getBukkitPlayer().getInventory().getContents();
             inventory.set(id, Arrays.asList(contents));
             inventory.save(file);
-            Bukkit.getPluginManager().callEvent(new InventorySafeEvent(this, id));
+            new InventorySafeEvent(this, id).call();
         } catch (IOException e) {
             Logger.error.println(e);
         }
@@ -2076,7 +2114,7 @@ public interface TNLPlayer extends TNLEntity, Player {
                         }
                     } else this.getInventory().clear();
                 } else this.getInventory().clear();
-                Bukkit.getPluginManager().callEvent(new InventoryLoadedEvent(this, id));
+                new InventoryLoadedEvent(this, id).call();
             }
         } catch (Exception e) {
             Logger.error.println(e);
@@ -2115,7 +2153,7 @@ public interface TNLPlayer extends TNLEntity, Player {
     default void closeGUI() {
         if (getGUI() != null) {
             getVirtualStorage().remove("current-gui");
-            closeInventory();
+            sendPacket(TNLCloseWindow.create());
         }
     }
 
@@ -2130,7 +2168,7 @@ public interface TNLPlayer extends TNLEntity, Player {
     default void closeSignMenu() {
         if (getSignMenu() != null) {
             getVirtualStorage().remove("current-sign");
-            closeInventory();
+            sendPacket(TNLCloseWindow.create());
         }
     }
 
