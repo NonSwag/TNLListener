@@ -18,6 +18,7 @@ import net.nonswag.tnl.listener.api.permission.PermissionManager;
 import net.nonswag.tnl.listener.api.permission.Permissions;
 import net.nonswag.tnl.listener.api.scoreboard.Sidebar;
 import net.nonswag.tnl.listener.api.scoreboard.Team;
+import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.storage.VirtualStorage;
 import net.nonswag.tnl.listener.api.title.Title;
@@ -1885,15 +1886,19 @@ public interface TNLPlayer extends TNLEntity, Player {
 
     default void updateTeam() {
         getTeam().getTeam().addEntry(getName());
-        setDisplayName(getTeam().getPrefix() + getTeam().getColor() + getName() + getTeam().getSuffix());
+        if (Settings.CUSTOM_TEAMS.getValue()) {
+            setDisplayName(getTeam().getPrefix() + getTeam().getColor() + getName() + getTeam().getSuffix());
+        }
         for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
             for (org.bukkit.scoreboard.Team team : Team.getScoreboard().getTeams()) {
                 org.bukkit.scoreboard.Team allTeam = all.getScoreboard().getTeam(team.getName());
                 if (allTeam == null) allTeam = all.getScoreboard().registerNewTeam(team.getName());
-                allTeam.setDisplayName(team.getDisplayName());
-                allTeam.setPrefix(team.getPrefix());
-                allTeam.setSuffix(team.getSuffix());
-                allTeam.setColor(team.getColor());
+                if (Settings.CUSTOM_TEAMS.getValue()) {
+                    allTeam.setDisplayName(team.getDisplayName());
+                    allTeam.setPrefix(team.getPrefix());
+                    allTeam.setSuffix(team.getSuffix());
+                    allTeam.setColor(team.getColor());
+                }
                 for (String entry : team.getEntries()) if (!allTeam.hasEntry(entry)) allTeam.addEntry(entry);
                 for (org.bukkit.scoreboard.Team.Option option : org.bukkit.scoreboard.Team.Option.values()) {
                     allTeam.setOption(option, team.getOption(option));

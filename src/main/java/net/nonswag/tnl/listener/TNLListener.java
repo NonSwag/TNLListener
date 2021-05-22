@@ -117,7 +117,7 @@ public class TNLListener {
             TNLPlayer player = TNLPlayer.cast(all);
             player.inject();
         }
-        if (Settings.CUSTOM_TEAMS.getValue()) updateTeams();
+        updateTeams();
     }
 
     protected void disable() {

@@ -5,6 +5,7 @@ import net.nonswag.tnl.listener.api.item.TNLItem;
 import net.nonswag.tnl.listener.api.item.TNLItemType;
 import net.nonswag.tnl.listener.api.math.Range;
 import net.nonswag.tnl.listener.api.object.Pair;
+import net.nonswag.tnl.listener.api.packet.TNLSetSlot;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
@@ -22,24 +23,28 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
     private final List<TNLPlayer> viewers = new ArrayList<>();
     @Nonnull
     private final String title;
+    @Nonnull
+    private ClickEvent clickListener = (player, slot, type) -> {
+    };
     private final int size;
     private int maxStackSize;
+    private boolean instantUpdates = false;
 
     public GUI(@Range(from = 0, to = 6) int rows, @Nonnull String title) {
         this(rows, 64, title);
     }
 
-    public GUI(@Range(from = 0, to = 6)  int rows, int maxStackSize, @Nonnull String title) {
+    public GUI(@Range(from = 0, to = 6) int rows, int maxStackSize, @Nonnull String title) {
         this.size = rows * 9;
         this.title = title;
         this.maxStackSize = maxStackSize;
     }
 
-    public GUI(@Range(from = 0, to = 6)  int rows, int maxStackSize) {
+    public GUI(@Range(from = 0, to = 6) int rows, int maxStackSize) {
         this(rows, maxStackSize, "§8» §4§lUnnamed§c§lGUI");
     }
 
-    public GUI(@Range(from = 0, to = 6)  int rows) {
+    public GUI(@Range(from = 0, to = 6) int rows) {
         this(rows, "§8» §4§lUnnamed§c§lGUI");
     }
 
@@ -58,6 +63,15 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
     }
 
     @Nonnull
+    public ClickEvent getClickListener() {
+        return clickListener;
+    }
+
+    public void setClickListener(@Nonnull ClickEvent clickListener) {
+        this.clickListener = clickListener;
+    }
+
+    @Nonnull
     public String getTitle() {
         return title;
     }
@@ -70,10 +84,18 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
         return maxStackSize;
     }
 
+    public boolean isInstantUpdates() {
+        return instantUpdates;
+    }
+
     @Nonnull
     public GUI setMaxStackSize(int maxStackSize) {
         this.maxStackSize = maxStackSize;
         return this;
+    }
+
+    public void setInstantUpdates(boolean instantUpdates) {
+        this.instantUpdates = instantUpdates;
     }
 
     @Nullable
@@ -87,6 +109,12 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
             if (slot >= 0 && slot < getSize()) getContentHashMap().put(slot, item);
             else throw new IllegalArgumentException("Slot '" + slot + "' is outside the gui");
         } else remove(slot);
+        if (isInstantUpdates()) {
+            for (TNLPlayer viewer : getViewers()) {
+                if (item != null) viewer.sendPackets(TNLSetSlot.create(slot, item));
+                else viewer.sendPackets(TNLSetSlot.create(slot, new ItemStack(Material.AIR)));
+            }
+        }
         return this;
     }
 
@@ -383,7 +411,7 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
         boolean removed = false;
         int amount = 0;
         GUIItem[] contents = getContents();
-        for(int i = 0; i < contents.length; i++) {
+        for (int i = 0; i < contents.length; i++) {
             GUIItem content = contents[i];
             if ((TNLItemType.isAir(item) && TNLItemType.isAir(content))
                     || (content != null && content.getBuilder().hasValue()
@@ -401,7 +429,7 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
         boolean removed = false;
         int amount = 0;
         GUIItem[] contents = getContents();
-        for(int slot = 0; slot < contents.length; slot++) {
+        for (int slot = 0; slot < contents.length; slot++) {
             GUIItem content = contents[slot];
             if ((TNLItemType.isAir(material) && TNLItemType.isAir(content))
                     && (content != null && content.getBuilder().hasValue()
@@ -462,7 +490,7 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
 
     public int firstPartial(@Nonnull Material material) {
         GUIItem[] contents = getContents();
-        for(int slot = 0; slot < contents.length; slot++) {
+        for (int slot = 0; slot < contents.length; slot++) {
             GUIItem item = contents[slot];
             if (TNLItemType.isAir(material) && TNLItemType.isAir(item)) return slot;
             if (item != null && item.getBuilder().hasValue() && item.getBuilder().nonnull().getType() == material
@@ -471,5 +499,10 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
             }
         }
         return -1;
+    }
+
+    public interface ClickEvent {
+
+        void onClick(@Nonnull TNLPlayer player, int slot, @Nonnull Interaction.Type type);
     }
 }

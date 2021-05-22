@@ -159,18 +159,22 @@ public class PacketListener implements Listener {
                 GUI gui = event.getPlayer().getGUI();
                 if (gui != null) {
                     event.setCancelled(true);
-                    event.getPlayer().updateGUI();
-                    event.getPlayer().updateInventory();
                     event.getPlayer().sendPacket(new PacketPlayOutSetSlot(-1, -1, ItemStack.b));
                     PacketPlayInWindowClick packet = (PacketPlayInWindowClick) event.getPacket();
-                    if (packet.c() <= gui.getSize()) {
-                        GUIItem item = gui.getItem(packet.c());
+                    int slot = packet.c();
+                    if (slot <= gui.getSize()) {
+                        GUIItem item = gui.getItem(slot);
                         Interaction.Type type = Interaction.Type.fromNMS(packet.d(), packet.g().name());
-                        if (item != null && type != null) {
-                            Interaction interaction = item.getInteraction(type);
-                            if (interaction != null) interaction.getAction().accept(event.getPlayer());
+                        if (type != null) {
+                            gui.getClickListener().onClick(event.getPlayer(), slot, type);
+                            if (item != null) {
+                                Interaction interaction = item.getInteraction(type);
+                                if (interaction != null) interaction.getAction().accept(event.getPlayer());
+                            }
                         }
                     }
+                    event.getPlayer().updateInventory();
+                    event.getPlayer().updateGUI();
                 }
             } else if (event.getPacket() instanceof PacketPlayInCloseWindow) {
                 GUI gui = event.getPlayer().getGUI();
