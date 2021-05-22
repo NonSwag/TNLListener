@@ -23,8 +23,8 @@ import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.storage.VirtualStorage;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
-import net.nonswag.tnl.listener.events.InventoryLoadedEvent;
-import net.nonswag.tnl.listener.events.InventorySafeEvent;
+import net.nonswag.tnl.listener.events.InventoryLoadEvent;
+import net.nonswag.tnl.listener.events.InventorySaveEvent;
 import net.nonswag.tnl.listener.events.PlayerChatEvent;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
@@ -290,6 +290,10 @@ public interface TNLPlayer extends TNLEntity, Player {
     @Override
     default void playNote(@Nonnull Location location, @Nonnull Instrument instrument, @Nonnull Note note) {
         getBukkitPlayer().playNote(location, instrument, note);
+    }
+
+    default void playSound(@Nonnull Sound sound, float volume, float pitch) {
+        getBukkitPlayer().playSound(getLocation(), sound, volume, pitch);
     }
 
     @Override
@@ -996,7 +1000,8 @@ public interface TNLPlayer extends TNLEntity, Player {
 
     @Override
     default void setGameMode(@Nonnull GameMode gameMode) {
-        getBukkitPlayer().setGameMode(gameMode);
+        if (Bukkit.isPrimaryThread()) getBukkitPlayer().setGameMode(gameMode);
+        else Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().setGameMode(gameMode));
     }
 
     @Override
@@ -1175,17 +1180,29 @@ public interface TNLPlayer extends TNLEntity, Player {
 
     @Override
     default boolean addPotionEffect(@Nonnull PotionEffect potionEffect) {
-        return getBukkitPlayer().addPotionEffect(potionEffect);
+        if (Bukkit.isPrimaryThread()) return getBukkitPlayer().addPotionEffect(potionEffect);
+        else {
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().addPotionEffect(potionEffect));
+        }
+        return true;
     }
 
     @Override
     default boolean addPotionEffect(@Nonnull PotionEffect potionEffect, boolean b) {
-        return getBukkitPlayer().addPotionEffect(potionEffect, b);
+        if (Bukkit.isPrimaryThread()) return getBukkitPlayer().addPotionEffect(potionEffect, b);
+        else {
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().addPotionEffect(potionEffect, b));
+        }
+        return true;
     }
 
     @Override
     default boolean addPotionEffects(@Nonnull Collection<PotionEffect> collection) {
-        return getBukkitPlayer().addPotionEffects(collection);
+        if (Bukkit.isPrimaryThread()) return getBukkitPlayer().addPotionEffects(collection);
+        else {
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().addPotionEffects(collection));
+        }
+        return true;
     }
 
     @Override
@@ -1201,7 +1218,10 @@ public interface TNLPlayer extends TNLEntity, Player {
 
     @Override
     default void removePotionEffect(@Nonnull PotionEffectType potionEffectType) {
-        getBukkitPlayer().removePotionEffect(potionEffectType);
+        if (Bukkit.isPrimaryThread()) getBukkitPlayer().removePotionEffect(potionEffectType);
+        else {
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().removePotionEffect(potionEffectType));
+        }
     }
 
     @Nonnull
@@ -1434,22 +1454,34 @@ public interface TNLPlayer extends TNLEntity, Player {
 
     @Override
     default boolean teleport(@Nonnull Location location) {
-        return getBukkitPlayer().teleport(location);
+        if (Bukkit.isPrimaryThread()) return getBukkitPlayer().teleport(location);
+        else Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().teleport(location));
+        return true;
     }
 
     @Override
     default boolean teleport(@Nonnull Location location, @Nonnull PlayerTeleportEvent.TeleportCause teleportCause) {
-        return getBukkitPlayer().teleport(location, teleportCause);
+        if (Bukkit.isPrimaryThread()) return getBukkitPlayer().teleport(location, teleportCause);
+        else {
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().teleport(location, teleportCause));
+        }
+        return true;
     }
 
     @Override
     default boolean teleport(@Nonnull Entity entity) {
-        return getBukkitPlayer().teleport(entity);
+        if (Bukkit.isPrimaryThread()) return getBukkitPlayer().teleport(entity);
+        else Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().teleport(entity));
+        return true;
     }
 
     @Override
     default boolean teleport(@Nonnull Entity entity, @Nonnull PlayerTeleportEvent.TeleportCause teleportCause) {
-        return getBukkitPlayer().teleport(entity, teleportCause);
+        if (Bukkit.isPrimaryThread()) return getBukkitPlayer().teleport(entity, teleportCause);
+        else {
+            Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().teleport(entity, teleportCause));
+        }
+        return true;
     }
 
     @Override
@@ -2084,29 +2116,73 @@ public interface TNLPlayer extends TNLEntity, Player {
         return getVirtualStorage().containsKey("current-conversation");
     }
 
-    default void sendDemoScreen() {
-        sendPacket(TNLGameStateChange.create(5, 0));
+    default void sendDemoScreen(@Nonnull DemoEvent demoEvent) {
+        sendPacket(TNLGameStateChange.create(5, demoEvent.getId()));
+    }
+
+    enum DemoEvent {
+        WELCOME_SCREEN(0),
+        MOVEMENT_CONTROLS(101),
+        JUMP_CONTROL(102),
+        INVENTORY_CONTROL(103),
+        DEMO_OVER(104);
+
+        private final int id;
+
+        DemoEvent(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
+
+    default void setInstantRespawn(boolean instant) {
+        sendPacket(TNLGameStateChange.create(11, instant ? 1 : 0));
+    }
+
+    default void playMobAppearance() {
+        sendPacket(TNLGameStateChange.create(10, 0));
+    }
+
+    default void playPufferfishSting() {
+        sendPacket(TNLGameStateChange.create(9, 0));
     }
 
     void exitCombat();
 
     void enterCombat();
 
-    default void saveInventory(@Nonnull String id) {
+    default void saveInventoryContents(@Nonnull String id) {
+        saveInventoryContents(id, getInventory().getContents());
+    }
+
+    default void saveInventoryContents(@Nonnull String id, @Nonnull ItemStack[] contents) {
         try {
-            File file = new File(new File("plugins/Listener/Inventories/"), getBukkitPlayer().getUniqueId() + ".yml");
-            FileCreator.create(file);
-            YamlConfiguration inventory = YamlConfiguration.loadConfiguration(file);
-            ItemStack[] contents = getBukkitPlayer().getInventory().getContents();
-            inventory.set(id, Arrays.asList(contents));
-            inventory.save(file);
-            new InventorySafeEvent(this, id).call();
+            if (new InventorySaveEvent(this, id).call()) {
+                File file = new File(new File("plugins/Listener/Inventories/"), getBukkitPlayer().getUniqueId() + ".yml");
+                FileCreator.create(file);
+                YamlConfiguration inventory = YamlConfiguration.loadConfiguration(file);
+                inventory.set(id, Arrays.asList(contents));
+                inventory.save(file);
+            }
         } catch (IOException e) {
             Logger.error.println(e);
         }
     }
 
-    default void loadInventory(@Nonnull String id) {
+    default void loadInventoryContents(@Nonnull String id) {
+        ItemStack[] contents = getInventoryContents(id);
+        if (contents.length > 0 && new InventoryLoadEvent(this, id).call()) {
+            getInventory().clear();
+            getInventory().setContents(contents);
+        }
+    }
+
+    @Nonnull
+    default ItemStack[] getInventoryContents(@Nonnull String id) {
+        ItemStack[] items = new ItemStack[]{};
         File file = new File(new File("plugins/Listener/Inventories/"), getBukkitPlayer().getUniqueId() + ".yml");
         try {
             if (file.exists()) {
@@ -2114,21 +2190,15 @@ public interface TNLPlayer extends TNLEntity, Player {
                 if (inventory.isSet(id)) {
                     List<?> contents = inventory.getList(id);
                     if (contents != null) {
-                        for (int i = 0; i < contents.size(); i++) {
-                            this.getInventory().setItem(i, ((ItemStack) contents.get(i)));
-                        }
-                    } else this.getInventory().clear();
-                } else this.getInventory().clear();
-                new InventoryLoadedEvent(this, id).call();
+                        items = new ItemStack[contents.size()];
+                        for (int i = 0; i < contents.size(); i++) items[i] = (ItemStack) contents.get(i);
+                    }
+                }
             }
         } catch (Exception e) {
             Logger.error.println(e);
         }
-    }
-
-    @Nullable
-    default Inventory getInventory(@Nonnull String id) {
-        throw new UnsupportedOperationException("method is not supported");
+        return items;
     }
 
     default void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server) {
@@ -2198,7 +2268,8 @@ public interface TNLPlayer extends TNLEntity, Player {
     default void openGUI(@Nonnull GUI gui) {
         if (!gui.getViewers().contains(this)) gui.getViewers().add(this);
         getVirtualStorage().put("current-gui", gui);
-        sendPacket(TNLOpenWindow.create((gui.getSize() / 9) - 1, gui.getTitle()));
+        sendPacket(TNLOpenWindow.create(gui.getSize() / 9, gui.getTitle()));
+        if(gui.isPlaySounds()) playSound(getLocation(), Sound.BLOCK_CHEST_OPEN, 0.6f, 1);
         updateGUI();
     }
 

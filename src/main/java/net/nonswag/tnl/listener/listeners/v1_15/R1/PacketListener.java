@@ -2,6 +2,7 @@ package net.nonswag.tnl.listener.listeners.v1_15.R1;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_15_R1.World;
 import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.Holograms;
 import net.nonswag.tnl.listener.api.event.TNLEvent;
@@ -16,9 +17,7 @@ import net.nonswag.tnl.listener.api.object.Objects;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.events.*;
-import org.bukkit.Bukkit;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
+import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -157,23 +156,33 @@ public class PacketListener implements Listener {
             } else if (event.getPacket() instanceof PacketPlayInWindowClick) {
                 GUI gui = event.getPlayer().getGUI();
                 if (gui != null) {
-                    event.setCancelled(true);
-                    event.getPlayer().sendPacket(new PacketPlayOutSetSlot(-1, -1, ItemStack.a));
                     PacketPlayInWindowClick packet = (PacketPlayInWindowClick) event.getPacket();
                     int slot = packet.c();
+                    Interaction.Type type = Interaction.Type.fromNMS(packet.d(), packet.g().name());
+                    boolean cancel = gui.getClickListener().onClick(event.getPlayer(), slot, type);
                     if (slot <= gui.getSize()) {
                         GUIItem item = gui.getItem(slot);
-                        Interaction.Type type = Interaction.Type.fromNMS(packet.d(), packet.g().name());
-                        if (type != null) {
-                            gui.getClickListener().onClick(event.getPlayer(), slot, type);
-                            if (item != null) {
-                                Interaction interaction = item.getInteraction(type);
-                                if (interaction != null) interaction.getAction().accept(event.getPlayer());
-                            }
+                        if (item != null) {
+                            Interaction interaction = item.getInteraction(type);
+                            if (interaction != null) interaction.getAction().accept(event.getPlayer());
+                            cancel = true;
                         }
                     }
-                    event.getPlayer().updateInventory();
-                    event.getPlayer().updateGUI();
+                    if (cancel) {
+                        event.setCancelled(true);
+                        event.getPlayer().sendPacket(new PacketPlayOutSetSlot(-1, -1, ItemStack.a));
+                        event.getPlayer().updateInventory();
+                        event.getPlayer().updateGUI();
+                    }
+                }
+            } else if (event.getPacket() instanceof PacketPlayInCloseWindow) {
+                GUI gui = event.getPlayer().getGUI();
+                if (gui != null) {
+                    gui.getViewers().remove(event.getPlayer());
+                    event.getPlayer().getVirtualStorage().remove("current-gui");
+                    if(gui.isPlaySounds()) {
+                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 0.6f, 1);
+                    }
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
                 BlockPosition position = ((PacketPlayInUseItem) event.getPacket()).c().getBlockPosition();
@@ -221,6 +230,17 @@ public class PacketListener implements Listener {
                 if (event.getPlayer().getId() == id) {
                     if (b >= 24 && b < 28) {
                         event.setPacketField("b", (byte) 28);
+                    }
+                }
+            } else if (event.getPacket() instanceof PacketPlayOutCloseWindow) {
+                if (!event.isCancelled()) {
+                    GUI gui = event.getPlayer().getGUI();
+                    if (gui != null) {
+                        gui.getViewers().remove(event.getPlayer());
+                        event.getPlayer().getVirtualStorage().remove("current-gui");
+                        if(gui.isPlaySounds()) {
+                            event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 0.6f, 1);
+                        }
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayOutChat) {

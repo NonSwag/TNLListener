@@ -1,5 +1,6 @@
 package net.nonswag.tnl.listener.api.gui;
 
+import net.nonswag.tnl.listener.api.annotation.Info;
 import net.nonswag.tnl.listener.api.gui.iterators.GUIIterator;
 import net.nonswag.tnl.listener.api.item.TNLItem;
 import net.nonswag.tnl.listener.api.item.TNLItemType;
@@ -24,27 +25,25 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
     @Nonnull
     private final String title;
     @Nonnull
-    private ClickEvent clickListener = (player, slot, type) -> {
-    };
+    private ClickEvent clickListener = (player, slot, type) -> true;
     private final int size;
-    private int maxStackSize;
     private boolean instantUpdates = false;
+    private boolean playSounds = true;
 
-    public GUI(@Range(from = 0, to = 6) int rows, @Nonnull String title) {
+    public GUI(@Range(from = 1, to = 6) int rows, @Nonnull String title) {
         this(rows, 64, title);
     }
 
-    public GUI(@Range(from = 0, to = 6) int rows, int maxStackSize, @Nonnull String title) {
-        this.size = rows * 9;
+    public GUI(@Range(from = 1, to = 6) int rows, int maxStackSize, @Nonnull String title) {
+        this.size = Math.min(Math.max(rows, 1), 6) * 9;
         this.title = title;
-        this.maxStackSize = maxStackSize;
     }
 
-    public GUI(@Range(from = 0, to = 6) int rows, int maxStackSize) {
+    public GUI(@Range(from = 1, to = 6) int rows, int maxStackSize) {
         this(rows, maxStackSize, "§8» §4§lUnnamed§c§lGUI");
     }
 
-    public GUI(@Range(from = 0, to = 6) int rows) {
+    public GUI(@Range(from = 1, to = 6) int rows) {
         this(rows, "§8» §4§lUnnamed§c§lGUI");
     }
 
@@ -80,22 +79,20 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
         return size;
     }
 
-    public int getMaxStackSize() {
-        return maxStackSize;
-    }
-
     public boolean isInstantUpdates() {
         return instantUpdates;
     }
 
-    @Nonnull
-    public GUI setMaxStackSize(int maxStackSize) {
-        this.maxStackSize = maxStackSize;
-        return this;
-    }
-
     public void setInstantUpdates(boolean instantUpdates) {
         this.instantUpdates = instantUpdates;
+    }
+
+    public boolean isPlaySounds() {
+        return playSounds;
+    }
+
+    public void setPlaySounds(boolean playSounds) {
+        this.playSounds = playSounds;
     }
 
     @Nullable
@@ -502,7 +499,7 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
     }
 
     public interface ClickEvent {
-
-        void onClick(@Nonnull TNLPlayer player, int slot, @Nonnull Interaction.Type type);
+        @Info(value = "if return value is true the event is cancelled (true by default)")
+        boolean onClick(@Nonnull TNLPlayer player, int slot, @Nonnull Interaction.Type type);
     }
 }

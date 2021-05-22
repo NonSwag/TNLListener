@@ -47,18 +47,15 @@ public class VirtualStorage {
 
     @Nonnull
     public <T> Objects<T> getOrDefault(@Nonnull String key, @Nonnull T object, Class<? extends T> clazz) {
-        if (clazz.isInstance(getStorage().get(key))) {
-            return new Objects<>((T) getStorage().get(key));
+        if (!clazz.isInstance(getStorage().get(key))) {
+            getStorage().put(key, object);
         }
-        return new Objects<>(object);
+        return get(key, clazz);
     }
 
     @Nonnull
     public <T> Objects<T> getOrDefault(@Nonnull String key, @Nonnull T object) {
-        if (object.getClass().isInstance(getStorage().get(key))) {
-            return new Objects<>((T) getStorage().get(key));
-        }
-        return new Objects<>(object);
+        return (Objects<T>) getOrDefault(key, object, object.getClass());
     }
 
     @Nonnull

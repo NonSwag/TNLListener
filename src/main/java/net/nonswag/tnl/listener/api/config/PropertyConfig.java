@@ -75,6 +75,18 @@ public class PropertyConfig implements Config {
         getValues().putIfAbsent(key.toLowerCase(), value);
     }
 
+    public void setValueIfAbsent(@Nonnull String key, @Nonnull Boolean value) {
+        getValues().putIfAbsent(key.toLowerCase(), String.valueOf(value));
+    }
+
+    public void setValueIfAbsent(@Nonnull String key, @Nonnull Number value) {
+        getValues().putIfAbsent(key.toLowerCase(), String.valueOf(value));
+    }
+
+    public void setValueIfAbsent(@Nonnull String key, @Nonnull Character value) {
+        getValues().putIfAbsent(key.toLowerCase(), String.valueOf(value));
+    }
+
     public void setValue(@Nonnull String key, @Nonnull String value) {
         getValues().put(key.toLowerCase(), value);
     }

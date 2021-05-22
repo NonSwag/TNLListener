@@ -6,14 +6,14 @@ import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class InventorySafeEvent extends TNLEvent {
+public class InventorySaveEvent extends TNLEvent {
 
     @Nonnull
     private final TNLPlayer player;
     @Nonnull
     private final String inventoryId;
 
-    public InventorySafeEvent(@Nonnull TNLPlayer player, @Nonnull String inventoryId) {
+    public InventorySaveEvent(@Nonnull TNLPlayer player, @Nonnull String inventoryId) {
         this.player = player;
         this.inventoryId = inventoryId;
     }
@@ -41,7 +41,7 @@ public class InventorySafeEvent extends TNLEvent {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        InventorySafeEvent that = (InventorySafeEvent) o;
+        InventorySaveEvent that = (InventorySaveEvent) o;
         return player.equals(that.player) && inventoryId.equals(that.inventoryId);
     }
 

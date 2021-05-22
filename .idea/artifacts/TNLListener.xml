@@ -5,6 +5,9 @@
       <element id="module-output" name="TNLListener" />
       <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/plugin.yml" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.6/gson-2.8.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/redis/clients/jedis/3.6.0/jedis-3.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/commons/commons-pool2/2.9.0/commons-pool2-2.9.0.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

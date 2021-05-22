@@ -125,7 +125,7 @@ public class Interaction implements Iterable<Interaction.Type>, Cloneable {
             return equals(type);
         }
 
-        @Nullable
+        @Nonnull
         public static Type fromNMS(int id, @Nonnull String nmsType) {
             if (id == 0) {
                 switch (nmsType) {
@@ -172,7 +172,7 @@ public class Interaction implements Iterable<Interaction.Type>, Cloneable {
             } else if (id == 40 && nmsType.equals("SWAP")) {
                 return Interaction.Type.OFF_HAND;
             }
-            return null;
+            return Interaction.Type.GENERAL;
         }
     }
 

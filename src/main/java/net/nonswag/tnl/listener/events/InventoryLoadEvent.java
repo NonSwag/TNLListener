@@ -5,14 +5,14 @@ import net.nonswag.tnl.listener.api.player.TNLPlayer;
 
 import javax.annotation.Nonnull;
 
-public class InventoryLoadedEvent extends TNLEvent {
+public class InventoryLoadEvent extends TNLEvent {
 
     @Nonnull
     private final TNLPlayer player;
     @Nonnull
     private final String inventoryId;
 
-    public InventoryLoadedEvent(@Nonnull TNLPlayer player, @Nonnull String inventoryId) {
+    public InventoryLoadEvent(@Nonnull TNLPlayer player, @Nonnull String inventoryId) {
         this.player = player;
         this.inventoryId = inventoryId;
     }
