@@ -13,89 +13,118 @@ import org.bukkit.util.Vector;
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
-public interface TNLFakePlayer {
+public class FakePlayer {
 
     @Nonnull
-    TNLEntityPlayer getPlayer();
+    private final TNLEntityPlayer player;
+    @Nonnull
+    private Location location;
+    @Nonnull
+    private Consumer<InteractEvent> onInteract = event -> {};
+
+    public FakePlayer(@Nonnull String name, @Nonnull Location location) {
+        this.location = location;
+        this.player = TNLEntityPlayer.create(getLocation(), new GameProfile(name));
+        getPlayer().setPing(32);
+    }
 
     @Nonnull
-    Location getLocation();
+    public TNLEntityPlayer getPlayer() {
+        return player;
+    }
 
     @Nonnull
-    Consumer<InteractEvent> onInteract();
+    public Location getLocation() {
+        return location;
+    }
 
     @Nonnull
-    TNLFakePlayer onInteract(@Nonnull Consumer<InteractEvent> onInteract);
+    public Consumer<InteractEvent> onInteract() {
+        return onInteract;
+    }
 
     @Nonnull
-    TNLFakePlayer setLocation(@Nonnull Location location);
+    public FakePlayer onInteract(@Nonnull Consumer<InteractEvent> onInteract) {
+        this.onInteract = onInteract;
+        return this;
+    }
 
     @Nonnull
-    default TNLFakePlayer setSkin(@Nonnull Skin skin) {
+    public FakePlayer setLocation(@Nonnull Location location) {
+        this.location = location;
+        return this;
+    }
+
+    @Nonnull
+    public FakePlayer setSkin(@Nonnull Skin skin) {
         getPlayer().getGameProfile().setSkin(skin);
         return this;
     }
 
     @Nonnull
-    default TNLFakePlayer setSkin(@Nonnull String player) {
+    public FakePlayer setSkin(@Nonnull String player) {
         setSkin(Skin.getSkin(player));
         Logger.warn.println("Please use the properties §8'§6" + getPlayer().getGameProfile().getSkin() + "§8'§a instead of the name §8'§6" + player + "§8'");
         return this;
     }
 
     @Nonnull
-    default TNLFakePlayer spawn(@Nonnull TNLPlayer receiver) {
+    public FakePlayer spawn(@Nonnull TNLPlayer receiver) {
         receiver.sendPacket(TNLPlayerInfo.create(getPlayer(), TNLPlayerInfo.Action.ADD_PLAYER));
         receiver.sendPacket(TNLNamedEntitySpawn.create(getPlayer()));
         receiver.sendPacket(TNLEntityMetadata.create(getPlayer()));
         receiver.sendPacket(TNLEntityEquipment.create(getPlayer()));
         receiver.sendPacket(TNLEntityHeadRotation.create(getPlayer()));
         Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> hideTabListName(receiver), 20);
+        receiver.registerFakePlayer(this);
         return this;
     }
 
     @Nonnull
-    default TNLFakePlayer spawn() {
+    public FakePlayer spawn() {
         for (TNLPlayer receiver : TNLListener.getInstance().getOnlinePlayers()) spawn(receiver);
         return this;
     }
 
     @Nonnull
-    default TNLFakePlayer sendStatus(@Nonnull TNLPlayer receiver, @Nonnull TNLEntityStatus.Status status) {
+    public FakePlayer sendStatus(@Nonnull TNLPlayer receiver, @Nonnull TNLEntityStatus.Status status) {
         receiver.sendPacket(TNLEntityStatus.create(getPlayer().getId(), status));
         return this;
     }
 
     @Nonnull
-    default TNLFakePlayer playAnimation(@Nonnull TNLPlayer receiver, @Nonnull TNLEntityAnimation.Animation animation) {
+    public FakePlayer playAnimation(@Nonnull TNLPlayer receiver, @Nonnull TNLEntityAnimation.Animation animation) {
         receiver.sendPacket(TNLEntityAnimation.create(getPlayer(), animation));
         return this;
     }
 
     @Nonnull
-    TNLFakePlayer setVelocity(@Nonnull TNLPlayer receiver, @Nonnull Vector vector);
+    public FakePlayer setVelocity(@Nonnull TNLPlayer receiver, @Nonnull Vector vector) {
+        receiver.sendPacket(TNLEntityVelocity.create(getPlayer().getId(), new Vector(vector.getX(), vector.getY(), vector.getZ())));
+        return this;
+    }
 
     @Nonnull
-    default TNLFakePlayer hideTabListName(@Nonnull TNLPlayer receiver) {
+    public FakePlayer hideTabListName(@Nonnull TNLPlayer receiver) {
         receiver.sendPacket(TNLPlayerInfo.create(getPlayer(), TNLPlayerInfo.Action.REMOVE_PLAYER));
         return this;
     }
 
     @Nonnull
-    default TNLFakePlayer showTabListName(@Nonnull TNLPlayer receiver) {
+    public FakePlayer showTabListName(@Nonnull TNLPlayer receiver) {
         receiver.sendPacket(TNLPlayerInfo.create(getPlayer(), TNLPlayerInfo.Action.ADD_PLAYER));
         return this;
     }
 
     @Nonnull
-    default TNLFakePlayer deSpawn(@Nonnull TNLPlayer receiver) {
+    public FakePlayer deSpawn(@Nonnull TNLPlayer receiver) {
         receiver.sendPacket(TNLPlayerInfo.create(getPlayer(), TNLPlayerInfo.Action.REMOVE_PLAYER));
         receiver.sendPacket(TNLEntityDestroy.create(getPlayer()));
         return this;
     }
 
     @Nonnull
-    default TNLFakePlayer deSpawn() {
+    public FakePlayer deSpawn() {
         for (TNLPlayer receiver : TNLListener.getInstance().getOnlinePlayers()) deSpawn(receiver);
         return this;
     }

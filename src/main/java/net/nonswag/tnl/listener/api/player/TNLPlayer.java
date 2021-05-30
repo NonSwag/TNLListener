@@ -1897,6 +1897,15 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         return getBukkitPlayer().getKiller() == null ? null : cast(getBukkitPlayer().getKiller());
     }
 
+    default void registerFakePlayer(@Nonnull FakePlayer fakePlayer) {
+        getVirtualStorage().put("FakePlayer-" + fakePlayer.getPlayer().getId(), fakePlayer);
+    }
+
+    @Nullable
+    default FakePlayer getFakePlayer(int id) {
+        return getVirtualStorage().get("FakePlayer-" + id, FakePlayer.class).getValue();
+    }
+
     @Nonnull
     default Sidebar getSidebar() {
         if (!getVirtualStorage().compareInstance("sidebar", Sidebar.class)) {

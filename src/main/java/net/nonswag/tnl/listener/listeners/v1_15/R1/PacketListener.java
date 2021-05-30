@@ -14,6 +14,7 @@ import net.nonswag.tnl.listener.api.holograms.event.InteractEvent;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Objects;
+import net.nonswag.tnl.listener.api.player.FakePlayer;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.events.*;
@@ -48,14 +49,21 @@ public class PacketListener implements Listener {
                 } else {
                     Objects<Integer> id = event.getPacketField("a", Integer.class);
                     if (id.hasValue()) {
-                        InteractEvent.Type type = packet.b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK) ?
-                                InteractEvent.Type.LEFT_CLICK : InteractEvent.Type.RIGHT_CLICK;
-                        for (Hologram hologram : Holograms.getInstance().cachedValues()) {
-                            for (Integer integer : Holograms.getInstance().getIds(hologram, event.getPlayer())) {
-                                if (integer.equals(id.nonnull())) {
-                                    InteractEvent interactEvent = new InteractEvent(hologram, event.getPlayer(), type);
-                                    hologram.onInteract().accept(interactEvent);
-                                    return;
+                        FakePlayer fakePlayer = event.getPlayer().getFakePlayer(id.nonnull());
+                        if (fakePlayer != null) {
+                            net.nonswag.tnl.listener.api.player.event.InteractEvent.Type type = packet.b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK) ?
+                                    net.nonswag.tnl.listener.api.player.event.InteractEvent.Type.LEFT_CLICK : net.nonswag.tnl.listener.api.player.event.InteractEvent.Type.RIGHT_CLICK;
+                            fakePlayer.onInteract().accept(new net.nonswag.tnl.listener.api.player.event.InteractEvent(event.getPlayer(), fakePlayer, type));
+                        } else {
+                            InteractEvent.Type type = packet.b().equals(PacketPlayInUseEntity.EnumEntityUseAction.ATTACK) ?
+                                    InteractEvent.Type.LEFT_CLICK : InteractEvent.Type.RIGHT_CLICK;
+                            for (Hologram hologram : Holograms.getInstance().cachedValues()) {
+                                for (Integer integer : Holograms.getInstance().getIds(hologram, event.getPlayer())) {
+                                    if (integer.equals(id.nonnull())) {
+                                        InteractEvent interactEvent = new InteractEvent(hologram, event.getPlayer(), type);
+                                        hologram.onInteract().accept(interactEvent);
+                                        return;
+                                    }
                                 }
                             }
                         }

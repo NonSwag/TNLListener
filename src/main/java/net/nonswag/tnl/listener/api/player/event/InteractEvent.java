@@ -1,6 +1,6 @@
 package net.nonswag.tnl.listener.api.player.event;
 
-import net.nonswag.tnl.listener.api.player.TNLFakePlayer;
+import net.nonswag.tnl.listener.api.player.FakePlayer;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 
 import javax.annotation.Nonnull;
@@ -10,7 +10,7 @@ public class InteractEvent extends FakePlayerEvent {
     @Nonnull
     private final Type type;
 
-    protected InteractEvent(@Nonnull TNLPlayer player, @Nonnull TNLFakePlayer fakePlayer, @Nonnull Type type) {
+    public InteractEvent(@Nonnull TNLPlayer player, @Nonnull FakePlayer fakePlayer, @Nonnull Type type) {
         super(fakePlayer, player);
         this.type = type;
     }
