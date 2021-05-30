@@ -15,7 +15,6 @@ import net.nonswag.tnl.listener.api.storage.VirtualStorage;
 import net.nonswag.tnl.listener.events.PlayerPacketEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.WeatherType;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
@@ -139,7 +138,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void setPing(int ping) {
-
+        getEntityPlayer().ping = ping;
     }
 
     @Override
@@ -307,28 +306,6 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public void setPlayerTime(long time, boolean b) {
-        getBukkitPlayer().setPlayerTime(time, b);
-        sendPacket(new PacketPlayOutUpdateTime(time, time, true));
-    }
-
-    @Override
-    public void resetPlayerTime() {
-        getBukkitPlayer().resetPlayerTime();
-        sendPacket(new PacketPlayOutUpdateTime(getWorld().getTime(), getWorld().getTime(), true));
-    }
-
-    @Override
-    public void setPlayerWeather(@Nonnull WeatherType weatherType) {
-        getBukkitPlayer().setPlayerWeather(weatherType);
-        if (weatherType.equals(WeatherType.DOWNFALL)) {
-            sendPacket(new PacketPlayOutGameStateChange(2, 0.0F));
-        } else {
-            sendPacket(new PacketPlayOutGameStateChange(1, 0.0F));
-        }
-    }
-
-    @Override
     public void setArrowCount(int arrows) {
         getEntityPlayer().setArrowCount(arrows);
     }
@@ -353,12 +330,11 @@ public class NMSPlayer implements TNLPlayer {
         try {
             if (isOnline()) {
                 uninject();
-                final NMSPlayer player = this;
                 ChannelDuplexHandler channelDuplexHandler = new ChannelDuplexHandler() {
                     @Override
                     public void channelRead(ChannelHandlerContext channelHandlerContext, Object packetObject) {
                         try {
-                            PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(player, ((Packet<?>) packetObject));
+                            PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet<?>) packetObject));
                             if (event.call()) super.channelRead(channelHandlerContext, event.getPacket());
                         } catch (Exception e) {
                             Logger.error.println(e);
@@ -369,7 +345,7 @@ public class NMSPlayer implements TNLPlayer {
                     @Override
                     public void write(ChannelHandlerContext channelHandlerContext, Object packetObject, ChannelPromise channelPromise) {
                         try {
-                            PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(player, ((Packet<?>) packetObject));
+                            PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet<?>) packetObject));
                             if (event.call()) super.write(channelHandlerContext, event.getPacket(), channelPromise);
                         } catch (Exception e) {
                             Logger.error.println(e);

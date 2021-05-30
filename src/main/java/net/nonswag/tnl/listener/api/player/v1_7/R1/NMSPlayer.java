@@ -14,7 +14,7 @@ import net.nonswag.tnl.listener.api.storage.VirtualStorage;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.events.PlayerPacketEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
@@ -238,6 +238,11 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
+    public void setCooldown(@Nonnull Material material, int i) {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
+    @Override
     @Nonnull
     public WorldServer getWorldServer() {
         return ((CraftWorld) getBukkitPlayer().getWorld()).getHandle();
@@ -274,12 +279,11 @@ public class NMSPlayer implements TNLPlayer {
         try {
             if (isOnline()) {
                 uninject();
-                final NMSPlayer player = this;
                 ChannelDuplexHandler channelDuplexHandler = new ChannelDuplexHandler() {
                     @Override
                     public void channelRead(ChannelHandlerContext channelHandlerContext, Object packetObject) {
                         try {
-                            PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(player, ((Packet) packetObject));
+                            PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet) packetObject));
                             if (event.call()) super.channelRead(channelHandlerContext, event.getPacket());
                         } catch (Exception e) {
                             Logger.error.println(e);
@@ -290,7 +294,7 @@ public class NMSPlayer implements TNLPlayer {
                     @Override
                     public void write(ChannelHandlerContext channelHandlerContext, Object packetObject, ChannelPromise channelPromise) {
                         try {
-                            PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(player, ((Packet) packetObject));
+                            PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet) packetObject));
                             if (event.call()) super.write(channelHandlerContext, event.getPacket(), channelPromise);
                         } catch (Exception e) {
                             Logger.error.println(e);

@@ -341,8 +341,9 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     }
 
     @Override
-    default void setPlayerTime(long time, boolean b) {
-        getBukkitPlayer().setPlayerTime(time, b);
+    default void setPlayerTime(long time, boolean offset) {
+        getBukkitPlayer().setPlayerTime(time, offset);
+        sendPacket(TNLUpdateTime.create(time));
     }
 
     @Override
@@ -368,6 +369,7 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     @Override
     default void setPlayerWeather(@Nonnull WeatherType weatherType) {
         getBukkitPlayer().setPlayerWeather(weatherType);
+        sendPacket(TNLGameStateChange.create(weatherType.equals(WeatherType.DOWNFALL) ? 2 : 1, 0));
     }
 
     @Nullable
@@ -1901,6 +1903,10 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         getVirtualStorage().put("FakePlayer-" + fakePlayer.getPlayer().getId(), fakePlayer);
     }
 
+    default void unregisterFakePlayer(@Nonnull FakePlayer fakePlayer) {
+        getVirtualStorage().remove("FakePlayer-" + fakePlayer.getPlayer().getId());
+    }
+
     @Nullable
     default FakePlayer getFakePlayer(int id) {
         return getVirtualStorage().get("FakePlayer-" + id, FakePlayer.class).getValue();
@@ -2006,7 +2012,11 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     @Nonnull
     default Scoreboard getScoreboard() {
         if (Bukkit.getScoreboardManager() == null || getBukkitPlayer().getScoreboard().equals(Bukkit.getScoreboardManager().getMainScoreboard())) {
-            getBukkitPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+            if (Bukkit.isPrimaryThread()) {
+                getBukkitPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+            } else {
+                Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard()));
+            }
         }
         return getBukkitPlayer().getScoreboard();
     }

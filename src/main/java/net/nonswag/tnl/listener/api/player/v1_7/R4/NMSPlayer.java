@@ -14,18 +14,14 @@ import net.nonswag.tnl.listener.api.storage.VirtualStorage;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.events.PlayerPacketEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_7_R4.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -152,11 +148,6 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public void setCooldown(@Nonnull ItemStack itemStack, int i) {
-        throw new UnsupportedOperationException("method is not supported in this version");
-    }
-
-    @Override
     public void exitCombat() {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
@@ -240,13 +231,6 @@ public class NMSPlayer implements TNLPlayer {
         return virtualStorage;
     }
 
-    @Override
-    public void sendBlockChange(@Nonnull Location location, @Nonnull BlockData block) {
-        PacketPlayOutBlockChange packet = new PacketPlayOutBlockChange(location.getBlockX(), location.getBlockY(), location.getBlockZ(), getWorldServer());
-        packet.block = CraftMagicNumbers.getBlock(block.getMaterial());
-        sendPacket(packet);
-    }
-
     @Nonnull
     @Override
     public Player getBukkitPlayer() {
@@ -295,12 +279,11 @@ public class NMSPlayer implements TNLPlayer {
         try {
             if (isOnline()) {
                 uninject();
-                final NMSPlayer player = this;
                 ChannelDuplexHandler channelDuplexHandler = new ChannelDuplexHandler() {
                     @Override
                     public void channelRead(ChannelHandlerContext channelHandlerContext, Object packetObject) {
                         try {
-                            PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(player, ((Packet) packetObject));
+                            PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet) packetObject));
                             if (event.call()) super.channelRead(channelHandlerContext, event.getPacket());
                         } catch (Exception e) {
                             Logger.error.println(e);
@@ -311,7 +294,7 @@ public class NMSPlayer implements TNLPlayer {
                     @Override
                     public void write(ChannelHandlerContext channelHandlerContext, Object packetObject, ChannelPromise channelPromise) {
                         try {
-                            PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(player, ((Packet) packetObject));
+                            PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet) packetObject));
                             if (event.call()) super.write(channelHandlerContext, event.getPacket(), channelPromise);
                         } catch (Exception e) {
                             Logger.error.println(e);

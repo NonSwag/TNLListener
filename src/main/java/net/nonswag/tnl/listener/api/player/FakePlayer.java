@@ -120,6 +120,7 @@ public class FakePlayer {
     public FakePlayer deSpawn(@Nonnull TNLPlayer receiver) {
         receiver.sendPacket(TNLPlayerInfo.create(getPlayer(), TNLPlayerInfo.Action.REMOVE_PLAYER));
         receiver.sendPacket(TNLEntityDestroy.create(getPlayer()));
+        receiver.unregisterFakePlayer(this);
         return this;
     }
 
