@@ -7,22 +7,14 @@ import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class SendEvent extends HologramEvent {
+public class SendEvent extends PlayerHologramEvent {
 
-    @Nonnull
-    private final TNLPlayer player;
     @Nonnull
     private final List<TNLArmorStand> armorStands;
 
-    public SendEvent(@Nonnull TNLPlayer player, @Nonnull Hologram hologram, @Nonnull List<TNLArmorStand> armorStands) {
-        super(hologram);
-        this.player = player;
+    public SendEvent(@Nonnull Hologram hologram, @Nonnull TNLPlayer player, @Nonnull List<TNLArmorStand> armorStands) {
+        super(hologram, player);
         this.armorStands = armorStands;
-    }
-
-    @Nonnull
-    public TNLPlayer getPlayer() {
-        return player;
     }
 
     @Nonnull

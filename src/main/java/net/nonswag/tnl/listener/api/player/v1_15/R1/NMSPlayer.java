@@ -14,7 +14,6 @@ import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.storage.VirtualStorage;
 import net.nonswag.tnl.listener.events.PlayerPacketEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.WeatherType;
 import org.bukkit.command.CommandSender;
@@ -139,6 +138,11 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
+    public void setPing(int ping) {
+
+    }
+
+    @Override
     @Nonnull
     public Player getBukkitPlayer() {
         return bukkitPlayer;
@@ -147,13 +151,6 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void sendPacket(@Nonnull Object packet) {
         getPlayerConnection().sendPacket((Packet<?>) packet);
-    }
-
-    @Override
-    public void openSignEditor(@Nonnull Location location) {
-        if (location.getBlock().getBlockData() instanceof org.bukkit.block.data.type.Sign) {
-            sendPacket(new PacketPlayOutOpenSignEditor(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ())));
-        }
     }
 
     @Override

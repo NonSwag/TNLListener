@@ -121,13 +121,13 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public void sendPacket(@Nonnull Object packet) {
-        getPlayerConnection().sendPacket((Packet) packet);
+    public void setPing(int ping) {
+        getEntityPlayer().ping = ping;
     }
 
     @Override
-    public void openSignEditor(@Nonnull Location location) {
-        sendPacket(new PacketPlayOutOpenSignEditor(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+    public void sendPacket(@Nonnull Object packet) {
+        getPlayerConnection().sendPacket((Packet) packet);
     }
 
     @Override

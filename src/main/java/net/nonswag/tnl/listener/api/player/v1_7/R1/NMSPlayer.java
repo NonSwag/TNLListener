@@ -117,6 +117,11 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
+    public void setPing(int ping) {
+        getEntityPlayer().ping = ping;
+    }
+
+    @Override
     @Nonnull
     public Player getBukkitPlayer() {
         return bukkitPlayer;
@@ -125,11 +130,6 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void sendPacket(@Nonnull Object packet) {
         getPlayerConnection().sendPacket((Packet) packet);
-    }
-
-    @Override
-    public void openSignEditor(@Nonnull Location location) {
-        sendPacket(new PacketPlayOutOpenSignEditor(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
     }
 
     @Override

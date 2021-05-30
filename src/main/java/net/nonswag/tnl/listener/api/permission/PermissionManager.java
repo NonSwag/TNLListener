@@ -73,7 +73,7 @@ public class PermissionManager implements Permissions {
 
     @Override
     public void updatePermissions() {
-        getPlayer().sendPacket(TNLEntityStatus.create(getPlayer().getId(), (byte) 28));
+        getPlayer().sendPacket(TNLEntityStatus.create(getPlayer().getId(), TNLEntityStatus.Status.PERMISSION_LEVEL_4));
     }
 
     @Nullable

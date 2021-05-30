@@ -1,8 +1,8 @@
 package net.nonswag.tnl.listener.api.packet;
 
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.entity.TNLEntityPlayer;
 import net.nonswag.tnl.listener.api.logger.Logger;
-import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
 
 import javax.annotation.Nonnull;
@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 public abstract class TNLPlayerInfo {
 
     @Nonnull
-    public static Object create(@Nonnull TNLPlayer player, @Nonnull Action action) {
+    public static Object create(@Nonnull TNLEntityPlayer player, @Nonnull Action action) {
         if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
             return new net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo(net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo.EnumPlayerInfoAction.valueOf(action.name()), ((net.nonswag.tnl.listener.api.player.v1_16.R3.NMSPlayer) player).getEntityPlayer());
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {

@@ -88,12 +88,19 @@ public class Sidebar {
     }
 
     @Nonnull
-    public List<String> getScores() {
+    public List<String> getScoreEntries() {
         List<String> scores = new ArrayList<>();
         for (int i = 0; i < 15; i++) {
             String score = getScore(i);
             if (score != null) scores.add(score);
         }
+        return scores;
+    }
+
+    @Nonnull
+    public List<Integer> getScores() {
+        List<Integer> scores = new ArrayList<>();
+        for (int i = 0; i < 15; i++) if (getScore(i) != null) scores.add(i);
         return scores;
     }
 

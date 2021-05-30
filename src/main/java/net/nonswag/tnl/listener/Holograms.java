@@ -165,12 +165,12 @@ public class Holograms {
                 }
             }
             if (!armorStands.isEmpty()) {
-                SendEvent event = new SendEvent(player, hologram, armorStands);
+                SendEvent event = new SendEvent(hologram, player, armorStands);
                 hologram.onSend().accept(event);
                 for (TNLArmorStand armorStand : event.getArmorStands()) {
                     packets.add(TNLEntitySpawn.create(armorStand));
                     packets.add(TNLEntityMetadata.create(armorStand));
-                    packets.add(TNLEntityEquipment.create(armorStand));
+                    packets.addAll(TNLEntityEquipment.create(armorStand));
                 }
                 player.sendPackets(packets);
             }
@@ -225,7 +225,7 @@ public class Holograms {
             }
         }
         if (!armorStands.isEmpty()) {
-            UpdateEvent event = new UpdateEvent(player, hologram, armorStands);
+            UpdateEvent event = new UpdateEvent(hologram, player, armorStands);
             hologram.onUpdate().accept(event);
             for (TNLArmorStand armorStand : armorStands) {
                 player.sendPacket(TNLEntityMetadata.create(armorStand));

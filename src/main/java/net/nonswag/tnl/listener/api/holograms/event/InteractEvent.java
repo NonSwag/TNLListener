@@ -5,22 +5,14 @@ import net.nonswag.tnl.listener.api.player.TNLPlayer;
 
 import javax.annotation.Nonnull;
 
-public class InteractEvent extends HologramEvent {
+public class InteractEvent extends PlayerHologramEvent {
 
-    @Nonnull
-    private final TNLPlayer player;
     @Nonnull
     private final Type type;
 
-    public InteractEvent(@Nonnull TNLPlayer player, @Nonnull Hologram hologram, @Nonnull Type type) {
-        super(hologram);
-        this.player = player;
+    public InteractEvent(@Nonnull Hologram hologram, @Nonnull TNLPlayer player, @Nonnull Type type) {
+        super(hologram, player);
         this.type = type;
-    }
-
-    @Nonnull
-    public TNLPlayer getPlayer() {
-        return player;
     }
 
     @Nonnull

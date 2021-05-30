@@ -53,7 +53,7 @@ public class PacketListener implements Listener {
                         for (Hologram hologram : Holograms.getInstance().cachedValues()) {
                             for (Integer integer : Holograms.getInstance().getIds(hologram, event.getPlayer())) {
                                 if (integer.equals(id.nonnull())) {
-                                    InteractEvent interactEvent = new InteractEvent(event.getPlayer(), hologram, type);
+                                    InteractEvent interactEvent = new InteractEvent(hologram, event.getPlayer(), type);
                                     hologram.onInteract().accept(interactEvent);
                                     return;
                                 }

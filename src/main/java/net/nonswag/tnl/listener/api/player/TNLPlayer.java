@@ -4,7 +4,7 @@ import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
 import net.nonswag.tnl.listener.api.chat.Conversation;
-import net.nonswag.tnl.listener.api.entity.TNLEntity;
+import net.nonswag.tnl.listener.api.entity.TNLEntityPlayer;
 import net.nonswag.tnl.listener.api.file.FileCreator;
 import net.nonswag.tnl.listener.api.gui.GUI;
 import net.nonswag.tnl.listener.api.gui.GUIItem;
@@ -69,7 +69,7 @@ import java.util.*;
  * TNLPlayer is a more net.minecraft.server based player
  **/
 
-public interface TNLPlayer extends TNLEntity, Player {
+public interface TNLPlayer extends TNLEntityPlayer, Player {
 
     @Nonnull
     @Override
@@ -1970,7 +1970,9 @@ public interface TNLPlayer extends TNLEntity, Player {
 
     void openVirtualSignEditor(@Nonnull SignMenu signMenu);
 
-    void openSignEditor(@Nonnull Location location);
+    default void openSignEditor(@Nonnull Location location) {
+        sendPacket(TNLOpenSign.create(location));
+    }
 
     @Nonnull
     <NetworkManager> NetworkManager getNetworkManager();
@@ -2009,7 +2011,20 @@ public interface TNLPlayer extends TNLEntity, Player {
         sendBlockChange(location, location.getBlock().getBlockData());
     }
 
+    @Nonnull
+    @Override
+    default GameProfile getGameProfile() {
+        if (!getVirtualStorage().compareInstance("GameProfile", GameProfile.class)) {
+            getVirtualStorage().put("GameProfile", new GameProfile(getUniqueId(), getName()));
+        }
+        return getVirtualStorage().get("GameProfile", GameProfile.class).nonnull();
+    }
+
+    @Override
     int getPing();
+
+    @Override
+    void setPing(int ping);
 
     void sendPacket(@Nonnull Object packet);
 

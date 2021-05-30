@@ -27,11 +27,9 @@ public class Team {
 
     public Team(int id) {
         this.id = id;
-        org.bukkit.scoreboard.Team team = getScoreboard().getTeam("team-" + getId());
-        if (team != null) {
-            team.unregister();
-        }
-        this.team = getScoreboard().registerNewTeam("team-" + getId());
+        org.bukkit.scoreboard.Team team = getScoreboard().getTeam("TEAM_" + getId());
+        if (team != null) team.unregister();
+        this.team = getScoreboard().registerNewTeam("TEAM_" + getId());
     }
 
     public int getId() {
