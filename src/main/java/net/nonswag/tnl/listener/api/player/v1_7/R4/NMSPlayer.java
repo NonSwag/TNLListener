@@ -158,11 +158,6 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public void openGUI(@Nonnull GUI gui) {
-        throw new UnsupportedOperationException("method is not supported in this version");
-    }
-
-    @Override
     public void hideTabListName(@Nonnull TNLPlayer[] players) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }

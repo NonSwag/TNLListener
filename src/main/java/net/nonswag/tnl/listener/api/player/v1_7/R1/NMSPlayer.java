@@ -4,7 +4,6 @@ import net.minecraft.server.v1_7_R1.*;
 import net.minecraft.util.io.netty.channel.*;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
-import net.nonswag.tnl.listener.api.gui.GUI;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
@@ -155,11 +154,6 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void enterCombat() {
-        throw new UnsupportedOperationException("method is not supported in this version");
-    }
-
-    @Override
-    public void openGUI(@Nonnull GUI gui) {
         throw new UnsupportedOperationException("method is not supported in this version");
     }
 

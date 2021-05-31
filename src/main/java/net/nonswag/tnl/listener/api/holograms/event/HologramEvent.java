@@ -10,7 +10,7 @@ public abstract class HologramEvent extends TNLEvent {
     @Nonnull
     private final Hologram hologram;
 
-    protected HologramEvent(@Nonnull Hologram hologram) {
+    public HologramEvent(@Nonnull Hologram hologram) {
         this.hologram = hologram;
     }
 

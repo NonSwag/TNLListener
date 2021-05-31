@@ -10,7 +10,7 @@ public abstract class PlayerEvent extends TNLEvent {
     @Nonnull
     private final TNLPlayer player;
 
-    protected PlayerEvent(@Nonnull TNLPlayer player) {
+    public PlayerEvent(@Nonnull TNLPlayer player) {
         this.player = player;
     }
 

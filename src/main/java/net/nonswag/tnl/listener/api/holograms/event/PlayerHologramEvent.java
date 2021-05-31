@@ -11,7 +11,7 @@ public abstract class PlayerHologramEvent extends PlayerEvent {
     @Nonnull
     private final Hologram hologram;
 
-    protected PlayerHologramEvent(@Nonnull Hologram hologram, @Nonnull TNLPlayer player) {
+    public PlayerHologramEvent(@Nonnull Hologram hologram, @Nonnull TNLPlayer player) {
         super(player);
         this.hologram = hologram;
     }
