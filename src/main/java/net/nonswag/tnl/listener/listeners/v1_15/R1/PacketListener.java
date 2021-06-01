@@ -14,6 +14,7 @@ import net.nonswag.tnl.listener.api.holograms.event.InteractEvent;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Objects;
+import net.nonswag.tnl.listener.api.packet.TNLSetSlot;
 import net.nonswag.tnl.listener.api.player.FakePlayer;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
@@ -167,8 +168,9 @@ public class PacketListener implements Listener {
                     PacketPlayInWindowClick packet = (PacketPlayInWindowClick) event.getPacket();
                     int slot = packet.c();
                     Interaction.Type type = Interaction.Type.fromNMS(packet.d(), packet.g().name());
-                    boolean cancel = gui.getClickListener().onClick(event.getPlayer(), slot, type);
+                    boolean cancel = false;
                     if (slot <= gui.getSize()) {
+                        cancel = gui.getClickListener().onClick(event.getPlayer(), slot, type);
                         GUIItem item = gui.getItem(slot);
                         if (item != null) {
                             Interaction interaction = item.getInteraction(type);
@@ -178,7 +180,7 @@ public class PacketListener implements Listener {
                     }
                     if (cancel) {
                         event.setCancelled(true);
-                        event.getPlayer().sendPacket(new PacketPlayOutSetSlot(-1, -1, ItemStack.a));
+                        event.getPlayer().sendPacket(TNLSetSlot.create(TNLSetSlot.Inventory.COURSER, -1, Material.AIR));
                         event.getPlayer().updateInventory();
                         event.getPlayer().updateGUI();
                     }
@@ -189,7 +191,7 @@ public class PacketListener implements Listener {
                     gui.getViewers().remove(event.getPlayer());
                     event.getPlayer().getVirtualStorage().remove("current-gui");
                     if(gui.isPlaySounds()) {
-                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 0.6f, 1);
+                        event.getPlayer().playSound(Sound.BLOCK_CHEST_CLOSE);
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInUseItem) {
@@ -247,7 +249,7 @@ public class PacketListener implements Listener {
                         gui.getViewers().remove(event.getPlayer());
                         event.getPlayer().getVirtualStorage().remove("current-gui");
                         if(gui.isPlaySounds()) {
-                            event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 0.6f, 1);
+                            event.getPlayer().playSound(Sound.BLOCK_CHEST_CLOSE);
                         }
                     }
                 }

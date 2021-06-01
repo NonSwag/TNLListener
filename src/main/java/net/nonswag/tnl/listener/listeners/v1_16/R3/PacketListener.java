@@ -14,6 +14,7 @@ import net.nonswag.tnl.listener.api.holograms.event.InteractEvent;
 import net.nonswag.tnl.listener.api.message.MessageKey;
 import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Objects;
+import net.nonswag.tnl.listener.api.packet.TNLSetSlot;
 import net.nonswag.tnl.listener.api.player.FakePlayer;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
@@ -167,19 +168,23 @@ public class PacketListener implements Listener {
                 if (gui != null) {
                     PacketPlayInWindowClick packet = (PacketPlayInWindowClick) event.getPacket();
                     int slot = packet.c();
-                    Interaction.Type type = Interaction.Type.fromNMS(packet.d(), packet.g().name());
-                    boolean cancel = gui.getClickListener().onClick(event.getPlayer(), slot, type);
-                    if (slot <= gui.getSize()) {
+                    boolean cancel = false;
+                    if (slot < gui.getSize() && slot >= 0) {
+                        Interaction.Type type = Interaction.Type.fromNMS(packet.d(), packet.g().name());
+                        cancel = gui.getClickListener().onClick(event.getPlayer(), slot, type);
                         GUIItem item = gui.getItem(slot);
                         if (item != null) {
                             Interaction interaction = item.getInteraction(type);
                             if (interaction != null) interaction.getAction().accept(event.getPlayer());
                             cancel = true;
                         }
+                    } else if (slot >= gui.getSize()) {
+                        event.setPacketField("slot", slot - gui.getSize() + 9);
+                        event.setPacketField("a", 0);
                     }
                     if (cancel) {
                         event.setCancelled(true);
-                        event.getPlayer().sendPacket(new PacketPlayOutSetSlot(-1, -1, ItemStack.b));
+                        event.getPlayer().sendPacket(TNLSetSlot.create(TNLSetSlot.Inventory.COURSER, -1, Material.AIR));
                         event.getPlayer().updateInventory();
                         event.getPlayer().updateGUI();
                     }
@@ -190,7 +195,7 @@ public class PacketListener implements Listener {
                     gui.getViewers().remove(event.getPlayer());
                     event.getPlayer().getVirtualStorage().remove("current-gui");
                     if(gui.isPlaySounds()) {
-                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 0.6f, 1);
+                        event.getPlayer().playSound(Sound.BLOCK_CHEST_CLOSE);
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayInPickItem) {
@@ -238,9 +243,7 @@ public class PacketListener implements Listener {
                     if (gui != null) {
                         gui.getViewers().remove(event.getPlayer());
                         event.getPlayer().getVirtualStorage().remove("current-gui");
-                        if(gui.isPlaySounds()) {
-                            event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 0.6f, 1);
-                        }
+                        if(gui.isPlaySounds()) event.getPlayer().playSound(Sound.BLOCK_CHEST_CLOSE);
                     }
                 }
             } else if (event.getPacket() instanceof PacketPlayOutEntityStatus) {

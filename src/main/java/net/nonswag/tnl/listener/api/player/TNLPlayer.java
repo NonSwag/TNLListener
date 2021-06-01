@@ -140,6 +140,18 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         getBukkitPlayer().setPlayerListHeaderFooter(header, footer);
     }
 
+    default void playSound(@Nonnull Sound sound) {
+        playSound(sound, SoundCategory.MASTER);
+    }
+
+    default void playSound(@Nonnull Sound sound, @Nonnull SoundCategory soundCategory) {
+        playSound(sound, soundCategory, 0.6f, 1.0f);
+    }
+
+    default void playSound(@Nonnull Sound sound, @Nonnull SoundCategory soundCategory, float volume, float pitch) {
+        playSound(getLocation(), sound, soundCategory, volume, pitch);
+    }
+
     @Override
     default void playSound(@Nonnull Location location, @Nonnull Sound sound, @Nonnull SoundCategory soundCategory, float volume, float pitch) {
         getBukkitPlayer().playSound(location, sound, soundCategory, volume, pitch);
@@ -148,6 +160,17 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     @Override
     default void playSound(@Nonnull Location location, @Nonnull String sound, @Nonnull SoundCategory soundCategory, float volume, float pitch) {
         getBukkitPlayer().playSound(location, sound, soundCategory, volume, pitch);
+    }
+
+    @Override
+    default void playSound(@Nonnull Location location, @Nonnull Sound sound, float volume, float pitch) {
+        getBukkitPlayer().playSound(location, sound, volume, pitch);
+    }
+
+    @Deprecated
+    @Override
+    default void playSound(@Nonnull Location location, @Nonnull String sound, float volume, float pitch) {
+        getBukkitPlayer().playSound(location, sound, volume, pitch);
     }
 
     @Override
@@ -212,13 +235,13 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
             if (!event.isCommand()) {
                 event.setCancelled(true);
                 String[] strings = message.split(" ");
-                for (Player all : Bukkit.getOnlinePlayers()) {
+                for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
                     if (message.toLowerCase().contains(all.getName().toLowerCase())) {
                         for (String string : strings) {
                             if (string.equalsIgnoreCase("@" + all.getName())) {
                                 message = message.replace(string + " ", "§8(§3" + all.getName() + "§8) §f");
                                 message = message.replace(string, "§8(§3" + all.getName() + "§8) §f");
-                                all.playSound(all.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
+                                all.playSound(Sound.BLOCK_NOTE_BLOCK_PLING);
                             }
                         }
                     }
@@ -294,17 +317,6 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
 
     default void playSound(@Nonnull Sound sound, float volume, float pitch) {
         getBukkitPlayer().playSound(getLocation(), sound, volume, pitch);
-    }
-
-    @Override
-    default void playSound(@Nonnull Location location, @Nonnull Sound sound, float volume, float pitch) {
-        getBukkitPlayer().playSound(location, sound, volume, pitch);
-    }
-
-    @Deprecated
-    @Override
-    default void playSound(@Nonnull Location location, @Nonnull String sound, float volume, float pitch) {
-        getBukkitPlayer().playSound(location, sound, volume, pitch);
     }
 
     @Deprecated
@@ -2303,7 +2315,7 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         if (!gui.getViewers().contains(this)) gui.getViewers().add(this);
         getVirtualStorage().put("current-gui", gui);
         sendPacket(TNLOpenWindow.create(gui.getSize() / 9, gui.getTitle()));
-        if(gui.isPlaySounds()) playSound(getLocation(), Sound.BLOCK_CHEST_OPEN, 0.6f, 1);
+        if(gui.isPlaySounds()) playSound(Sound.BLOCK_CHEST_OPEN);
         updateGUI();
     }
 

@@ -54,6 +54,41 @@ public interface TNLItem {
         if (getItemMeta() != null) {
             getItemMeta().setDisplayName(name);
         }
+        if (getItemMeta() instanceof BookMeta) {
+            ((BookMeta) getItemMeta()).setTitle(name);
+        }
+        return this;
+    }
+
+    @Nonnull
+    default TNLItem setAuthor(@Nonnull String author) {
+        if (getItemMeta() instanceof BookMeta) {
+            ((BookMeta) getItemMeta()).setAuthor(author);
+        }
+        return this;
+    }
+
+    @Nonnull
+    default TNLItem setGeneration(@Nonnull BookMeta.Generation generation) {
+        if (getItemMeta() instanceof BookMeta) {
+            ((BookMeta) getItemMeta()).setGeneration(generation);
+        }
+        return this;
+    }
+
+    @Nonnull
+    default TNLItem addPage(@Nonnull String... text) {
+        if (getItemMeta() instanceof BookMeta) {
+            ((BookMeta) getItemMeta()).addPage(text);
+        }
+        return this;
+    }
+
+    @Nonnull
+    default TNLItem setAuthor(@Nonnull Enchantment enchantment, int level) {
+        if (getItemMeta() != null) {
+            getItemMeta().addEnchant(enchantment, level, true);
+        }
         return this;
     }
 

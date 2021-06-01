@@ -6,8 +6,7 @@ import org.bukkit.event.inventory.ClickType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Iterator;
-import java.util.ListIterator;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class Interaction implements Iterable<Interaction.Type>, Cloneable {
@@ -16,19 +15,14 @@ public class Interaction implements Iterable<Interaction.Type>, Cloneable {
     public static final Interaction EMPTY = new Interaction(player -> {});
 
     @Nonnull
-    private final Type[] types = new Type[Type.values().length];
+    private final List<Type> types = new ArrayList<>();
     @Nonnull
     private final Consumer<TNLPlayer> action;
 
     public Interaction(@Nonnull Consumer<TNLPlayer> action, @Nonnull Type... types) {
         this.action = action;
-        Type[] typeArray = types.length == 0 ? new Type[]{Type.GENERAL} : types;
-        add:
-        for (int i = 0; i < typeArray.length; i++) {
-            for (@Nullable Type type : getTypes()) {
-                if (type != null && type.equals(typeArray[i])) continue add;
-            }
-            getTypes()[i] = typeArray[i];
+        for (@Nullable Type type : types.length == 0 ? Collections.singletonList(Type.GENERAL) : Arrays.asList(types)) {
+            if (type != null && !this.types.contains(type)) this.types.add(type);
         }
     }
 
@@ -45,7 +39,7 @@ public class Interaction implements Iterable<Interaction.Type>, Cloneable {
     }
 
     @Nonnull
-    public Type[] getTypes() {
+    public List<Type> getTypes() {
         return types;
     }
 

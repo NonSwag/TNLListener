@@ -47,13 +47,13 @@ public class TypeIterator implements ListIterator<Interaction.Type> {
 
     @Override
     public boolean hasNext() {
-        return this.nextIndex < getInteraction().getTypes().length;
+        return this.nextIndex < getInteraction().getTypes().size();
     }
 
     @Override
     public Interaction.Type next() {
         setLastDirection(true);
-        return getInteraction().getTypes()[this.nextIndex++];
+        return getInteraction().getTypes().get(this.nextIndex++);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class TypeIterator implements ListIterator<Interaction.Type> {
     @Override
     public Interaction.Type previous() {
         setLastDirection(false);
-        return getInteraction().getTypes()[this.nextIndex--];
+        return getInteraction().getTypes().get(this.nextIndex--);
     }
 
     public int previousIndex() {
@@ -82,7 +82,7 @@ public class TypeIterator implements ListIterator<Interaction.Type> {
             throw new IllegalStateException("No current type!");
         } else {
             int i = getLastDirection() ? getNextIndex() - 1 : getNextIndex();
-            getInteraction().getTypes()[i] = type;
+            getInteraction().getTypes().set(i, type);
         }
     }
 

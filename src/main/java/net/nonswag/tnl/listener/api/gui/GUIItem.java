@@ -53,8 +53,8 @@ public class GUIItem implements Iterable<Interaction>, Cloneable {
     @Nullable
     public Interaction getInteraction(@Nonnull Interaction.Type type) {
         for (Interaction interaction : this) {
-            for (Interaction.Type interactionType : interaction) {
-                if (type.comparable(interactionType)) {
+            for (@Nullable Interaction.Type interactionType : interaction) {
+                if (type.comparable(interactionType != null ? interactionType : Interaction.Type.LEFT)) {
                     return interaction;
                 }
             }

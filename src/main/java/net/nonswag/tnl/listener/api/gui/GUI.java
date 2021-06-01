@@ -108,8 +108,8 @@ public class GUI implements Iterable<GUIItem>, Cloneable {
         } else remove(slot);
         if (isInstantUpdates()) {
             for (TNLPlayer viewer : getViewers()) {
-                if (item != null) viewer.sendPackets(TNLSetSlot.create(slot, item));
-                else viewer.sendPackets(TNLSetSlot.create(slot, new ItemStack(Material.AIR)));
+                if (item != null) viewer.sendPackets(TNLSetSlot.create(TNLSetSlot.Inventory.TOP, slot, item));
+                else viewer.sendPackets(TNLSetSlot.create(TNLSetSlot.Inventory.TOP, slot, new ItemStack(Material.AIR)));
             }
         }
         return this;
