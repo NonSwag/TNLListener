@@ -9,11 +9,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Bootstrap extends JavaPlugin {
 
     @Nullable
-    protected static Bootstrap instance = null;
+    private static Bootstrap instance = null;
+    @Nonnull
+    private final List<ShutdownHook> shutdownHooks = new ArrayList<>();
 
     public Bootstrap() {
         setInstance(this);
@@ -46,8 +50,22 @@ public class Bootstrap extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        for (ShutdownHook shutdownHook : getShutdownHooks()) shutdownHook.onShutdown();
         Holograms.getInstance().disable();
         TNLListener.getInstance().disable();
+    }
+
+    @Nonnull
+    private List<ShutdownHook> getShutdownHooks() {
+        return shutdownHooks;
+    }
+
+    public void registerShutdownHook(@Nonnull ShutdownHook shutdownHook) {
+        getShutdownHooks().add(shutdownHook);
+    }
+
+    public void unregisterShutdownHook(@Nonnull ShutdownHook shutdownHook) {
+        getShutdownHooks().remove(shutdownHook);
     }
 
     private static void setInstance(@Nonnull Bootstrap instance) {
@@ -58,5 +76,9 @@ public class Bootstrap extends JavaPlugin {
     public static Bootstrap getInstance() {
         assert instance != null;
         return instance;
+    }
+
+    public interface ShutdownHook {
+        void onShutdown();
     }
 }

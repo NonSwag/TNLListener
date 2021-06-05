@@ -1,5 +1,7 @@
 package net.nonswag.tnl.listener.api.player;
 
+import org.bukkit.entity.Player;
+
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
@@ -16,6 +18,10 @@ public class GameProfile {
         this.uniqueId = uniqueId;
         this.name = name;
         this.skin = skin;
+    }
+
+    public GameProfile(@Nonnull Player player) {
+        this(player.getUniqueId(), player.getName());
     }
 
     public GameProfile(@Nonnull UUID uniqueId, @Nonnull String name) {

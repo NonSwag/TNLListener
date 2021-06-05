@@ -32,6 +32,18 @@ public class PacketListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPacket(PlayerPacketEvent<Packet<?>> event) {
         if (event.isIncoming()) {
+            if (!(event.getPacket() instanceof PacketPlayInWindowClick
+                    || event.getPacket() instanceof PacketPlayInCloseWindow
+                    || event.getPacket() instanceof PacketPlayInFlying
+                    || event.getPacket() instanceof PacketPlayInEntityAction
+                    || event.getPacket() instanceof PacketPlayInAbilities
+                    || event.getPacket() instanceof PacketPlayInHeldItemSlot
+                    || event.getPacket() instanceof PacketPlayInKeepAlive)) {
+                if (event.getPlayer().getGUI() != null) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
             if (event.getPacket() instanceof PacketPlayInChat && Settings.BETTER_CHAT.getValue()) {
                 PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), ((PacketPlayInChat) event.getPacket()).b());
                 event.getPlayer().chat(chatEvent);
@@ -174,8 +186,9 @@ public class PacketListener implements Listener {
                         cancel = gui.getClickListener().onClick(event.getPlayer(), slot, type);
                         GUIItem item = gui.getItem(slot);
                         if (item != null) {
-                            Interaction interaction = item.getInteraction(type);
-                            if (interaction != null) interaction.getAction().accept(event.getPlayer());
+                            for (Interaction interaction : item.getInteractions(type)) {
+                                interaction.getAction().accept(event.getPlayer());
+                            }
                             cancel = true;
                         }
                     } else if (slot >= gui.getSize()) {

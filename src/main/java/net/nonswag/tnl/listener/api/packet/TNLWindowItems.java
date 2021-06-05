@@ -17,7 +17,7 @@ public abstract class TNLWindowItems {
     @Nonnull
     public static Object create(@Nonnull List<ItemStack> items) {
         Object packet;
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
             net.minecraft.server.v1_16_R3.NonNullList<net.minecraft.server.v1_16_R3.ItemStack> itemStacks = net.minecraft.server.v1_16_R3.NonNullList.a();
             for (ItemStack item : items) {
                 itemStacks.add(org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack.asNMSCopy(item));
@@ -29,7 +29,7 @@ public abstract class TNLWindowItems {
                 itemStacks.add(org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack.asNMSCopy(item));
             }
             packet = new net.minecraft.server.v1_15_R1.PacketPlayOutWindowItems(1, itemStacks);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
             List<net.minecraft.server.v1_7_R4.ItemStack> itemStacks = new ArrayList<>();
             for (ItemStack item : items) {
                 itemStacks.add(org.bukkit.craftbukkit.v1_7_R4.inventory.CraftItemStack.asNMSCopy(item));
@@ -42,7 +42,7 @@ public abstract class TNLWindowItems {
             }
             packet = new net.minecraft.server.v1_7_R1.PacketPlayOutWindowItems(1, itemStacks);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
         return packet;

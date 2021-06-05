@@ -5,8 +5,8 @@ import com.google.gson.JsonObject;
 import net.nonswag.tnl.listener.Holograms;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.holograms.event.InteractEvent;
+import net.nonswag.tnl.listener.api.holograms.event.PlaceholderRequestEvent;
 import net.nonswag.tnl.listener.api.holograms.event.SendEvent;
-import net.nonswag.tnl.listener.api.holograms.event.UpdateEvent;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.math.Range;
 import net.nonswag.tnl.listener.api.message.Placeholder;
@@ -62,7 +62,7 @@ public class Hologram {
     @Nonnull
     private Consumer<InteractEvent> onInteract = event -> {};
     @Nonnull
-    private Consumer<UpdateEvent> onUpdate = event -> {};
+    private Consumer<PlaceholderRequestEvent> onPlaceholderRequest = event -> {};
 
     public Hologram(@Nonnull String name, boolean cache, @Nonnull String... lines) {
         this.name = name;
@@ -152,8 +152,8 @@ public class Hologram {
     }
 
     @Nonnull
-    public Consumer<UpdateEvent> onUpdate() {
-        return onUpdate;
+    public Consumer<PlaceholderRequestEvent> onPlaceholderRequest() {
+        return onPlaceholderRequest;
     }
 
     @Nonnull
@@ -169,8 +169,8 @@ public class Hologram {
     }
 
     @Nonnull
-    public Hologram onUpdate(@Nonnull Consumer<UpdateEvent> onUpdate) {
-        this.onUpdate = onUpdate;
+    public Hologram onPlaceholderRequest(@Nonnull Consumer<PlaceholderRequestEvent> onPlaceholderRequest) {
+        this.onPlaceholderRequest = onPlaceholderRequest;
         return this;
     }
 

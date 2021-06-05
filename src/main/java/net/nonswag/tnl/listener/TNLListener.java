@@ -14,19 +14,20 @@ import net.nonswag.tnl.listener.listeners.QuitListener;
 import net.nonswag.tnl.listener.listeners.WorldListener;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 public class TNLListener {
 
+    @Nonnull
     private static final TNLListener instance = new TNLListener();
 
     @Nonnull
@@ -42,9 +43,11 @@ public class TNLListener {
         ServerVersion version = ServerVersion.UNKNOWN;
         for (ServerVersion serverVersion : ServerVersion.values()) {
             if (!serverVersion.equals(ServerVersion.UNKNOWN)) {
-                if (Bukkit.getVersion().toLowerCase().contains(serverVersion.getVersion().toLowerCase())) {
-                    version = serverVersion;
-                    break;
+                for (String v : serverVersion.getVersions()) {
+                    if (Bukkit.getVersion().toLowerCase().contains(v)) {
+                        version = serverVersion;
+                        break;
+                    }
                 }
             }
         }
@@ -90,7 +93,7 @@ public class TNLListener {
         Bukkit.getMessenger().registerOutgoingPluginChannel(Bootstrap.getInstance(), "BungeeCord");
         if (Settings.AUTO_UPDATER.getValue()) new PluginUpdate(Bootstrap.getInstance()).downloadUpdate();
         try {
-            if (getVersion().equals(ServerVersion.v1_16_4) || getVersion().equals(ServerVersion.v1_16_5)) {
+            if (getVersion().equals(ServerVersion.v1_16_4)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.CommandListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.InteractListener());
@@ -98,7 +101,7 @@ public class TNLListener {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15.R1.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.CommandListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.InteractListener());
-            } else if (getVersion().equals(ServerVersion.v1_7_10)) {
+            } else if (getVersion().equals(ServerVersion.v1_7_6)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R4.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.legacy.CommandListener());
             } else if (getVersion().equals(ServerVersion.v1_7_2)) {
@@ -151,37 +154,11 @@ public class TNLListener {
     }
 
     @Nonnull
-    public TNLPlayer getPlayer(@Nonnull Player player) {
-        return getPlayerHashMap().get(player);
-    }
-
-    @Nonnull
     public String getServerName() {
         return serverName;
     }
 
-    @Nullable
-    public TNLPlayer getPlayer(@Nonnull CommandSender player) {
-        if (player instanceof Player) return getPlayerHashMap().get(player);
-        return null;
-    }
-
-    @Nullable
-    public TNLPlayer getPlayer(@Nullable Entity player) {
-        if (player instanceof Player) return getPlayerHashMap().get(player);
-        else return null;
-    }
-
-    @Nullable
-    public TNLPlayer getPlayer(@Nonnull String player) {
-        return getPlayerHashMap().get(Bukkit.getPlayer(player));
-    }
-
-    @Nullable
-    public TNLPlayer getPlayer(@Nonnull UUID player) {
-        return getPlayerHashMap().get(Bukkit.getPlayer(player));
-    }
-
+    @Nonnull
     public static TNLListener getInstance() {
         return instance;
     }

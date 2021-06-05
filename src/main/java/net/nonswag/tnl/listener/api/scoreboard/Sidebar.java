@@ -58,21 +58,21 @@ public class Sidebar {
         if (team != null) {
             if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)
                     || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)
-                    || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+                   ) {
                 if (content.length() > 64) {
                     team.setPrefix(content.substring(0, 63));
                 } else {
                     team.setPrefix(content);
                 }
             } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)
-                    || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
+                    || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
                 if (content.length() > 32) {
                     team.setPrefix(content.substring(0, 31));
                 } else {
                     team.setPrefix(content);
                 }
             } else {
-                Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+                Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
                 throw new IllegalStateException();
             }
             showScore(score);

@@ -11,6 +11,7 @@ import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class NMSArmorStand extends EntityArmorStand implements TNLArmorStand {
 
@@ -43,33 +44,33 @@ public class NMSArmorStand extends EntityArmorStand implements TNLArmorStand {
     }
 
     @Override
-    public void setHeadPose(float x, float y, float z) {
-        super.setHeadPose(new Vector3f(x, y, z));
+    public void setHeadPose(@Nullable Pose pose) {
+        if (pose != null) super.setHeadPose(new Vector3f(pose.getX(), pose.getY(), pose.getZ()));
     }
 
     @Override
-    public void setBodyPose(float x, float y, float z) {
-        super.setBodyPose(new Vector3f(x, y, z));
+    public void setBodyPose(@Nullable Pose pose) {
+        if (pose != null) super.setBodyPose(new Vector3f(pose.getX(), pose.getY(), pose.getZ()));
     }
 
     @Override
-    public void setLeftArmPose(float x, float y, float z) {
-        super.setLeftArmPose(new Vector3f(x, y, z));
+    public void setLeftArmPose(@Nullable Pose pose) {
+        if (pose != null) super.setLeftArmPose(new Vector3f(pose.getX(), pose.getY(), pose.getZ()));
     }
 
     @Override
-    public void setRightArmPose(float x, float y, float z) {
-        super.setRightArmPose(new Vector3f(x, y, z));
+    public void setRightArmPose(@Nullable Pose pose) {
+        if (pose != null) super.setRightArmPose(new Vector3f(pose.getX(), pose.getY(), pose.getZ()));
     }
 
     @Override
-    public void setLeftLegPose(float x, float y, float z) {
-        super.setLeftLegPose(new Vector3f(x, y, z));
+    public void setLeftLegPose(@Nullable Pose pose) {
+        if (pose != null) super.setLeftLegPose(new Vector3f(pose.getX(), pose.getY(), pose.getZ()));
     }
 
     @Override
-    public void setRightLegPose(float x, float y, float z) {
-        super.setRightLegPose(new Vector3f(x, y, z));
+    public void setRightLegPose(@Nullable Pose pose) {
+        if (pose != null) super.setRightLegPose(new Vector3f(pose.getX(), pose.getY(), pose.getZ()));
     }
 
     @Override
@@ -88,33 +89,38 @@ public class NMSArmorStand extends EntityArmorStand implements TNLArmorStand {
     }
 
     @Override
-    public void setItemInMainHand(@Nonnull TNLItem item) {
-        super.setSlot(EnumItemSlot.MAINHAND, CraftItemStack.asNMSCopy(item.build()), true);
+    public void setBasePlate(boolean flag) {
+        super.setBasePlate(!flag);
     }
 
     @Override
-    public void setItemInOffHand(@Nonnull TNLItem item) {
-        super.setSlot(EnumItemSlot.OFFHAND, CraftItemStack.asNMSCopy(item.build()), true);
+    public void setItemInMainHand(@Nullable TNLItem item) {
+        super.setSlot(EnumItemSlot.MAINHAND, CraftItemStack.asNMSCopy(item != null ? item.build() : null), true);
     }
 
     @Override
-    public void setHelmet(@Nonnull TNLItem item) {
-        super.setSlot(EnumItemSlot.HEAD, CraftItemStack.asNMSCopy(item.build()), true);
+    public void setItemInOffHand(@Nullable TNLItem item) {
+        super.setSlot(EnumItemSlot.OFFHAND, CraftItemStack.asNMSCopy(item != null ? item.build() : null), true);
     }
 
     @Override
-    public void setChestplate(@Nonnull TNLItem item) {
-        super.setSlot(EnumItemSlot.CHEST, CraftItemStack.asNMSCopy(item.build()), true);
+    public void setHelmet(@Nullable TNLItem item) {
+        super.setSlot(EnumItemSlot.HEAD, CraftItemStack.asNMSCopy(item != null ? item.build() : null), true);
     }
 
     @Override
-    public void setLeggings(@Nonnull TNLItem item) {
-        super.setSlot(EnumItemSlot.LEGS, CraftItemStack.asNMSCopy(item.build()), true);
+    public void setChestplate(@Nullable TNLItem item) {
+        super.setSlot(EnumItemSlot.CHEST, CraftItemStack.asNMSCopy(item != null ? item.build() : null), true);
     }
 
     @Override
-    public void setBoots(@Nonnull TNLItem item) {
-        super.setSlot(EnumItemSlot.FEET, CraftItemStack.asNMSCopy(item.build()), true);
+    public void setLeggings(@Nullable TNLItem item) {
+        super.setSlot(EnumItemSlot.LEGS, CraftItemStack.asNMSCopy(item != null ? item.build() : null), true);
+    }
+
+    @Override
+    public void setBoots(@Nullable TNLItem item) {
+        super.setSlot(EnumItemSlot.FEET, CraftItemStack.asNMSCopy(item != null ? item.build() : null), true);
     }
 
     @Override

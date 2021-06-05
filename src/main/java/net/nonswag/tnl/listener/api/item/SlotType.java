@@ -19,7 +19,7 @@ public enum SlotType {
 
     @Nonnull
     public Object toNMS() {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
             if (equals(MAIN_HAND)) {
                 return net.minecraft.server.v1_16_R3.EnumItemSlot.MAINHAND;
             } else if (equals(OFF_HAND)) {
@@ -51,7 +51,7 @@ public enum SlotType {
             } else {
                 throw new UnsupportedOperationException("method is not supported in this version");
             }
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             if (equals(MAIN_HAND)) {
                 return 0;
             } else if (equals(BOOTS)) {
@@ -66,14 +66,14 @@ public enum SlotType {
                 throw new UnsupportedOperationException("method is not supported in this version");
             }
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }
 
     @Nonnull
     public static SlotType fromNMS(@Nonnull Object object) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
             if (object.equals(net.minecraft.server.v1_16_R3.EnumItemSlot.MAINHAND)) {
                 return MAIN_HAND;
             } else if (object.equals(net.minecraft.server.v1_16_R3.EnumItemSlot.OFFHAND)) {
@@ -105,7 +105,7 @@ public enum SlotType {
             } else {
                 throw new UnsupportedOperationException("method is not supported in this version");
             }
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             if (object.equals(0)) {
                 return MAIN_HAND;
             } else if (object.equals(1)) {
@@ -120,7 +120,7 @@ public enum SlotType {
                 throw new UnsupportedOperationException("method is not supported in this version");
             }
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }

@@ -50,16 +50,17 @@ public class GUIItem implements Iterable<Interaction>, Cloneable {
         return this;
     }
 
-    @Nullable
-    public Interaction getInteraction(@Nonnull Interaction.Type type) {
+    @Nonnull
+    public List<Interaction> getInteractions(@Nonnull Interaction.Type type) {
+        List<Interaction> interactions = new ArrayList<>();
         for (Interaction interaction : this) {
             for (@Nullable Interaction.Type interactionType : interaction) {
                 if (type.comparable(interactionType != null ? interactionType : Interaction.Type.LEFT)) {
-                    return interaction;
+                    interactions.add(interaction);
                 }
             }
         }
-        return null;
+        return interactions;
     }
 
     @Nonnull

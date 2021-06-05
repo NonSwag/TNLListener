@@ -7,8 +7,8 @@ import net.nonswag.tnl.listener.api.config.JsonConfig;
 import net.nonswag.tnl.listener.api.entity.TNLArmorStand;
 import net.nonswag.tnl.listener.api.holograms.Hologram;
 import net.nonswag.tnl.listener.api.holograms.UpdateRunnable;
+import net.nonswag.tnl.listener.api.holograms.event.PlaceholderRequestEvent;
 import net.nonswag.tnl.listener.api.holograms.event.SendEvent;
-import net.nonswag.tnl.listener.api.holograms.event.UpdateEvent;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Objects;
 import net.nonswag.tnl.listener.api.packet.*;
@@ -84,6 +84,8 @@ public class Holograms {
     }
 
     public void loadAll() {
+        Logger.debug.println("Reloading all holograms from database");
+        unloadAll();
         getHologramHashMap().clear();
         List<String> holograms = list();
         for (String s : holograms) {
@@ -153,6 +155,12 @@ public class Holograms {
                             }
                         }
                     }
+                    if (s.contains("%")) {
+                        PlaceholderRequestEvent event = new PlaceholderRequestEvent(hologram, player, s);
+                        event.call();
+                        hologram.onPlaceholderRequest().accept(event);
+                        s = event.getLine();
+                    }
                     armorStand.setInvisible(true);
                     armorStand.setSmall(true);
                     armorStand.setCustomNameVisible(true);
@@ -166,6 +174,7 @@ public class Holograms {
             }
             if (!armorStands.isEmpty()) {
                 SendEvent event = new SendEvent(hologram, player, armorStands);
+                event.call();
                 hologram.onSend().accept(event);
                 for (TNLArmorStand armorStand : event.getArmorStands()) {
                     packets.add(TNLEntitySpawn.create(armorStand));
@@ -216,6 +225,12 @@ public class Holograms {
                                 }
                             }
                         }
+                        if (s.contains("%")) {
+                            PlaceholderRequestEvent event = new PlaceholderRequestEvent(hologram, player, s);
+                            event.call();
+                            hologram.onPlaceholderRequest().accept(event);
+                            s = event.getLine();
+                        }
                         if (armorStand.getBukkitEntity().getName().equals(s)) continue;
                         armorStand.setCustomName(s);
                         armorStand.setCustomNameVisible(true);
@@ -224,12 +239,8 @@ public class Holograms {
                 }
             }
         }
-        if (!armorStands.isEmpty()) {
-            UpdateEvent event = new UpdateEvent(hologram, player, armorStands);
-            hologram.onUpdate().accept(event);
-            for (TNLArmorStand armorStand : armorStands) {
-                player.sendPacket(TNLEntityMetadata.create(armorStand));
-            }
+        if (!armorStands.isEmpty()) for (TNLArmorStand armorStand : armorStands) {
+            player.sendPacket(TNLEntityMetadata.create(armorStand));
         }
     }
 
@@ -359,11 +370,11 @@ public class Holograms {
 
     @Nonnull
     public List<String> list() {
-        List<String> list = new ArrayList<>();
+        List<String> holograms = new ArrayList<>();
         for (Map.Entry<String, JsonElement> entry : getSaves().getJsonElement().getAsJsonObject().entrySet()) {
-            list.add(entry.getKey());
+            holograms.add(entry.getKey());
         }
-        return list;
+        return holograms;
     }
 
     @Nonnull

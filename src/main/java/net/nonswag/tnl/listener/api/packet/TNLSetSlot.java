@@ -14,16 +14,16 @@ public abstract class TNLSetSlot {
 
     @Nonnull
     public static Object create(@Nonnull Inventory inventory, int slot, @Nonnull ItemStack item) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
             return new net.minecraft.server.v1_16_R3.PacketPlayOutSetSlot(inventory.getId(), slot, org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack.asNMSCopy(item));
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return new net.minecraft.server.v1_15_R1.PacketPlayOutSetSlot(inventory.getId(), slot, org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack.asNMSCopy(item));
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
             return new net.minecraft.server.v1_7_R4.PacketPlayOutSetSlot(inventory.getId(), slot, org.bukkit.craftbukkit.v1_7_R4.inventory.CraftItemStack.asNMSCopy(item));
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             return new net.minecraft.server.v1_7_R1.PacketPlayOutSetSlot(inventory.getId(), slot, org.bukkit.craftbukkit.v1_7_R1.inventory.CraftItemStack.asNMSCopy(item));
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }

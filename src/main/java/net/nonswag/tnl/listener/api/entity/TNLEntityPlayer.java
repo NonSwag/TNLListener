@@ -13,16 +13,16 @@ public interface TNLEntityPlayer extends TNLEntity {
 
     @Nonnull
     static TNLEntityPlayer create(@Nonnull World world, double x, double y, double z, float yaw, float pitch, @Nonnull GameProfile profile) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
             return new net.nonswag.tnl.listener.api.entity.v1_16.R3.NMSEntityPlayer(world, x, y, z, yaw, pitch, profile);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return new net.nonswag.tnl.listener.api.entity.v1_15.R1.NMSEntityPlayer(world, x, y, z, yaw, pitch, profile);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
             throw new UnsupportedOperationException("method is not supported in this version");
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             throw new UnsupportedOperationException("method is not supported in this version");
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }

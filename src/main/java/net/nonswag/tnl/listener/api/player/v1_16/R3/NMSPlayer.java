@@ -1,5 +1,7 @@
 package net.nonswag.tnl.listener.api.player.v1_16.R3;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import io.netty.channel.*;
 import net.minecraft.server.v1_16_R3.*;
 import net.nonswag.tnl.listener.TNLListener;
@@ -7,6 +9,7 @@ import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
 import net.nonswag.tnl.listener.api.bossbar.v1_16.R3.NMSBossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Generic;
+import net.nonswag.tnl.listener.api.player.Skin;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
@@ -61,17 +64,13 @@ public class NMSPlayer implements TNLPlayer {
 
     @Nullable
     public static NMSPlayer cast(@Nullable CommandSender sender) {
-        if (sender instanceof Player) {
-            return cast((Player) sender);
-        }
+        if (sender instanceof Player) return cast((Player) sender);
         return null;
     }
 
     @Nullable
     public static NMSPlayer cast(@Nullable HumanEntity humanEntity) {
-        if (humanEntity instanceof Player) {
-            return cast((Player) humanEntity);
-        }
+        if (humanEntity instanceof Player) return cast((Player) humanEntity);
         return null;
     }
 
@@ -85,26 +84,20 @@ public class NMSPlayer implements TNLPlayer {
 
     @Nullable
     public static NMSPlayer cast(@Nullable LivingEntity livingEntity) {
-        if (livingEntity instanceof Player) {
-            return cast((Player) livingEntity);
-        }
+        if (livingEntity instanceof Player) return cast((Player) livingEntity);
         return null;
     }
 
     @Nullable
     public static NMSPlayer cast(@Nonnull String string) {
         Player player = Bukkit.getPlayer(string);
-        if (player != null) {
-            return cast(player);
-        }
+        if (player != null) return cast(player);
         return null;
     }
 
     @Nullable
     public static NMSPlayer cast(@Nullable Object object) {
-        if (object instanceof Player) {
-            return cast(((Player) object));
-        }
+        if (object instanceof Player) return cast(((Player) object));
         return null;
     }
 
@@ -164,16 +157,19 @@ public class NMSPlayer implements TNLPlayer {
             }
         }
         Material material = Material.getMaterial(signMenu.getType().name());
-        if (material != null) {
-            sendBlockChange(signMenu.getLocation(), material.createBlockData());
-        } else {
-            sendBlockChange(signMenu.getLocation(), Material.SPRUCE_WALL_SIGN.createBlockData());
-        }
+        if (material != null) sendBlockChange(signMenu.getLocation(), material.createBlockData());
+        else sendBlockChange(signMenu.getLocation(), Material.SPRUCE_WALL_SIGN.createBlockData());
         PacketPlayOutTileEntityData updatePacket = tileEntitySign.getUpdatePacket();
         assert updatePacket != null;
         sendPacket(updatePacket);
         sendPacket(editor);
         getVirtualStorage().put("current-sign", signMenu);
+    }
+
+    @Override
+    public void setSkin(@Nonnull Skin skin, @Nonnull TNLPlayer player) {
+        GameProfile profile = getEntityPlayer().getProfile();
+        profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
     }
 
     @Override
@@ -184,15 +180,6 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void enterCombat() {
         getEntityPlayer().enterCombat();
-    }
-
-    @Override
-    public void hideTabListName(@Nonnull TNLPlayer[] players) {
-        for (TNLPlayer all : players) {
-            if (!all.getUniqueId().equals(getUniqueId())) {
-                sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ((NMSPlayer) all).getEntityPlayer()));
-            }
-        }
     }
 
     @Override

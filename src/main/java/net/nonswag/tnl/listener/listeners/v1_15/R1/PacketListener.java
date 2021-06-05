@@ -32,6 +32,18 @@ public class PacketListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPacket(PlayerPacketEvent<Packet<?>> event) {
         if (event.isIncoming()) {
+            if (!(event.getPacket() instanceof PacketPlayInWindowClick
+                    || event.getPacket() instanceof PacketPlayInCloseWindow
+                    || event.getPacket() instanceof PacketPlayInFlying
+                    || event.getPacket() instanceof PacketPlayInEntityAction
+                    || event.getPacket() instanceof PacketPlayInAbilities
+                    || event.getPacket() instanceof PacketPlayInHeldItemSlot
+                    || event.getPacket() instanceof PacketPlayInKeepAlive)) {
+                if (event.getPlayer().getGUI() != null) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
             if (event.getPacket() instanceof PacketPlayInChat && Settings.BETTER_CHAT.getValue()) {
                 PlayerChatEvent chatEvent = new PlayerChatEvent(event.getPlayer(), ((PacketPlayInChat) event.getPacket()).b());
                 event.getPlayer().chat(chatEvent);
@@ -167,16 +179,20 @@ public class PacketListener implements Listener {
                 if (gui != null) {
                     PacketPlayInWindowClick packet = (PacketPlayInWindowClick) event.getPacket();
                     int slot = packet.c();
-                    Interaction.Type type = Interaction.Type.fromNMS(packet.d(), packet.g().name());
                     boolean cancel = false;
-                    if (slot <= gui.getSize()) {
+                    if (slot < gui.getSize() && slot >= 0) {
+                        Interaction.Type type = Interaction.Type.fromNMS(packet.d(), packet.g().name());
                         cancel = gui.getClickListener().onClick(event.getPlayer(), slot, type);
                         GUIItem item = gui.getItem(slot);
                         if (item != null) {
-                            Interaction interaction = item.getInteraction(type);
-                            if (interaction != null) interaction.getAction().accept(event.getPlayer());
+                            for (Interaction interaction : item.getInteractions(type)) {
+                                interaction.getAction().accept(event.getPlayer());
+                            }
                             cancel = true;
                         }
+                    } else if (slot >= gui.getSize()) {
+                        event.setPacketField("slot", slot - gui.getSize() + 9);
+                        event.setPacketField("a", 0);
                     }
                     if (cancel) {
                         event.setCancelled(true);

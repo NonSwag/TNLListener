@@ -4,6 +4,7 @@ import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
 import net.nonswag.tnl.listener.api.chat.Conversation;
+import net.nonswag.tnl.listener.api.entity.TNLEntity;
 import net.nonswag.tnl.listener.api.entity.TNLEntityPlayer;
 import net.nonswag.tnl.listener.api.file.FileCreator;
 import net.nonswag.tnl.listener.api.gui.GUI;
@@ -22,6 +23,7 @@ import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.storage.VirtualStorage;
 import net.nonswag.tnl.listener.api.title.Title;
+import net.nonswag.tnl.listener.api.version.ProtocolVersion;
 import net.nonswag.tnl.listener.api.version.ServerVersion;
 import net.nonswag.tnl.listener.events.InventoryLoadEvent;
 import net.nonswag.tnl.listener.events.InventorySaveEvent;
@@ -35,6 +37,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.conversations.ConversationAbandonedEvent;
 import org.bukkit.entity.*;
@@ -1291,6 +1294,14 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         return getBukkitPlayer().setLeashHolder(entity);
     }
 
+    default void leash(@Nonnull TNLEntity entity) {
+        sendPacket(TNLEntityAttach.create(this, entity));
+    }
+
+    default void unleash() {
+        sendPacket(TNLEntityAttach.create(this, null));
+    }
+
     @Override
     default boolean isGliding() {
         return getBukkitPlayer().isGliding();
@@ -2051,6 +2062,22 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         return getVirtualStorage().get("GameProfile", GameProfile.class).nonnull();
     }
 
+    void setSkin(@Nonnull Skin skin, @Nonnull TNLPlayer player);
+
+    default void setSkin(@Nonnull Skin skin, @Nonnull TNLPlayer... players) {
+        setSkin(skin, Arrays.asList(players));
+    }
+
+    default void setSkin(@Nonnull Skin skin, @Nonnull List<TNLPlayer> players) {
+        for (TNLPlayer all : players) {
+            setSkin(skin, all);
+        }
+    }
+
+    default void setSkin(@Nonnull Skin skin) {
+        setSkin(skin, TNLListener.getInstance().getOnlinePlayers());
+    }
+
     @Override
     int getPing();
 
@@ -2324,7 +2351,21 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         if (gui != null) sendPacket(TNLWindowItems.create(gui.items()));
     }
 
-    void hideTabListName(@Nonnull TNLPlayer[] players);
+    default void hideTabListName(@Nonnull TNLPlayer player) {
+        player.sendPacket(TNLPlayerInfo.create(this, TNLPlayerInfo.Action.REMOVE_PLAYER));
+    }
+
+    default void hideTabListName(@Nonnull TNLPlayer... players) {
+        hideTabListName(Arrays.asList(players));
+    }
+
+    default void hideTabListName(@Nonnull List<TNLPlayer> players) {
+        for (TNLPlayer all : players) hideTabListName(all);
+    }
+
+    default void hideTabListName() {
+        hideTabListName(TNLListener.getInstance().getOnlinePlayers());
+    }
 
     default void disguise(@Nonnull Generic<?> entity, @Nonnull List<TNLPlayer> receivers) {
         for (TNLPlayer receiver : receivers) disguise(entity, receiver);
@@ -2403,6 +2444,11 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
 
     void setGlowing(@Nonnull Entity entity, boolean glowing);
 
+    @Nonnull
+    default ProtocolVersion getVersion() {
+        return ProtocolVersion.UNKNOWN;
+    }
+
     void uninject();
 
     void inject();
@@ -2422,22 +2468,34 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     }
 
     @Nonnull
-    static TNLPlayer cast(@Nonnull HumanEntity humanEntity) {
-        return cast(((Player) humanEntity));
+    static TNLPlayer cast(@Nonnull HumanEntity entity) {
+        return cast((Player) entity);
+    }
+
+    @Nullable
+    static TNLPlayer cast(@Nullable Entity entity) {
+        if (entity instanceof Player) return cast((Player) entity);
+        return null;
+    }
+
+    @Nullable
+    static TNLPlayer cast(@Nullable CommandSender sender) {
+        if (sender instanceof Player) return cast((Player) sender);
+        return null;
     }
 
     @Nonnull
     static TNLPlayer cast(@Nonnull Player player) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
             return net.nonswag.tnl.listener.api.player.v1_16.R3.NMSPlayer.cast(player);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer.cast(player);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
             return net.nonswag.tnl.listener.api.player.v1_7.R4.NMSPlayer.cast(player);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             return net.nonswag.tnl.listener.api.player.v1_7.R1.NMSPlayer.cast(player);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }

@@ -1,13 +1,15 @@
 package net.nonswag.tnl.listener.api.player.v1_15.R1;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import io.netty.channel.*;
 import net.minecraft.server.v1_15_R1.*;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
 import net.nonswag.tnl.listener.api.bossbar.v1_15.R1.NMSBossBar;
-import net.nonswag.tnl.listener.api.gui.GUI;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Generic;
+import net.nonswag.tnl.listener.api.player.Skin;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
@@ -174,6 +176,12 @@ public class NMSPlayer implements TNLPlayer {
         sendPacket(updatePacket);
         sendPacket(editor);
         getVirtualStorage().put("current-sign", signMenu);
+    }
+
+    @Override
+    public void setSkin(@Nonnull Skin skin, @Nonnull TNLPlayer player) {
+        GameProfile profile = getEntityPlayer().getProfile();
+        profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
     }
 
     @Override

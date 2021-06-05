@@ -4,8 +4,10 @@ import net.minecraft.server.v1_7_R1.*;
 import net.minecraft.util.io.netty.channel.*;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
+import net.nonswag.tnl.listener.api.entity.TNLEntityPlayer;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Generic;
+import net.nonswag.tnl.listener.api.player.Skin;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
@@ -145,6 +147,11 @@ public class NMSPlayer implements TNLPlayer {
         }
         sendPacket(tileEntitySign.getUpdatePacket());
         sendPacket(new PacketPlayOutOpenSignEditor(signMenu.getLocation().getBlockX(), signMenu.getLocation().getBlockY(), signMenu.getLocation().getBlockZ()));
+    }
+
+    @Override
+    public void setSkin(@Nonnull Skin skin, @Nonnull TNLPlayer player) {
+        throw new UnsupportedOperationException("method is not supported in this version");
     }
 
     @Override

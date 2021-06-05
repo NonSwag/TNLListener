@@ -49,6 +49,16 @@ public interface TNLItem {
         return getItemMeta() != null ? getItemMeta().getDisplayName() : "";
     }
 
+    @Nullable
+    default Color getColor() {
+        if (getItemMeta() instanceof PotionMeta) {
+            return ((PotionMeta) getItemMeta()).getColor();
+        } else if (getItemMeta() instanceof LeatherArmorMeta) {
+            return ((LeatherArmorMeta) getItemMeta()).getColor();
+        }
+        return null;
+    }
+
     @Nonnull
     default TNLItem setName(@Nullable String name) {
         if (getItemMeta() != null) {
@@ -135,20 +145,15 @@ public interface TNLItem {
     }
 
     @Nonnull
-    default TNLItem setSkullOwner(@Nonnull OfflinePlayer owner) {
-        if (getItemMeta() instanceof SkullMeta) {
-            ((SkullMeta) getItemMeta()).setOwningPlayer(owner);
-        }
+    default TNLItem setSkullOwner(@Nullable OfflinePlayer owner) {
+        if (getItemMeta() instanceof SkullMeta) ((SkullMeta) getItemMeta()).setOwningPlayer(owner);
         return this;
     }
 
     @SuppressWarnings("deprecation")
     @Nonnull
     default TNLItem setSkullOwner(@Nonnull String name) {
-        if (getItemMeta() instanceof SkullMeta) {
-            ((SkullMeta) getItemMeta()).setOwningPlayer(Bukkit.getOfflinePlayer(name));
-        }
-        return this;
+        return setSkullOwner(Bukkit.getOfflinePlayer(name));
     }
 
     @Nonnull
@@ -172,13 +177,11 @@ public interface TNLItem {
     }
 
     @Nonnull
-    default TNLItem setColor(@Nonnull Color color) {
-        if (getItemMeta() instanceof PotionMeta) {
-            ((PotionMeta) getItemMeta()).setColor(color);
-        } else if (getItemMeta() instanceof FireworkEffectMeta) {
-            setEffect(FireworkEffect.builder().withColor(color).build());
-        } else if (getItemMeta() instanceof LeatherArmorMeta) {
-            ((LeatherArmorMeta) getItemMeta()).setColor(color);
+    default TNLItem setColor(@Nullable Color color) {
+        if (getItemMeta() instanceof PotionMeta) ((PotionMeta) getItemMeta()).setColor(color);
+        else if (getItemMeta() instanceof LeatherArmorMeta) ((LeatherArmorMeta) getItemMeta()).setColor(color);
+        else if (getItemMeta() instanceof FireworkEffectMeta) {
+            if (color != null) setEffect(FireworkEffect.builder().withColor(color).build());
         }
         return this;
     }
@@ -350,18 +353,28 @@ public interface TNLItem {
 
     @Nonnull
     static TNLItem create(@Nonnull ItemStack itemStack) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
             return new net.nonswag.tnl.listener.api.item.v1_16.R3.NMSItem(itemStack);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return new net.nonswag.tnl.listener.api.item.v1_15.R1.NMSItem(itemStack);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
             return new net.nonswag.tnl.listener.api.item.v1_7.R4.NMSItem(itemStack);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             return new net.nonswag.tnl.listener.api.item.v1_7.R1.NMSItem(itemStack);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
+    }
+
+    @Nonnull
+    static TNLItem create(@Nonnull TNLItem item) {
+        return create(item.build());
+    }
+
+    @Nonnull
+    static TNLItem create(@Nonnull GUIItem item) {
+        return create(item.getBuilder().getOrDefault(TNLItem.create(Material.AIR)));
     }
 
     @Nonnull

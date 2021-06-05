@@ -1,52 +1,54 @@
 package net.nonswag.tnl.listener.api.version;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.List;
 
 public enum ProtocolVersion {
-    UNKNOWN("Unknown", -1),
-    LEGACY("Legacy", -2),
-    MINECRAFT_1_7_2("1.7.2", 4),
-    MINECRAFT_1_7_6("1.7.6", 5),
-    MINECRAFT_1_8("1.8", 47),
-    MINECRAFT_1_9("1.9", 107),
-    MINECRAFT_1_9_1("1.9.1", 108),
-    MINECRAFT_1_9_2("1.9.2", 109),
-    MINECRAFT_1_9_4("1.9.4", 110),
-    MINECRAFT_1_10("1.10", 210),
-    MINECRAFT_1_11("1.11", 315),
-    MINECRAFT_1_11_1("1.11.1", 316),
-    MINECRAFT_1_12("1.12", 335),
-    MINECRAFT_1_12_1("1.12.1", 338),
-    MINECRAFT_1_12_2("1.12.2", 340),
-    MINECRAFT_1_13("1.13", 393),
-    MINECRAFT_1_13_1("1.13.1", 401),
-    MINECRAFT_1_13_2("1.13.2", 404),
-    MINECRAFT_1_14("1.14", 477),
-    MINECRAFT_1_14_1("1.14.1", 480),
-    MINECRAFT_1_14_2("1.14.2", 485),
-    MINECRAFT_1_14_3("1.14.3", 490),
-    MINECRAFT_1_14_4("1.14.4", 498),
-    MINECRAFT_1_15("1.15", 573),
-    MINECRAFT_1_15_1("1.15.1", 575),
-    MINECRAFT_1_15_2("1.15.2", 578),
-    MINECRAFT_1_16("1.16", 735),
-    MINECRAFT_1_16_1("1.16.1", 736),
-    MINECRAFT_1_16_2("1.16.2", 751),
-    MINECRAFT_1_16_3("1.16.3", 753),
-    MINECRAFT_1_16_4("1.16.4", 754);
+    UNKNOWN(-1, "Unknown"),
+    v1_7_2(4, "1.7.2", "1.7.3", "1.7.4", "1.7.5"),
+    v1_7_6(5, "1.7.6", "1.7.7", "1.7.8", "1.7.9", "1.7.10"),
+    v1_8(47, "1.8", "1.8.1", "1.8.2", "1.8.3", "1.8.4", "1.8.5", "1.8.6", "1.8.7", "1.8.8", "1.8.9"),
+    v1_9(107, "1.9"),
+    v1_9_1(108, "1.9.1"),
+    v1_9_2(109, "1.9.2"),
+    v1_9_4(110, "1.9.3", "1.9.4"),
+    v1_10(210, "1.10", "1.10.1", "1.10.2"),
+    v1_11(315, "1.11"),
+    v1_11_1(316, "1.11.1", "1.11.2"),
+    v1_12(335, "1.12"),
+    v1_12_1(338, "1.12.1"),
+    v1_12_2(340, "1.12.2"),
+    v1_13(393, "1.13"),
+    v1_13_1(401, "1.13.1"),
+    v1_13_2(404, "1.13.2"),
+    v1_14(477, "1.14"),
+    v1_14_1(480, "1.14.1"),
+    v1_14_2(485, "1.14.2"),
+    v1_14_3(490, "1.14.3"),
+    v1_14_4(498, "1.14.4"),
+    v1_15(573, "1.15"),
+    v1_15_1(575, "1.15.1"),
+    v1_15_2(578, "1.15.2"),
+    v1_16(735, "1.16"),
+    v1_16_1(736, "1.16.1"),
+    v1_16_2(751, "1.16.2"),
+    v1_16_3(753, "1.16.3"),
+    v1_16_4(754, "1.16.4", "1.16.5"),
+    ;
 
     @Nonnull
-    private final String name;
+    private final List<String> versions;
     private final int protocol;
 
-    ProtocolVersion(@Nonnull String name, int protocol) {
-        this.name = name;
+    ProtocolVersion(int protocol, @Nonnull String... versions) {
         this.protocol = protocol;
+        this.versions = Arrays.asList(versions);
     }
 
     @Nonnull
-    public String getName() {
-        return name;
+    public List<String> getVersions() {
+        return versions;
     }
 
     public int getProtocol() {
@@ -54,12 +56,18 @@ public enum ProtocolVersion {
     }
 
     @Nonnull
-    public static ProtocolVersion getProtocolVersion(int protocol) {
-        for (ProtocolVersion version : values()) {
-            if (version.getProtocol() == protocol) {
-                return version;
-            }
-        }
-        return ProtocolVersion.UNKNOWN;
+    public String getIntroducedVersion() {
+        return getVersions().get(0);
+    }
+
+    @Nonnull
+    public String getRecentVersion() {
+        return getVersions().get(getVersions().size() - 1);
+    }
+
+    @Nonnull
+    @Override
+    public String toString() {
+        return getRecentVersion();
     }
 }

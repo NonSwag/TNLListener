@@ -11,17 +11,19 @@ public abstract class TNLNamedEntitySpawn {
 
     @Nonnull
     public static Object create(@Nonnull TNLEntityPlayer player) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5)) {
-            return new net.minecraft.server.v1_16_R3.PacketPlayOutNamedEntitySpawn((net.minecraft.server.v1_16_R3.EntityPlayer) player);
+        Object packet;
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+            packet = new net.minecraft.server.v1_16_R3.PacketPlayOutNamedEntitySpawn((net.minecraft.server.v1_16_R3.EntityPlayer) player);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
-            return new net.minecraft.server.v1_15_R1.PacketPlayOutNamedEntitySpawn((net.minecraft.server.v1_15_R1.EntityPlayer) player);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
-            return new net.minecraft.server.v1_7_R4.PacketPlayOutNamedEntitySpawn((net.minecraft.server.v1_7_R4.EntityPlayer) player);
+            packet = new net.minecraft.server.v1_15_R1.PacketPlayOutNamedEntitySpawn((net.minecraft.server.v1_15_R1.EntityPlayer) player);
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
+            packet = new net.minecraft.server.v1_7_R4.PacketPlayOutNamedEntitySpawn((net.minecraft.server.v1_7_R4.EntityPlayer) player);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
-            return new net.minecraft.server.v1_7_R1.PacketPlayOutNamedEntitySpawn((net.minecraft.server.v1_7_R1.EntityPlayer) player);
+            packet = new net.minecraft.server.v1_7_R1.PacketPlayOutNamedEntitySpawn((net.minecraft.server.v1_7_R1.EntityPlayer) player);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
+        return packet;
     }
 }

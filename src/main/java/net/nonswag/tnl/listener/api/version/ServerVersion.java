@@ -1,33 +1,48 @@
 package net.nonswag.tnl.listener.api.version;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.List;
 
 public enum ServerVersion {
-    UNKNOWN,
-    v1_7_2("1.7.2"),
-    v1_7_10("1.7.10"),
-    v1_8_8("1.8.8"),
-    v1_12_2("1.12.2"),
-    v1_13_2("1.13.2"),
-    v1_14_4("1.14.4"),
-    v1_15_2("1.15.2"),
-    v1_16_4("1.16.4"),
-    v1_16_5("1.16.5"),
+    UNKNOWN(-1, "Unknown"),
+    v1_7_2(4, "1.7.2", "1.7.3", "1.7.4", "1.7.5"),
+    v1_7_6(5, "1.7.6", "1.7.7", "1.7.8", "1.7.9", "1.7.10"),
+    v1_15_2(578, "1.15.2"),
+    v1_16_4(754, "1.16.4", "1.16.5"),
     ;
 
     @Nonnull
-    private final String version;
+    private final List<String> versions;
+    private final int protocol;
 
-    ServerVersion() {
-        this.version = "unknown";
-    }
-
-    ServerVersion(@Nonnull String version) {
-        this.version = version;
+    ServerVersion(int protocol, @Nonnull String... versions) {
+        this.protocol = protocol;
+        this.versions = Arrays.asList(versions);
     }
 
     @Nonnull
-    public String getVersion() {
-        return version;
+    public List<String> getVersions() {
+        return versions;
+    }
+
+    public int getProtocol() {
+        return protocol;
+    }
+
+    @Nonnull
+    public String getIntroducedVersion() {
+        return getVersions().get(0);
+    }
+
+    @Nonnull
+    public String getRecentVersion() {
+        return getVersions().get(getVersions().size() - 1);
+    }
+
+    @Nonnull
+    @Override
+    public String toString() {
+        return getRecentVersion();
     }
 }

@@ -8,21 +8,22 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface TNLArmorStand extends TNLEntity {
 
     @Nonnull
     static TNLArmorStand create(@Nonnull World world, double x, double y, double z, float yaw, float pitch) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_5) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
             return new net.nonswag.tnl.listener.api.entity.v1_16.R3.NMSArmorStand(world, x, y, z, yaw, pitch);
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
             return new net.nonswag.tnl.listener.api.entity.v1_15.R1.NMSArmorStand(world, x, y, z, yaw, pitch);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_10)) {
+        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
             throw new UnsupportedOperationException("method is not supported in this version");
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             throw new UnsupportedOperationException("method is not supported in this version");
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }
@@ -76,17 +77,17 @@ public interface TNLArmorStand extends TNLEntity {
 
     boolean isMarker();
 
-    void setHeadPose(float x, float y, float z);
+    void setHeadPose(@Nullable Pose pose);
 
-    void setBodyPose(float x, float y, float z);
+    void setBodyPose(@Nullable Pose pose);
 
-    void setLeftArmPose(float x, float y, float z);
+    void setLeftArmPose(@Nullable Pose pose);
 
-    void setRightArmPose(float x, float y, float z);
+    void setRightArmPose(@Nullable Pose pose);
 
-    void setLeftLegPose(float x, float y, float z);
+    void setLeftLegPose(@Nullable Pose pose);
 
-    void setRightLegPose(float x, float y, float z);
+    void setRightLegPose(@Nullable Pose pose);
 
     boolean isInteractable();
 
@@ -102,15 +103,40 @@ public interface TNLArmorStand extends TNLEntity {
 
     void setGravity(boolean gravity);
 
-    void setItemInMainHand(@Nonnull TNLItem item);
+    void setItemInMainHand(@Nullable TNLItem item);
 
-    void setItemInOffHand(@Nonnull TNLItem item);
+    void setItemInOffHand(@Nullable TNLItem item);
 
-    void setHelmet(@Nonnull TNLItem item);
+    void setHelmet(@Nullable TNLItem item);
 
-    void setChestplate(@Nonnull TNLItem item);
+    void setChestplate(@Nullable TNLItem item);
 
-    void setLeggings(@Nonnull TNLItem item);
+    void setLeggings(@Nullable TNLItem item);
 
-    void setBoots(@Nonnull TNLItem item);
+    void setBoots(@Nullable TNLItem item);
+
+    class Pose {
+
+        private final float x;
+        private final float y;
+        private final float z;
+
+        public Pose(double x, double y, double z) {
+            this.x = Math.round(x);
+            this.y = Math.round(y);
+            this.z = Math.round(z);
+        }
+
+        public float getX() {
+            return x;
+        }
+
+        public float getY() {
+            return y;
+        }
+
+        public float getZ() {
+            return z;
+        }
+    }
 }
