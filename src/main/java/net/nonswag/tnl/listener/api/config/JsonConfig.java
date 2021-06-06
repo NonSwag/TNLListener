@@ -37,7 +37,7 @@ public class JsonConfig implements Config {
         }
         this.jsonElement = jsonElement;
         save();
-        if (!isValid()) Logger.error.println("The file '" + file.getAbsolutePath() + "' is invalid");
+        if (!isValid()) Logger.error.println("The file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
     }
 
     @Nonnull
@@ -57,7 +57,8 @@ public class JsonConfig implements Config {
             writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(getJsonElement()));
             writer.close();
         } catch (Exception e) {
-            Logger.error.println("Failed to save file '" + getFile().getAbsolutePath() + "'", e);
+            Logger.error.println("Failed to save file §8'§4" + getFile().getAbsolutePath() + "§4'", e);
         }
     }
 }
+

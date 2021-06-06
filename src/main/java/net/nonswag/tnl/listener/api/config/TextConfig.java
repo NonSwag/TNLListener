@@ -29,15 +29,11 @@ public class TextConfig implements Config {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), StandardCharsets.UTF_8));
             Object[] array = bufferedReader.lines().toArray();
             this.content = new String[array.length];
-            for (int i = 0; i < array.length; i++) {
-                content[i] = (String) array[i];
-            }
+            for (int i = 0; i < array.length; i++) content[i] = (String) array[i];
         } catch (Exception ignored) {
         }
         save();
-        if (!isValid()) {
-            Logger.error.println("The file '" + file.getAbsolutePath() + "' is invalid");
-        }
+        if (!isValid()) Logger.error.println("§cThe file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
     }
 
     @Nonnull
@@ -58,12 +54,10 @@ public class TextConfig implements Config {
     public void save() {
         try {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(getFile()), StandardCharsets.UTF_8));
-            for (String s : content) {
-                writer.write(s + "\n");
-            }
+            for (String s : content) writer.write(s + "\n");
             writer.close();
         } catch (Exception e) {
-            Logger.error.println("Failed to save file '" + getFile().getAbsolutePath() + "'", e);
+            Logger.error.println("Failed to save file §8'§4" + getFile().getAbsolutePath() + "§8'", e);
         }
     }
 }

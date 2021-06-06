@@ -45,9 +45,7 @@ public class PropertyConfig implements Config {
         } catch (Exception e) {
             Logger.error.println(e);
         }
-        if (!isValid()) {
-            Logger.error.println("§cThe file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
-        }
+        if (!isValid()) Logger.error.println("§cThe file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
     }
 
     @Nonnull
@@ -67,7 +65,7 @@ public class PropertyConfig implements Config {
             });
             writer.close();
         } catch (Exception e) {
-            Logger.error.println(e);
+            Logger.error.println("Failed to save file §8'§4" + getFile().getAbsolutePath() + "§8'", e);
         }
     }
 
