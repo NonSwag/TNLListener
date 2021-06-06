@@ -172,7 +172,9 @@ public class PacketListener implements Listener {
                         });
                     }
                     event.getPlayer().getVirtualStorage().remove("current-sign");
-                    event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
+                    if (signMenu.getLocation() != null) {
+                        event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
+                    }
                 }
             } else if (event.getPacket() instanceof PacketPlayInWindowClick) {
                 GUI gui = event.getPlayer().getGUI();

@@ -26,10 +26,36 @@ public class Redis extends Jedis {
         super(getConfig().getString("host"), getConfig().getInteger("port"));
     }
 
+    @Nonnull
     @Override
     public String set(@Nonnull String key, @Nullable String value) {
         if (value == null) return super.sentinelRemove(key);
         else return super.set(key.getBytes(StandardCharsets.UTF_8), value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Nonnull
+    public String set(@Nonnull String key, @Nullable Object value) {
+        return set(key, value == null ? null : value.toString());
+    }
+
+    public int getInt(@Nonnull String key) {
+        return Integer.parseInt(get(key));
+    }
+
+    public double getDouble(@Nonnull String key) {
+        return Double.parseDouble(get(key));
+    }
+
+    public long getLong(@Nonnull String key) {
+        return Long.parseLong(get(key));
+    }
+
+    public short getShort(@Nonnull String key) {
+        return Short.parseShort(get(key));
+    }
+
+    public boolean getBoolean(@Nonnull String key) {
+        return Boolean.parseBoolean(get(key));
     }
 
     @Override

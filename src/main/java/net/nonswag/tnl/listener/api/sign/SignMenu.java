@@ -5,28 +5,23 @@ import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.Location;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.BiPredicate;
 
 public class SignMenu {
 
-    @Nonnull
-    private final Location location;
     @Nonnull
     private final String[] lines;
     @Nonnull
     private final Objects<BiPredicate<TNLPlayer, String[]>> response = new Objects<>();
     @Nonnull
     private Type type = Type.DARK_OAK_WALL_SIGN;
+    @Nullable
+    private Location location = null;
     private boolean reopenOnFail = false;
 
-    public SignMenu(@Nonnull Location location, @Nonnull String... lines) {
-        this.location = location;
+    public SignMenu(@Nonnull String... lines) {
         this.lines = lines;
-    }
-
-    @Nonnull
-    public Location getLocation() {
-        return location;
     }
 
     @Nonnull
@@ -46,6 +41,15 @@ public class SignMenu {
 
     public void setType(@Nonnull Type type) {
         this.type = type;
+    }
+
+    @Nullable
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(@Nonnull Location location) {
+        this.location = location;
     }
 
     @Nonnull
