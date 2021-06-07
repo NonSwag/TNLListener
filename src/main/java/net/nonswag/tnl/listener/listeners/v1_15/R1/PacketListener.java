@@ -38,8 +38,9 @@ public class PacketListener implements Listener {
                     || event.getPacket() instanceof PacketPlayInEntityAction
                     || event.getPacket() instanceof PacketPlayInAbilities
                     || event.getPacket() instanceof PacketPlayInHeldItemSlot
+                    || event.getPacket() instanceof PacketPlayInUpdateSign
                     || event.getPacket() instanceof PacketPlayInKeepAlive)) {
-                if (event.getPlayer().getGUI() != null) {
+                if (event.getPlayer().getGUI() != null || event.getPlayer().getSignMenu() != null) {
                     event.setCancelled(true);
                     return;
                 }
@@ -163,15 +164,15 @@ public class PacketListener implements Listener {
                 SignMenu signMenu = event.getPlayer().getSignMenu();
                 if (signMenu != null) {
                     event.setCancelled(true);
+                    event.getPlayer().closeSignMenu();
                     if (signMenu.getResponse().hasValue()) {
                         Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> {
                             boolean success = signMenu.getResponse().nonnull().test(event.getPlayer(), ((PacketPlayInUpdateSign) event.getPacket()).c());
                             if (!success && signMenu.isReopenOnFail()) {
-                                Bukkit.getScheduler().runTaskLater(Bootstrap.getInstance(), () -> event.getPlayer().openVirtualSignEditor(signMenu), 2);
+                                event.getPlayer().openVirtualSignEditor(signMenu);
                             }
                         });
                     }
-                    event.getPlayer().getVirtualStorage().remove("current-sign");
                     if (signMenu.getLocation() != null) {
                         event.getPlayer().sendBlockChange(signMenu.getLocation(), signMenu.getLocation().getBlock().getBlockData());
                     }

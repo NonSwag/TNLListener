@@ -157,16 +157,16 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void openVirtualSignEditor(@Nonnull SignMenu signMenu) {
+        if (getGUI() != null) getGUI().getViewers().remove(this);
+        getVirtualStorage().remove("current-gui");
         Location location = new Location(getWorld(), getLocation().getBlockX(), getLocation().getBlockY() - 5, getLocation().getBlockZ());
         signMenu.setLocation(location);
         BlockPosition position = new BlockPosition(location.getX(), location.getY(), location.getZ());
         PacketPlayOutOpenSignEditor editor = new PacketPlayOutOpenSignEditor(position);
         TileEntitySign tileEntitySign = new TileEntitySign();
         tileEntitySign.setLocation(getWorldServer(), position);
-        for (int line = 0; line < 4; line++) {
-            if (signMenu.getLines().length >= (line + 1)) {
-                tileEntitySign.lines[line] = new ChatMessage(signMenu.getLines()[line]);
-            }
+        for (int line = 0; line < signMenu.getLines().length; line++) {
+            tileEntitySign.lines[line] = new ChatMessage(signMenu.getLines()[line]);
         }
         Material material = Material.getMaterial(signMenu.getType().name());
         if (material != null) sendBlockChange(location, material.createBlockData());

@@ -154,10 +154,8 @@ public class NMSPlayer implements TNLPlayer {
         PacketPlayOutOpenSignEditor editor = new PacketPlayOutOpenSignEditor(position);
         TileEntitySign tileEntitySign = new TileEntitySign();
         tileEntitySign.setLocation(getWorldServer(), position);
-        for (int line = 0; line < 4; line++) {
-            if (signMenu.getLines().length >= (line + 1)) {
-                tileEntitySign.lines[line] = new ChatMessage(signMenu.getLines()[line]);
-            }
+        for (int line = 0; line < signMenu.getLines().length; line++) {
+            tileEntitySign.lines[line] = new ChatMessage(signMenu.getLines()[line]);
         }
         Material material = Material.getMaterial(signMenu.getType().name());
         if (material != null) sendBlockChange(location, material.createBlockData());

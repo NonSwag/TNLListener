@@ -21,6 +21,7 @@ public class SignMenu {
     private boolean reopenOnFail = false;
 
     public SignMenu(@Nonnull String... lines) {
+        for (int i = 0; i < lines.length; i++) if (lines[i] == null) lines[i] = "";
         this.lines = lines;
     }
 

@@ -2292,32 +2292,23 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
 
     @Nullable
     default GUI getGUI() {
-        if (getVirtualStorage().compareInstance("current-gui", GUI.class)) {
-            return getVirtualStorage().get("current-gui", GUI.class).nonnull();
-        }
-        return null;
+        return getVirtualStorage().get("current-gui", GUI.class).getValue();
     }
 
     default void closeGUI() {
-        if (getGUI() != null) {
-            getVirtualStorage().remove("current-gui");
-            sendPacket(TNLCloseWindow.create());
-        }
+        if (getGUI() != null) getGUI().getViewers().remove(this);
+        getVirtualStorage().remove("current-gui");
+        if (getSignMenu() == null) sendPacket(TNLCloseWindow.create());
     }
 
     @Nullable
     default SignMenu getSignMenu() {
-        if (getVirtualStorage().compareInstance("current-sign", SignMenu.class)) {
-            return getVirtualStorage().get("current-sign", SignMenu.class).nonnull();
-        }
-        return null;
+        return getVirtualStorage().get("current-sign", SignMenu.class).getValue();
     }
 
     default void closeSignMenu() {
-        if (getSignMenu() != null) {
-            getVirtualStorage().remove("current-sign");
-            sendPacket(TNLCloseWindow.create());
-        }
+        getVirtualStorage().remove("current-sign");
+        if (getGUI() == null) sendPacket(TNLCloseWindow.create());
     }
 
     default void setCooldown(@Nonnull GUIItem item, int cooldown) {
@@ -2339,6 +2330,9 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     }
 
     default void openGUI(@Nonnull GUI gui) {
+        GUI current = getGUI();
+        if (current != null) current.getViewers().remove(this);
+        getVirtualStorage().remove("current-gui");
         if (!gui.getViewers().contains(this)) gui.getViewers().add(this);
         getVirtualStorage().put("current-gui", gui);
         sendPacket(TNLOpenWindow.create(gui.getSize() / 9, gui.getTitle()));

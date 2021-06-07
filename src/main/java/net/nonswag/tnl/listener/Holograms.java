@@ -187,7 +187,7 @@ public class Holograms {
     }
 
     public void update(@Nonnull Hologram hologram, @Nonnull TNLPlayer player) {
-        final List<TNLArmorStand> armorStands = new ArrayList<>();
+        List<TNLArmorStand> armorStands = new ArrayList<>();
         for (int line = 0; line < hologram.getLines().size(); line++) {
             for (int darkness = 0; darkness < hologram.getDarkness(); darkness++) {
                 Objects<Number> id = player.getVirtualStorage().getNumber("hologram=" + hologram.getName() + ",line=" + line + ",darkness=" + darkness);
