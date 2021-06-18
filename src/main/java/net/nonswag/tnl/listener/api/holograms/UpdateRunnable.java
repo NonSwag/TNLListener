@@ -21,7 +21,7 @@ public class UpdateRunnable {
                 } while (true);
             } catch (Exception e) {
                 if (!(e instanceof InterruptedException)) {
-                    Logger.error.println(e);
+                    Logger.error.println(e.getMessage());
                 }
             }
         });

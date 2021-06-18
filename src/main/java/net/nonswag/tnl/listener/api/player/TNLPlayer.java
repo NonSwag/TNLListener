@@ -13,6 +13,7 @@ import net.nonswag.tnl.listener.api.item.TNLItem;
 import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
+import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.packet.*;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
@@ -251,9 +252,9 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
                 }
                 for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
                     if (event.getFormat() == null) {
-                        all.sendMessage(MessageKey.CHAT_FORMAT, new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("display_name", event.getPlayer().getDisplayName()), new Placeholder("color", event.getPlayer().getTeam().getColor().toString()), new Placeholder("message", message), new Placeholder("colored_message", net.nonswag.tnl.listener.api.logger.Color.Minecraft.colorize(message, '&')), new Placeholder("text", net.nonswag.tnl.listener.api.logger.Color.Minecraft.colorize(message, '&')));
+                        all.sendMessage(MessageKey.CHAT_FORMAT, new Placeholder("color", event.getPlayer().getTeam().getColor().toString()), new Placeholder("message", message), new Placeholder("colored_message", net.nonswag.tnl.listener.api.logger.Color.Minecraft.colorize(message, '&')), new Placeholder("text", net.nonswag.tnl.listener.api.logger.Color.Minecraft.colorize(message, '&')));
                     } else {
-                        all.sendMessage(event.getFormat(), new Placeholder("world", event.getPlayer().getWorldAlias()), new Placeholder("player", event.getPlayer().getName()), new Placeholder("display_name", event.getPlayer().getDisplayName()), new Placeholder("color", event.getPlayer().getTeam().getColor().toString()), new Placeholder("message", message), new Placeholder("colored_message", Color.Minecraft.colorize(message, '&')));
+                        all.sendMessage(event.getFormat(), new Placeholder("color", event.getPlayer().getTeam().getColor().toString()), new Placeholder("message", message), new Placeholder("colored_message", Color.Minecraft.colorize(message, '&')));
                     }
                 }
             }
@@ -2106,7 +2107,7 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     }
 
     default void sendMessage(@Nonnull String message, boolean validate) {
-        if (validate) message = ChatComponent.getText(message);
+        if (validate) message = ChatComponent.getText(message, this);
         getBukkitPlayer().sendMessage(message);
     }
 
@@ -2115,11 +2116,11 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     }
 
     default void sendMessage(@Nonnull ChatComponent component, @Nonnull Placeholder... placeholders) {
-        sendMessage(component.getText(placeholders), false);
+        sendMessage(component.getText(this, placeholders), false);
     }
 
     default void sendMessage(@Nonnull String message, @Nonnull Placeholder... placeholders) {
-        sendMessage(ChatComponent.getText(message, placeholders), false);
+        sendMessage(ChatComponent.getText(message, this, placeholders), false);
     }
 
     default void sendMessage(@Nonnull MessageKey messageKey, @Nonnull Placeholder... placeholders) {
@@ -2127,9 +2128,9 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         if (!messageKey.isSystemMessage()) language = getLanguage();
         LanguageKey languageKey = new LanguageKey(language, messageKey);
         ChatComponent component = Message.valueOf(languageKey);
-        if (component != null) sendMessage(component.getText(placeholders), false);
+        if (component != null) sendMessage(component.getText(this, placeholders), false);
         else {
-            Logger.error.println("§cUnknown component§8: §4" + languageKey.getMessageKey().getKey() + " §8(§4" + languageKey.getLanguage().getName() + "§8)");
+            Logger.error.println("Unknown component: " + languageKey.getMessageKey().getKey() + " (" + languageKey.getLanguage().getName() + ")");
             sendMessage("%prefix% §cUnknown component§8: §4" + languageKey.getMessageKey() + " §8(§4" + languageKey.getLanguage().getName() + "§8)");
         }
     }
@@ -2148,7 +2149,7 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     }
 
     default void disconnect(@Nonnull String kickMessage, boolean validate) {
-        String message = (validate ? ChatComponent.getText(kickMessage) : kickMessage);
+        String message = (validate ? ChatComponent.getText(kickMessage, this) : kickMessage);
         if (Bukkit.isPrimaryThread()) getBukkitPlayer().kickPlayer(message);
         else Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().kickPlayer(message));
     }
@@ -2162,9 +2163,9 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         if (!messageKey.isSystemMessage()) language = getLanguage();
         LanguageKey languageKey = new LanguageKey(language, messageKey);
         ChatComponent component = Message.valueOf(languageKey);
-        if (component != null) disconnect(component.getText(placeholders) + append, false);
+        if (component != null) disconnect(component.getText(this, placeholders) + append, false);
         else {
-            Logger.error.println("§cUnknown component§8: §4" + languageKey);
+            Logger.error.println("Unknown component: " + languageKey);
             disconnect("§cUnknown component§8: §4" + languageKey, false);
         }
     }
@@ -2241,7 +2242,7 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
                 inventory.save(file);
             }
         } catch (IOException e) {
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
     }
 
@@ -2489,7 +2490,7 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             return net.nonswag.tnl.listener.api.player.v1_7.R1.NMSPlayer.cast(player);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }

@@ -7,9 +7,9 @@ import net.nonswag.tnl.listener.api.config.JsonConfig;
 import net.nonswag.tnl.listener.api.entity.TNLArmorStand;
 import net.nonswag.tnl.listener.api.holograms.Hologram;
 import net.nonswag.tnl.listener.api.holograms.UpdateRunnable;
-import net.nonswag.tnl.listener.api.holograms.event.PlaceholderRequestEvent;
 import net.nonswag.tnl.listener.api.holograms.event.SendEvent;
 import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.api.message.ChatComponent;
 import net.nonswag.tnl.listener.api.object.Objects;
 import net.nonswag.tnl.listener.api.packet.*;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
@@ -110,7 +110,7 @@ public class Holograms {
                     }
                 }
             } catch (Exception e) {
-                Logger.error.println(e);
+                Logger.error.println(e.getMessage());
             }
         }
     }
@@ -129,14 +129,7 @@ public class Holograms {
                             replace("&", "§").
                             replace(">>", "»").
                             replace("<<", "«").
-                            replace("%player%", player.getName()).
-                            replace("%display_name%", player.getDisplayName()).
-                            replace("%language%", player.getLocale()).
-                            replace("%server%", TNLListener.getInstance().getServerName()).
-                            replace("%online%", Bukkit.getOnlinePlayers().size() + "").
-                            replace("%max_online%", Bukkit.getMaxPlayers() + "").
-                            replace("%world%", player.getWorld().getName() + "").
-                            replace("%world_alias%", player.getWorldAlias() + "");
+                            replace("%online%", Bukkit.getOnlinePlayers().size() + "");
                     if (s.contains("%status_") || s.contains("%online_") || s.contains("%max_online_") || s.contains("%players_")) {
                         for (Server server : TNLListener.getInstance().getServers()) {
                             if (s.contains("%status_" + server.getName() + "%")) {
@@ -155,18 +148,12 @@ public class Holograms {
                             }
                         }
                     }
-                    if (s.contains("%")) {
-                        PlaceholderRequestEvent event = new PlaceholderRequestEvent(hologram, player, s);
-                        event.call();
-                        hologram.onPlaceholderRequest().accept(event);
-                        s = event.getLine();
-                    }
                     armorStand.setInvisible(true);
                     armorStand.setSmall(true);
                     armorStand.setCustomNameVisible(true);
                     armorStand.setBasePlate(true);
                     armorStand.setMarker(true);
-                    armorStand.setCustomName(s);
+                    armorStand.setCustomName(ChatComponent.getText(s, player));
                     player.getVirtualStorage().put("hologram=" + hologram.getName() + ",line=" + line + ",darkness=" + darkness, armorStand.getId());
                     player.getVirtualStorage().put("hologram-by-id=" + armorStand.getId(), armorStand);
                     armorStands.add(armorStand);
@@ -199,14 +186,7 @@ public class Holograms {
                                 replace("&", "§").
                                 replace(">>", "»").
                                 replace("<<", "«").
-                                replace("%player%", player.getName()).
-                                replace("%display_name%", player.getDisplayName()).
-                                replace("%language%", player.getLocale()).
-                                replace("%server%", TNLListener.getInstance().getServerName()).
-                                replace("%online%", Bukkit.getOnlinePlayers().size() + "").
-                                replace("%max_online%", Bukkit.getMaxPlayers() + "").
-                                replace("%world%", player.getWorld().getName() + "").
-                                replace("%world_alias%", player.getWorldAlias() + "");
+                                replace("%online%", Bukkit.getOnlinePlayers().size() + "");
                         if (s.contains("%status_") || s.contains("%online_") || s.contains("%max_online_") || s.contains("%players_")) {
                             for (Server server : TNLListener.getInstance().getServers()) {
                                 if (s.contains("%status_" + server.getName() + "%")) {
@@ -225,12 +205,7 @@ public class Holograms {
                                 }
                             }
                         }
-                        if (s.contains("%")) {
-                            PlaceholderRequestEvent event = new PlaceholderRequestEvent(hologram, player, s);
-                            event.call();
-                            hologram.onPlaceholderRequest().accept(event);
-                            s = event.getLine();
-                        }
+                        s = ChatComponent.getText(s, player);
                         if (armorStand.getBukkitEntity().getName().equals(s)) continue;
                         armorStand.setCustomName(s);
                         armorStand.setCustomNameVisible(true);

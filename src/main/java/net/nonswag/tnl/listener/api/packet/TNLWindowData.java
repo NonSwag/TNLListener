@@ -18,7 +18,7 @@ public abstract class TNLWindowData {
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
             packet = new net.minecraft.server.v1_7_R4.PacketPlayOutWindowData(1, property, value);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
         return packet;

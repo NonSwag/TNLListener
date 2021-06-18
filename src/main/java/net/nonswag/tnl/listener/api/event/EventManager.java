@@ -24,9 +24,9 @@ public class EventManager {
     public void registerListener(@Nonnull Listener listener) {
         try {
             Bukkit.getPluginManager().registerEvents(listener, getPlugin());
-            Logger.debug.println("§aRegistered listener §8'§6" + listener.getClass().getSimpleName() + "§8'");
+            Logger.debug.println("Registered listener <'" + listener.getClass().getSimpleName() + "'>>");
         } catch (Throwable t) {
-            Logger.error.println("§cFailed to register listener §8'§4" + listener.getClass().getSimpleName() + "§8'", t);
+            Logger.error.println("Failed to register listener <'" + listener.getClass().getSimpleName() + "'>", t.getMessage());
         }
     }
 }

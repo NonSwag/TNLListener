@@ -142,15 +142,6 @@ public enum Language {
         return file;
     }
 
-    @Override
-    public String toString() {
-        return "Language{" +
-                "name='" + name + '\'' +
-                ", shorthand='" + shorthand + '\'' +
-                ", file='" + file + '\'' +
-                '}';
-    }
-
     @Nonnull
     public static Language fromLocale(@Nonnull String locale) {
         try {

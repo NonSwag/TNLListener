@@ -4,7 +4,6 @@ import net.minecraft.server.v1_7_R4.*;
 import net.minecraft.util.io.netty.channel.*;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
-import net.nonswag.tnl.listener.api.entity.TNLEntityPlayer;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.player.Skin;
@@ -15,6 +14,7 @@ import net.nonswag.tnl.listener.api.storage.VirtualStorage;
 import net.nonswag.tnl.listener.api.title.Title;
 import net.nonswag.tnl.listener.events.PlayerPacketEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
@@ -129,18 +129,18 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void openVirtualSignEditor(@Nonnull SignMenu signMenu) {
+        Location location = new Location(getWorld(), getLocation().getBlockX(), getLocation().getBlockY() - 5, getLocation().getBlockZ());
+        signMenu.setLocation(location);
         TileEntitySign tileEntitySign = new TileEntitySign();
         tileEntitySign.a(getWorldServer());
-        tileEntitySign.x = signMenu.getLocation().getBlockX();
-        tileEntitySign.y = signMenu.getLocation().getBlockY();
-        tileEntitySign.z = signMenu.getLocation().getBlockZ();
-        for (int line = 0; line < 4; line++) {
-            if (signMenu.getLines().length >= (line + 1)) {
-                tileEntitySign.lines[line] = signMenu.getLines()[line];
-            }
+        tileEntitySign.x = location.getBlockX();
+        tileEntitySign.y = location.getBlockY();
+        tileEntitySign.z = location.getBlockZ();
+        for (int line = 0; line < signMenu.getLines().length; line++) {
+            tileEntitySign.lines[line] = signMenu.getLines()[line];
         }
         sendPacket(tileEntitySign.getUpdatePacket());
-        sendPacket(new PacketPlayOutOpenSignEditor(signMenu.getLocation().getBlockX(), signMenu.getLocation().getBlockY(), signMenu.getLocation().getBlockZ()));
+        sendPacket(new PacketPlayOutOpenSignEditor(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
     }
 
     @Override
@@ -287,7 +287,7 @@ public class NMSPlayer implements TNLPlayer {
                             PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet) packetObject));
                             if (event.call()) super.channelRead(channelHandlerContext, event.getPacket());
                         } catch (Exception e) {
-                            Logger.error.println(e);
+                            Logger.error.println(e.getMessage());
                             uninject();
                         }
                     }
@@ -298,7 +298,7 @@ public class NMSPlayer implements TNLPlayer {
                             PlayerPacketEvent<Packet> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet) packetObject));
                             if (event.call()) super.write(channelHandlerContext, event.getPacket(), channelPromise);
                         } catch (Exception e) {
-                            Logger.error.println(e);
+                            Logger.error.println(e.getMessage());
                             uninject();
                         }
 
@@ -317,12 +317,12 @@ public class NMSPlayer implements TNLPlayer {
                     uninject();
                 }
             } else {
-                Logger.error.println("§cFailed to inject §8'§4" + getName() + "§8'", "§cThe player can't be offline");
+                Logger.error.println("Failed to inject '" + getName() + "'>", "The player can't be offline");
                 disconnect("%prefix%\n" + "§cYou are online but your connection is offline?!");
             }
         } catch (Exception e) {
             uninject();
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
     }
 

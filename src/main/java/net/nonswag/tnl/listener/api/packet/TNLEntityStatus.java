@@ -23,7 +23,7 @@ public abstract class TNLEntityStatus {
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             packet = new net.minecraft.server.v1_7_R1.PacketPlayOutEntityStatus();
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
         Reflection.setField(packet, "a", id);
@@ -63,13 +63,6 @@ public abstract class TNLEntityStatus {
 
         public byte getId() {
             return id;
-        }
-
-        @Override
-        public String toString() {
-            return "Status{" +
-                    "id=" + id +
-                    '}';
         }
     }
 }

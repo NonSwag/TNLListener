@@ -21,7 +21,7 @@ public abstract class TNLEntityMetadata {
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             return new net.minecraft.server.v1_7_R1.PacketPlayOutEntityMetadata(id, (net.minecraft.server.v1_7_R1.DataWatcher) dataWatcher, true);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }
@@ -42,7 +42,7 @@ public abstract class TNLEntityMetadata {
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             return new net.minecraft.server.v1_7_R1.PacketPlayOutEntityMetadata(entity.getEntityId(), ((org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity) entity).getHandle().getDataWatcher(), true);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }

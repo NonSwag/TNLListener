@@ -14,7 +14,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Objects;
 
 public class Server {
 
@@ -164,31 +163,6 @@ public class Server {
     public static Server getOrDefault(@Nonnull String name, @Nonnull Server server) {
         Server wrap = wrap(name);
         return wrap != null ? wrap : server;
-    }
-
-    @Override
-    public String toString() {
-        return "Server{" +
-                "name='" + name + '\'' +
-                ", inetSocketAddress=" + inetSocketAddress +
-                ", status=" + status +
-                ", playerCount=" + playerCount +
-                ", maxPlayerCount=" + maxPlayerCount +
-                ", lastUpdateTime=" + lastUpdateTime +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Server server = (Server) o;
-        return playerCount == server.playerCount && maxPlayerCount == server.maxPlayerCount && lastUpdateTime == server.lastUpdateTime && name.equals(server.name) && inetSocketAddress.equals(server.inetSocketAddress) && status == server.status;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, inetSocketAddress, status, playerCount, maxPlayerCount, lastUpdateTime);
     }
 
     public enum Status {

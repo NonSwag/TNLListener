@@ -38,14 +38,14 @@ public class PropertyConfig implements Config {
                         getValues().put(split.get(0).toLowerCase(), String.join("=", split.subList(1, split.size())));
                     }
                 } catch (Exception e) {
-                    Logger.error.println(e);
+                    Logger.error.println(e.getMessage());
                 }
             });
             reader.close();
         } catch (Exception e) {
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
-        if (!isValid()) Logger.error.println("§cThe file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
+        if (!isValid()) Logger.error.println("The file <'" + file.getAbsolutePath() + "'> is invalid");
     }
 
     @Nonnull
@@ -65,7 +65,7 @@ public class PropertyConfig implements Config {
             });
             writer.close();
         } catch (Exception e) {
-            Logger.error.println("Failed to save file §8'§4" + getFile().getAbsolutePath() + "§8'", e);
+            Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", e);
         }
     }
 
@@ -122,10 +122,13 @@ public class PropertyConfig implements Config {
     @Nonnull
     public List<String> getStringList(@Nonnull String key) {
         try {
-            return Arrays.asList(new Objects<>(getString(key.toLowerCase())).nonnull().split(", "));
+            String string = getString(key);
+            if (string != null && !string.isEmpty()) {
+                return Arrays.asList(new Objects<>(getString(key.toLowerCase())).nonnull().split(", "));
+            }
         } catch (Exception ignored) {
-            return new ArrayList<>();
         }
+        return new ArrayList<>();
     }
 
     public int getInteger(@Nonnull String key) {

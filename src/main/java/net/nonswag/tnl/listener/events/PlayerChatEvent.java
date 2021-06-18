@@ -5,7 +5,6 @@ import net.nonswag.tnl.listener.api.player.TNLPlayer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public class PlayerChatEvent extends TNLEvent {
 
@@ -46,28 +45,5 @@ public class PlayerChatEvent extends TNLEvent {
     @Nonnull
     public String getMessage() {
         return message;
-    }
-
-    @Override
-    public String toString() {
-        return "PlayerChatEvent{" +
-                "player=" + player +
-                ", message='" + message + '\'' +
-                ", format='" + format + '\'' +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        PlayerChatEvent that = (PlayerChatEvent) o;
-        return player.equals(that.player) && message.equals(that.message) && Objects.equals(format, that.format);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), player, message, format);
     }
 }

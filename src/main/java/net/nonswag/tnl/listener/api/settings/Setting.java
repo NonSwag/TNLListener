@@ -3,7 +3,6 @@ package net.nonswag.tnl.listener.api.settings;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class Setting<S> {
 
@@ -37,26 +36,5 @@ public class Setting<S> {
     @Nonnull
     public static List<Setting<?>> getList() {
         return list;
-    }
-
-    @Override
-    public String toString() {
-        return "Setting{" +
-                "key='" + key + '\'' +
-                ", value=" + value +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Setting<?> setting = (Setting<?>) o;
-        return key.equals(setting.key) && Objects.equals(value, setting.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(key, value);
     }
 }

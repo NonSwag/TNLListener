@@ -20,7 +20,7 @@ public abstract class TNLOpenWindow {
             packet = new net.minecraft.server.v1_15_R1.PacketPlayOutOpenWindow();
             Reflection.setField(packet, "c", new net.minecraft.server.v1_15_R1.ChatMessage(title));
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
         Reflection.setField(packet, "a", 1);

@@ -30,7 +30,7 @@ public class Reflection {
             field.set(clazz, value);
             field.setAccessible(false);
         } catch (IllegalAccessException | NoSuchFieldException e) {
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
     }
 
@@ -41,7 +41,7 @@ public class Reflection {
             field.set(clazz, value);
             field.setAccessible(false);
         } catch (IllegalAccessException | NoSuchFieldException e) {
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
     }
 
@@ -56,7 +56,7 @@ public class Reflection {
             modifiers.setAccessible(false);
             field.setAccessible(false);
         } catch (IllegalAccessException | NoSuchFieldException e) {
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
     }
 
@@ -100,9 +100,7 @@ public class Reflection {
                 } else if ((pair.getValue() instanceof Character)) {
                     fields.addProperty(pair.getKey().toString(), ((Character) pair.getValue()));
                 }
-            } else {
-                fields.addProperty(field, o.hasValue() ? o.nonnull().toString() : "");
-            }
+            } else fields.addProperty(field, o.hasValue() ? o.nonnull().toString() : "");
         }
         object.add(clazz.getClass().getSimpleName(), fields);
         return object;
@@ -111,9 +109,7 @@ public class Reflection {
     @Nonnull
     public static List<String> getFields(@Nonnull Class<?> clazz) {
         List<String> fields = new ArrayList<>();
-        for (Field field : clazz.getDeclaredFields()) {
-            fields.add(field.getName());
-        }
+        for (Field field : clazz.getDeclaredFields()) fields.add(field.getName());
         return fields;
     }
 }

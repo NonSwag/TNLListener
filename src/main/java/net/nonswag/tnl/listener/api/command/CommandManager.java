@@ -42,18 +42,18 @@ public class CommandManager {
             pluginCommand.setExecutor(commandExecutor);
             pluginCommand.setAliases(pluginCommand.getAliases());
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("§aRegistered command §8'§6").append(command).append("§8'§a with aliases §8'§6").append(String.join("§8, §6", pluginCommand.getAliases())).append("§8'");
+            stringBuilder.append("Registered command <'").append(command).append("'> with aliases <'").append(String.join(", ", pluginCommand.getAliases())).append("'>");
             if (permission != null) {
                 pluginCommand.setPermission(permission);
                 pluginCommand.setPermissionMessage(Message.NO_PERMISSION_EN.getText(new Placeholder("permission", permission)));
-                stringBuilder.append("§a with permission §8'§6").append(permission).append("§8'");
+                stringBuilder.append(" with permission <'").append(permission).append("'>");
             }
             if (tabCompleter != null) {
                 pluginCommand.setTabCompleter(tabCompleter);
             }
             Logger.debug.println(stringBuilder.toString());
         } else {
-            Logger.error.println("§cThe command '§4" + command + "§8'§c is not registered in your plugin.yml");
+            Logger.error.println("The command <'" + command + "'> is not registered in your plugin.yml");
         }
     }
 }

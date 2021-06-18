@@ -6,7 +6,6 @@ import com.google.gson.JsonParser;
 import javax.annotation.Nonnull;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Objects;
 
 public class Skin {
 
@@ -37,28 +36,6 @@ public class Skin {
     public void setSignature(@Nonnull String signature) {
         this.signature = signature;
     }
-
-    @Override
-    public String toString() {
-        return "Skin{" +
-                "value='" + value + '\'' +
-                ", signature='" + signature + '\'' +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Skin skin = (Skin) o;
-        return value.equals(skin.value) && signature.equals(skin.signature);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value, signature);
-    }
-
     @Nonnull
     public static Skin getSkin(@Nonnull String player) {
         Skin skin = new Skin("", "");

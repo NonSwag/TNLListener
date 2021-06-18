@@ -1,13 +1,15 @@
 package net.nonswag.tnl.listener.api.message;
 
+import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.api.player.TNLPlayer;
+import org.bukkit.Bukkit;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 public class Placeholder {
 
@@ -15,10 +17,17 @@ public class Placeholder {
 
         @Nonnull
         private static final HashMap<String, String> PLACEHOLDERS = new HashMap<>();
+        @Nonnull
+        private static final List<Formulary> FORMULARY = new ArrayList<>();
 
         @Nonnull
-        public static List<String> values() {
+        static List<String> values() {
             return new ArrayList<>(PLACEHOLDERS.keySet());
+        }
+
+        @Nonnull
+        static List<Formulary> formularies() {
+            return new ArrayList<>(FORMULARY);
         }
 
         public static boolean isRegistered(@Nonnull String placeholder) {
@@ -28,47 +37,72 @@ public class Placeholder {
         public static void register(@Nonnull Placeholder placeholder) {
             if (!PLACEHOLDERS.containsKey(placeholder.getPlaceholder())) {
                 PLACEHOLDERS.put(placeholder.getPlaceholder(), placeholder.getObject().toString());
-                Logger.debug.println("§aRegistered static placeholder §8'§6" + placeholder.getPlaceholder() + "§8'§a with value §8'§f" + placeholder.getObject().toString() + "§8'");
+                Logger.debug.println("Registered static placeholder <'" + placeholder.getPlaceholder() + "'> with value <'" + placeholder.getObject() + "'>");
             } else {
-                Logger.debug.println("§cA static placeholder named §8'§4" + placeholder.getPlaceholder() + "§8'§c is already registered");
+                Logger.error.println("A static placeholder named <'" + placeholder.getPlaceholder() + "'> is already registered");
             }
         }
 
         public static void unregister(@Nonnull String placeholder) {
             if (PLACEHOLDERS.containsKey(placeholder)) {
                 PLACEHOLDERS.remove(placeholder);
-                Logger.debug.println("§aUnregistered static placeholder §8'§6" + placeholder + "§8'");
-            } else {
-                Logger.error.println("§cA static placeholder named §8'§4" + placeholder + "§8'§c is not registered");
-            }
+                Logger.debug.println("Unregistered static placeholder <'" + placeholder + "'>");
+            } else Logger.error.println("A static placeholder named <'" + placeholder + "'> is not registered");
         }
 
         public static void updateValue(@Nonnull Placeholder placeholder) {
             if (PLACEHOLDERS.containsKey(placeholder.getPlaceholder())) {
                 PLACEHOLDERS.put(placeholder.getPlaceholder(), placeholder.getObject().toString());
-                Logger.debug.println("§aUpdated static placeholder §8'§6" + placeholder.getPlaceholder() + "§8'", "§aChanged value to §8'§6" + placeholder.getObject().toString() + "§8'");
-            } else {
-                Logger.error.println("§cA static placeholder named §8'§4" + placeholder + "§8'§c is not registered");
-            }
+                Logger.debug.println("Updated static placeholder <'" + placeholder.getPlaceholder() + "'>", "Changed value to <'" + placeholder.getObject() + "'>");
+            } else Logger.error.println("A static placeholder named <'" + placeholder + "'> is not registered");
         }
 
         @Nullable
         public static Placeholder valueOf(@Nonnull String placeholder) {
-            if (isRegistered(placeholder)) {
-                return new Placeholder(placeholder, PLACEHOLDERS.get(placeholder));
-            } else {
-                return null;
-            }
+            if (isRegistered(placeholder)) return new Placeholder(placeholder, PLACEHOLDERS.get(placeholder));
+            else return null;
         }
 
         static {
             register(new Placeholder("prefix", Message.PREFIX.getText()));
             register(new Placeholder("nl", "\n"));
+            register(new Placeholder("server", TNLListener.getInstance().getServerName()));
+            register(new Placeholder("max_online", Bukkit.getMaxPlayers()));
+
+            register(player -> new Placeholder("player", player.getName()));
+            register(player -> new Placeholder("display_name", player.getDisplayName()));
+            register(player -> new Placeholder("custom_name", player.getCustomName()));
+            register(player -> new Placeholder("player_list_name", player.getPlayerListName()));
+            register(player -> new Placeholder("language", player.getLanguage().getName()));
+            register(player -> new Placeholder("world_alias", player.getWorldAlias()));
+            register(player -> new Placeholder("world", player.getWorld().getName()));
+            register(player -> new Placeholder("health", player.getHealth()));
+            register(player -> new Placeholder("max_health", player.getMaxHealth()));
+            register(player -> new Placeholder("food_level", player.getFoodLevel()));
+            register(player -> new Placeholder("version", player.getVersion().getRecentVersion()));
+            register(player -> new Placeholder("gamemode", player.getGameMode().name().toLowerCase()));
+        }
+
+        public static void register(@Nonnull Formulary formulary) {
+            if (!FORMULARY.contains(formulary)) FORMULARY.add(formulary);
+            else Logger.error.println("This dynamic placeholder is already registered");
+        }
+
+        public static void unregister(@Nonnull Formulary formulary) {
+            if (FORMULARY.contains(formulary)) FORMULARY.remove(formulary);
+            else Logger.error.println("This dynamic placeholder is not registered");
         }
     }
 
-    @Nonnull private final String placeholder;
-    @Nonnull private final Object object;
+    public interface Formulary {
+        @Nonnull
+        Placeholder check(@Nonnull TNLPlayer player);
+    }
+
+    @Nonnull
+    private final String placeholder;
+    @Nonnull
+    private final Object object;
 
     public Placeholder(@Nonnull String placeholder, @Nullable Object object) {
         this.placeholder = placeholder;
@@ -97,26 +131,5 @@ public class Placeholder {
             string = placeholder.replace(string);
         }
         return string;
-    }
-
-    @Override
-    public String toString() {
-        return "Placeholder{" +
-                "placeholder='" + placeholder + '\'' +
-                ", object=" + object +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Placeholder that = (Placeholder) o;
-        return placeholder.equals(that.placeholder) && object.equals(that.object);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(placeholder, object);
     }
 }

@@ -26,15 +26,11 @@ public final class LinuxUtil {
         BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
         if (isDebug()) {
             String string;
-            Logger.info.println("§7Executing§8: §6" + command);
-            while ((string = br.readLine()) != null) {
-                Logger.info.println("%prefix% §a" + string);
-            }
+            Logger.info.println("Executing: " + command);
+            while ((string = br.readLine()) != null) Logger.info.println(string);
         }
         process.waitFor();
-        if (isDebug()) {
-            Logger.info.println("%prefix% §7Finished program with exit code§8: §6" + process.exitValue());
-        }
+        if (isDebug()) Logger.info.println("Finished program with exit code: " + process.exitValue());
         process.destroy();
     }
 
@@ -42,7 +38,7 @@ public final class LinuxUtil {
         try {
             runShellCommand(command, directory);
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            Logger.error.println(e.getMessage());
         }
     }
 }

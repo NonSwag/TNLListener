@@ -2,7 +2,6 @@ package net.nonswag.tnl.listener.api.object;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public class Pair<K, V> {
 
@@ -32,26 +31,5 @@ public class Pair<K, V> {
 
     public void setValue(@Nullable V value) {
         this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return "Set{" +
-                "key=" + key +
-                ", value=" + value +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Pair<?, ?> pair = (Pair<?, ?>) o;
-        return key.equals(pair.key) && Objects.equals(value, pair.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(key, value);
     }
 }

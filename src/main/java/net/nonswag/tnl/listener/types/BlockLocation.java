@@ -6,7 +6,6 @@ import org.bukkit.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public class BlockLocation {
 
@@ -44,29 +43,5 @@ public class BlockLocation {
     @Nonnull
     public Location getLocation() {
         return location;
-    }
-
-    @Override
-    public String toString() {
-        return "BlockLocation{" +
-                "world=" + world +
-                ", x=" + x +
-                ", y=" + y +
-                ", z=" + z +
-                ", location=" + location +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BlockLocation that = (BlockLocation) o;
-        return x == that.x && y == that.y && z == that.z && Objects.equals(world, that.world) && Objects.equals(location, that.location);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(world, x, y, z, location);
     }
 }

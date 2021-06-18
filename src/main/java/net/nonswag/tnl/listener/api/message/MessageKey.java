@@ -82,12 +82,9 @@ public class MessageKey {
         return systemMessage;
     }
 
-    @Override
-    public String toString() {
-        return "MessageKey{" +
-                "key='" + key + '\'' +
-                ", systemMessage=" + systemMessage +
-                '}';
+    @Nonnull
+    public static List<MessageKey> getKeys() {
+        return keys;
     }
 
     @Override
@@ -101,10 +98,5 @@ public class MessageKey {
     @Override
     public int hashCode() {
         return Objects.hash(key, systemMessage);
-    }
-
-    @Nonnull
-    public static List<MessageKey> getKeys() {
-        return keys;
     }
 }

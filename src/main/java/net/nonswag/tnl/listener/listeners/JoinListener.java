@@ -3,7 +3,6 @@ package net.nonswag.tnl.listener.listeners;
 import net.nonswag.tnl.listener.Holograms;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.message.MessageKey;
-import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import org.bukkit.event.EventHandler;
@@ -26,13 +25,13 @@ public class JoinListener implements Listener {
             if (player.hasPlayedBefore()) {
                 if (Settings.JOIN_MESSAGE.getValue()) {
                     for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
-                        all.sendMessage(MessageKey.JOIN_MESSAGE, new Placeholder("player", event.getPlayer().getName()));
+                        all.sendMessage(MessageKey.JOIN_MESSAGE);
                     }
                 }
             } else {
                 if (Settings.FIRST_JOIN_MESSAGE.getValue()) {
                     for (TNLPlayer all : TNLListener.getInstance().getOnlinePlayers()) {
-                        all.sendMessage(MessageKey.FIRST_JOIN_MESSAGE, new Placeholder("player", event.getPlayer().getName()));
+                        all.sendMessage(MessageKey.FIRST_JOIN_MESSAGE);
                     }
                 }
             }

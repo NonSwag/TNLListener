@@ -26,14 +26,6 @@ public class LanguageKey {
     }
 
     @Override
-    public String toString() {
-        return "LanguageKey{" +
-                "language=" + language +
-                ", messageKey=" + messageKey +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

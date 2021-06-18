@@ -64,7 +64,7 @@ public class FakePlayer {
     @Nonnull
     public FakePlayer setSkin(@Nonnull String player) {
         setSkin(Skin.getSkin(player));
-        Logger.warn.println("Please use the properties §8'§6" + getPlayer().getGameProfile().getSkin() + "§8'§a instead of the name §8'§6" + player + "§8'");
+        Logger.warn.println("Please use the properties <'" + getPlayer().getGameProfile().getSkin() + "'> instead of the name '" + player + "'>");
         return this;
     }
 
@@ -147,13 +147,6 @@ public class FakePlayer {
 
         public int getId() {
             return id;
-        }
-
-        @Override
-        public String toString() {
-            return "Pose{" +
-                    "id=" + id +
-                    '}';
         }
     }
 }

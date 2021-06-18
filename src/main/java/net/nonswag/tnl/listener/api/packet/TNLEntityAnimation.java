@@ -20,7 +20,7 @@ public abstract class TNLEntityAnimation {
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             return new net.minecraft.server.v1_7_R1.PacketPlayOutAnimation((net.minecraft.server.v1_7_R1.EntityPlayer) player, animation.getId());
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version '" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }
@@ -40,13 +40,6 @@ public abstract class TNLEntityAnimation {
 
         public int getId() {
             return id;
-        }
-
-        @Override
-        public String toString() {
-            return "Animation{" +
-                    "id=" + id +
-                    '}';
         }
     }
 }

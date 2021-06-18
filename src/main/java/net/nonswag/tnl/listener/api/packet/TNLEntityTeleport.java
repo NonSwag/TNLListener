@@ -35,7 +35,7 @@ public abstract class TNLEntityTeleport {
             Reflection.setField(packet, "c", ((int) y));
             Reflection.setField(packet, "d", ((int) z));
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
         Reflection.setField(packet, "a", id);

@@ -10,7 +10,7 @@ import java.util.Objects;
 public class Team {
 
     @Nonnull
-    private static final Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+    private static final Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
 
     @Nonnull
     public static final Team NONE = new Team(9999999).setColor(ChatColor.GRAY);
@@ -75,29 +75,6 @@ public class Team {
         this.color = color;
         getTeam().setColor(color);
         return this;
-    }
-
-    @Override
-    public String toString() {
-        return "Team{" +
-                "id=" + id +
-                ", prefix='" + prefix + '\'' +
-                ", suffix='" + suffix + '\'' +
-                ", color=" + color +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Team team = (Team) o;
-        return id == team.id && prefix.equals(team.prefix) && suffix.equals(team.suffix) && color == team.color;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, prefix, suffix, color);
     }
 
     @Nonnull

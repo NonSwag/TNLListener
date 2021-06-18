@@ -319,7 +319,7 @@ public class NMSPlayer implements TNLPlayer {
                             PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet<?>) packetObject));
                             if (event.call()) super.channelRead(channelHandlerContext, event.getPacket());
                         } catch (Exception e) {
-                            Logger.error.println(e);
+                            Logger.error.println(e.getMessage());
                             uninject();
                         }
                     }
@@ -330,7 +330,7 @@ public class NMSPlayer implements TNLPlayer {
                             PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet<?>) packetObject));
                             if (event.call()) super.write(channelHandlerContext, event.getPacket(), channelPromise);
                         } catch (Exception e) {
-                            Logger.error.println(e);
+                            Logger.error.println(e.getMessage());
                             uninject();
                         }
                     }
@@ -342,12 +342,12 @@ public class NMSPlayer implements TNLPlayer {
                     uninject();
                 }
             } else {
-                Logger.error.println("§cFailed to inject §8'§4" + getName() + "§8'", "§cThe player can't be offline");
+                Logger.error.println("Failed to inject '" + getName() + "'>", "The player can't be offline");
                 disconnect("%prefix%\n" + "§cYou are online but your connection is offline?!");
             }
         } catch (Exception e) {
             uninject();
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
     }
 

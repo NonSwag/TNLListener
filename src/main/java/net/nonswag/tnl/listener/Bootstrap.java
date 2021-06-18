@@ -1,5 +1,6 @@
 package net.nonswag.tnl.listener;
 
+import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.Message;
 import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.events.MessagesInitializeEvent;
@@ -44,8 +45,13 @@ public class Bootstrap extends JavaPlugin {
             System.exit(1);
             return;
         }
-        TNLListener.getInstance().enable();
-        Holograms.getInstance().enable();
+        try {
+            TNLListener.getInstance().enable();
+            Holograms.getInstance().enable();
+        } catch (Throwable t) {
+            Logger.error.println(t.getMessage());
+            throw t;
+        }
     }
 
     @Override

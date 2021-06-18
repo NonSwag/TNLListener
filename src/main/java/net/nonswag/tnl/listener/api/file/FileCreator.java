@@ -17,12 +17,12 @@ public abstract class FileCreator {
     public static void create(@Nonnull File file) throws IOException {
         if (!file.exists()) {
             if (file.getAbsoluteFile().getParentFile().mkdirs()) {
-                Logger.info.println("§aGenerated directories §8'§6" + file.getAbsoluteFile().getParent() + "§8'");
+                Logger.info.println("Generated directories <'" + file.getAbsoluteFile().getParent() + "'>");
             }
             if (file.createNewFile()) {
-                Logger.info.println("§aGenerated file §8'§6" + file.getAbsolutePath() + "§8'");
+                Logger.info.println("Generated file <'" + file.getAbsolutePath() + "'>");
             } else {
-                Logger.error.println("§cCouldn't generate file §8'§4" + file.getAbsolutePath() + "§8'");
+                Logger.error.println("Couldn't generate file <'" + file.getAbsolutePath() + "'>");
                 throw new FileNotFoundException("Couldn't generate file");
             }
         }

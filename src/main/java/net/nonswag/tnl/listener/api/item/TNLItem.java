@@ -161,7 +161,7 @@ public interface TNLItem {
         try {
             setSkullValue(Base64.getEncoder().encodeToString(("{\"textures\":{\"SKIN\":{\"url\":\"" + new URI(url) + "\"}}}").getBytes()));
         } catch (Exception e) {
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
         return this;
     }
@@ -171,7 +171,7 @@ public interface TNLItem {
         try {
             modifyNBT("{SkullOwner:{Id:\"" + new UUID(base64.hashCode(), base64.hashCode()) + "\",Properties:{textures:[{Value:\"" + base64 + "\"}]}}}");
         } catch (Exception e) {
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
         return this;
     }
@@ -362,7 +362,7 @@ public interface TNLItem {
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             return new net.nonswag.tnl.listener.api.item.v1_7.R1.NMSItem(itemStack);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }

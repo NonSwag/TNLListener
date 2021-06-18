@@ -42,7 +42,7 @@ public abstract class TNLWindowItems {
             }
             packet = new net.minecraft.server.v1_7_R1.PacketPlayOutWindowItems(1, itemStacks);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
         return packet;

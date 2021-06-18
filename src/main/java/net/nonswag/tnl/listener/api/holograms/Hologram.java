@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import net.nonswag.tnl.listener.Holograms;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.holograms.event.InteractEvent;
-import net.nonswag.tnl.listener.api.holograms.event.PlaceholderRequestEvent;
 import net.nonswag.tnl.listener.api.holograms.event.SendEvent;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.math.Range;
@@ -21,7 +20,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -61,8 +59,6 @@ public class Hologram {
     private Consumer<SendEvent> onSend = event -> {};
     @Nonnull
     private Consumer<InteractEvent> onInteract = event -> {};
-    @Nonnull
-    private Consumer<PlaceholderRequestEvent> onPlaceholderRequest = event -> {};
 
     public Hologram(@Nonnull String name, boolean cache, @Nonnull String... lines) {
         this.name = name;
@@ -132,10 +128,10 @@ public class Hologram {
     public Hologram setDarkness(@Range(from = 1, to = 5) int darkness) {
         if (darkness > 5) {
             darkness = 5;
-            Logger.error.println(new IllegalArgumentException("The hologram darkness can't be higher then 5"));
+            Logger.error.println("The hologram darkness can't be higher then 5");
         } else if (darkness < 1) {
             darkness = 1;
-            Logger.error.println(new IllegalArgumentException("The hologram darkness can't be lower then 1"));
+            Logger.error.println("The hologram darkness can't be lower then 1");
         }
         this.darkness = darkness;
         return this;
@@ -152,11 +148,6 @@ public class Hologram {
     }
 
     @Nonnull
-    public Consumer<PlaceholderRequestEvent> onPlaceholderRequest() {
-        return onPlaceholderRequest;
-    }
-
-    @Nonnull
     public Hologram onSend(@Nonnull Consumer<SendEvent> onSend) {
         this.onSend = onSend;
         return this;
@@ -165,12 +156,6 @@ public class Hologram {
     @Nonnull
     public Hologram onInteract(@Nonnull Consumer<InteractEvent> onInteract) {
         this.onInteract = onInteract;
-        return this;
-    }
-
-    @Nonnull
-    public Hologram onPlaceholderRequest(@Nonnull Consumer<PlaceholderRequestEvent> onPlaceholderRequest) {
-        this.onPlaceholderRequest = onPlaceholderRequest;
         return this;
     }
 
@@ -299,32 +284,5 @@ public class Hologram {
     public Hologram reloadAll() {
         Holograms.getInstance().reloadAll(this);
         return this;
-    }
-
-    @Override
-    public String toString() {
-        return "Hologram{" +
-                "name='" + name + '\'' +
-                ", lines=" + lines +
-                ", location=" + location +
-                ", lineDistance=" + lineDistance +
-                ", darkness=" + darkness +
-                ", cache=" + cache +
-                ", onSend=" + onSend +
-                ", onInteract=" + onInteract +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Hologram hologram = (Hologram) o;
-        return Double.compare(hologram.lineDistance, lineDistance) == 0 && darkness == hologram.darkness && cache == hologram.cache && name.equals(hologram.name) && lines.equals(hologram.lines) && Objects.equals(location, hologram.location) && onSend.equals(hologram.onSend) && onInteract.equals(hologram.onInteract);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, lines, location, lineDistance, darkness, cache, onSend, onInteract);
     }
 }

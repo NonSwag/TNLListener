@@ -11,13 +11,13 @@ public abstract class Message {
     @Nonnull
     public static final ChatComponent PREFIX = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.PREFIX), "§8[§f§lTNL§8]§r");
     @Nonnull
-    public static final ChatComponent LOG_INFO = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_INFO), "§8[§1%time% §8|§1 Info §8| §1%thread%§8]§a");
+    public static final ChatComponent LOG_INFO = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_INFO), "§8[§1%time% §8|§1 Info §8| §1%thread%§8]");
     @Nonnull
-    public static final ChatComponent LOG_WARN = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_WARN), "§8[§e%time% §8|§e Warning §8| §e%thread%§8]§e");
+    public static final ChatComponent LOG_WARN = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_WARN), "§8[§e%time% §8|§e Warning §8| §e%thread%§8]");
     @Nonnull
-    public static final ChatComponent LOG_ERROR = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_ERROR), "§8[§4%time% §8|§4 Error §8| §4%thread%§8]§c");
+    public static final ChatComponent LOG_ERROR = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_ERROR), "§8[§4%time% §8|§4 Error §8| §4%thread%§8]");
     @Nonnull
-    public static final ChatComponent LOG_DEBUG = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_DEBUG), "§8[§6%time% §8|§6 Debug §8| §6%thread%§8]§a");
+    public static final ChatComponent LOG_DEBUG = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.LOG_DEBUG), "§8[§6%time% §8|§6 Debug §8| §6%thread%§8]");
     @Nonnull
     public static final ChatComponent CHAT_FORMAT = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.CHAT_FORMAT), "§8[%color%%world%§8] §f%display_name% §8» %color%%message%");
     @Nonnull
@@ -102,10 +102,8 @@ public abstract class Message {
         for (Language language : Language.values()) {
             JsonConfig jsonConfig = new JsonConfig("plugins/Listener/Messages/", language.getFile());
             for (MessageKey key : MessageKey.getKeys()) {
-                String string = "§4%prefix%§c Undefined message §8§4'" + key.getKey() + "§8'§c for language §8'§4" + language.getName() + "§8'";
-                if (!language.getShorthand().isEmpty()) {
-                    string = string + " §8(§4" + language.getShorthand() + "§8)";
-                }
+                String string = "§4%prefix%§c Undefined message <'" + key.getKey() + "'> for language <'" + language.getName() + "'>";
+                if (!language.getShorthand().isEmpty()) string = string + " (" + language.getShorthand() + ")";
                 if ((key.isSystemMessage() && !language.equals(Language.ROOT)) || (!key.isSystemMessage() && language.equals(Language.ROOT))) {
                     continue;
                 }
@@ -116,11 +114,11 @@ public abstract class Message {
                             String value = jsonConfig.getJsonElement().getAsJsonObject().get(key.getKey()).getAsString();
                             if (value != null) {
                                 message.setText(value);
-                                Logger.debug.println("§aLoaded component §8'§6" + key.getKey() + "§8'§a with value §8'§6" + value + "§8'§6 for language §8'§f" + language.getName() + "§8'");
+                                Logger.debug.println("Loaded component <'" + key.getKey() + "'> with value <'" + value + "'> for language <'" + language.getName() + "'>");
                             } else {
                                 message.setText(message.getText());
                                 jsonConfig.getJsonElement().getAsJsonObject().addProperty(key.getKey(), message.getText());
-                                Logger.debug.println("§aAdded component §8'§6" + key.getKey() + "§8'§a with value §8'§6" + message.getText() + "§8'§6 for language §8'§f" + language.getName() + "§8'");
+                                Logger.debug.println("Added component <'" + key.getKey() + "'> with value <'" + message.getText() + "'> for language <'" + language.getName() + "'>");
                             }
                             exists = true;
                             break;
@@ -130,10 +128,10 @@ public abstract class Message {
                         String value = jsonConfig.getJsonElement().getAsJsonObject().get(key.getKey()).getAsString();
                         if (value != null) {
                             new ChatComponent(new LanguageKey(language, key), value);
-                            Logger.debug.println("§aLoaded component §8'§6" + key.getKey() + "§8'§a with value §8'§6" + value + "§8'§6 for language §8'§f" + language.getName() + "§8'");
+                            Logger.debug.println("Loaded component <'" + key.getKey() + "'> with value <'" + value + "'> for language <'" + language.getName() + "'>");
                         } else {
                             new ChatComponent(new LanguageKey(language, key), string);
-                            Logger.debug.println("§aAdded component §8'§6" + key.getKey() + "§8'§a with value §8'§6" + string + "§8'§6 for language §8'§f" + language.getName() + "§8'");
+                            Logger.debug.println("Added component <'" + key.getKey() + "'> with value <'" + string + "'> for language <'" + language.getName() + "'>");
                         }
                     }
                 } else {
@@ -147,7 +145,7 @@ public abstract class Message {
                     if (!exists) {
                         jsonConfig.getJsonElement().getAsJsonObject().addProperty(key.getKey(), string);
                     }
-                    Logger.debug.println("§aAdded component §8'§6" + key.getKey() + "§8'§a with value §8'§6" + jsonConfig.getJsonElement().getAsJsonObject().get(key.getKey()).getAsString() + "§8'§6 for language §8'§f" + language.getName() + "§8'");
+                    Logger.debug.println("Added component <'" + key.getKey() + "'> with value <'" + jsonConfig.getJsonElement().getAsJsonObject().get(key.getKey()).getAsString() + "'> for language <'" + language.getName() + "'>");
                 }
             }
             jsonConfig.save();

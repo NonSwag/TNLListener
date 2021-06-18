@@ -33,11 +33,11 @@ public class JsonConfig implements Config {
             if (jsonElement instanceof JsonNull) jsonElement = new JsonObject();
         } catch (Exception e) {
             LinuxUtil.runSafeShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
-            Logger.error.println("Failed to load file §8'§4" + getFile().getAbsolutePath() + "§8'", "Creating Backup of the old file");
+            Logger.error.println("Failed to load file <'" + getFile().getAbsolutePath() + "'>", "Creating Backup of the old file");
         }
         this.jsonElement = jsonElement;
         save();
-        if (!isValid()) Logger.error.println("The file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
+        if (!isValid()) Logger.error.println("The file <'" + file.getAbsolutePath() + "'> is invalid");
     }
 
     @Nonnull
@@ -57,7 +57,7 @@ public class JsonConfig implements Config {
             writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(getJsonElement()));
             writer.close();
         } catch (Exception e) {
-            Logger.error.println("Failed to save file §8'§4" + getFile().getAbsolutePath() + "§4'", e);
+            Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", e.getMessage());
         }
     }
 }

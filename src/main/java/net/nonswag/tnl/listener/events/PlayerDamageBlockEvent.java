@@ -5,7 +5,6 @@ import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.block.Block;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 public class PlayerDamageBlockEvent extends TNLEvent {
 
@@ -44,30 +43,6 @@ public class PlayerDamageBlockEvent extends TNLEvent {
 
     public void setUpdate(boolean update) {
         this.update = update;
-    }
-
-    @Override
-    public String toString() {
-        return "PlayerDamageBlockEvent{" +
-                "player=" + player +
-                ", block=" + block +
-                ", blockDamageType=" + blockDamageType +
-                ", update=" + update +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        PlayerDamageBlockEvent that = (PlayerDamageBlockEvent) o;
-        return update == that.update && player.equals(that.player) && block.equals(that.block) && blockDamageType == that.blockDamageType;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), player, block, blockDamageType, update);
     }
 
     public enum BlockDamageType {

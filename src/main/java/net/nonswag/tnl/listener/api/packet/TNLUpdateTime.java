@@ -19,7 +19,7 @@ public abstract class TNLUpdateTime {
         } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
             return new net.minecraft.server.v1_7_R1.PacketPlayOutUpdateTime(timestamp, timestamp, true);
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }

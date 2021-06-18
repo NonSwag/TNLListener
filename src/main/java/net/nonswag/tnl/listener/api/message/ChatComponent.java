@@ -1,11 +1,12 @@
 package net.nonswag.tnl.listener.api.message;
 
 import net.nonswag.tnl.listener.api.logger.Logger;
+import net.nonswag.tnl.listener.api.player.TNLPlayer;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class ChatComponent {
 
@@ -40,12 +41,17 @@ public class ChatComponent {
     }
 
     @Nonnull
-    public String getText(@Nonnull Placeholder... placeholders) {
-        return ChatComponent.getText(this.text, placeholders);
+    public String getText(@Nullable TNLPlayer player, @Nonnull Placeholder... placeholders) {
+        return ChatComponent.getText(this.text, player, placeholders);
     }
 
     @Nonnull
-    public static String getText(@Nonnull String text, @Nonnull Placeholder... placeholders) {
+    public String getText(@Nonnull Placeholder... placeholders) {
+        return this.getText((TNLPlayer) null, placeholders);
+    }
+
+    @Nonnull
+    public static String getText(@Nonnull String text, @Nullable TNLPlayer player, @Nonnull Placeholder... placeholders) {
         for (Placeholder placeholder : placeholders) {
             text = text.replace("%" + placeholder.getPlaceholder() + "%", placeholder.getObject().toString());
         }
@@ -53,32 +59,18 @@ public class ChatComponent {
             Placeholder placeholder = Placeholder.Registry.valueOf(value);
             if (placeholder != null) {
                 text = text.replace("%" + placeholder.getPlaceholder() + "%", placeholder.getObject().toString());
-            } else {
-                Logger.error.println("§cCannot find placeholder §8'§4" + value + "§8'§c but it is registered");
-            }
+            } else Logger.error.println("Cannot find placeholder <'" + value + "'> but it is registered");
+        }
+        if (player != null) for (Placeholder.Formulary formulary : Placeholder.Registry.formularies()) {
+            Placeholder check = formulary.check(player);
+            text = text.replace("%" + check.getPlaceholder() + "%", check.getObject().toString());
         }
         return text;
     }
 
-    @Override
-    public String toString() {
-        return "ChatComponent{" +
-                "languageKey=" + languageKey +
-                ", text='" + text + '\'' +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ChatComponent component = (ChatComponent) o;
-        return languageKey.equals(component.languageKey) && text.equals(component.text);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(languageKey, text);
+    @Nonnull
+    public static String getText(@Nonnull String text, @Nonnull Placeholder... placeholders) {
+        return getText(text, null, placeholders);
     }
 
     @Nonnull

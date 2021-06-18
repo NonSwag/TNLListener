@@ -65,6 +65,10 @@ public enum ProtocolVersion {
         return getVersions().get(getVersions().size() - 1);
     }
 
+    public boolean isAtLeast(@Nonnull ProtocolVersion version) {
+        return getProtocol() >= version.getProtocol();
+    }
+
     @Nonnull
     @Override
     public String toString() {

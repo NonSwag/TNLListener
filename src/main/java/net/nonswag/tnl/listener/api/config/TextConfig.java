@@ -33,7 +33,7 @@ public class TextConfig implements Config {
         } catch (Exception ignored) {
         }
         save();
-        if (!isValid()) Logger.error.println("§cThe file §8'§4" + file.getAbsolutePath() + "§8'§c is invalid");
+        if (!isValid()) Logger.error.println("The file <'" + file.getAbsolutePath() + "'> is invalid");
     }
 
     @Nonnull
@@ -57,7 +57,7 @@ public class TextConfig implements Config {
             for (String s : content) writer.write(s + "\n");
             writer.close();
         } catch (Exception e) {
-            Logger.error.println("Failed to save file §8'§4" + getFile().getAbsolutePath() + "§8'", e);
+            Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", e);
         }
     }
 }

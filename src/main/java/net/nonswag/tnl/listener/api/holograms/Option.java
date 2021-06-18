@@ -64,14 +64,4 @@ public enum Option {
     public List<String> getValues() {
         return values;
     }
-
-    @Override
-    public String toString() {
-        return "Option{" +
-                "name='" + name + '\'' +
-                ", clazz=" + clazz +
-                ", type='" + type + '\'' +
-                ", values=" + values +
-                '}';
-    }
 }

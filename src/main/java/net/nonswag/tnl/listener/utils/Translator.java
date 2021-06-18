@@ -21,7 +21,7 @@ public class Translator {
             String translatedText = new JsonParser().parse(reader).getAsJsonObject().get("responseData").getAsJsonObject().get("translatedText").getAsString();
             return translatedText.replace("\"\"", "").replace(",", "").replace("match", "").replace("-", "").replace("\\\\u", "").replace("\\u", "").replace("~", "");
         } catch (Exception e) {
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
         return string;
     }

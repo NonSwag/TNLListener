@@ -11,6 +11,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
+import javax.annotation.Nonnull;
+
 public class CommandListener implements Listener {
 
     @EventHandler
@@ -42,7 +44,7 @@ public class CommandListener implements Listener {
     }
 
     @EventHandler
-    public void onConsoleCommand(ServerCommandEvent event) {
+    public void onConsoleCommand(@Nonnull ServerCommandEvent event) {
         String command = event.getCommand().split(" ")[0];
         switch (command.toLowerCase()) {
             case "reload":

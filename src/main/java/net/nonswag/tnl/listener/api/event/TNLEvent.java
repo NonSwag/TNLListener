@@ -6,7 +6,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 public class TNLEvent extends Event implements Cancellable {
 
@@ -42,25 +41,5 @@ public class TNLEvent extends Event implements Cancellable {
     @Nonnull
     public static HandlerList getHandlerList() {
         return handlers;
-    }
-
-    @Override
-    public String toString() {
-        return "TNLEvent{" +
-                "cancelled=" + cancelled +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TNLEvent tnlEvent = (TNLEvent) o;
-        return cancelled == tnlEvent.cancelled;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(cancelled);
     }
 }

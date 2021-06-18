@@ -67,7 +67,7 @@ public class Redis extends Jedis {
         try {
             connect();
         } catch (Exception e) {
-            Logger.error.println("Failed to connect to Redis §8'§4" + getConfig().getString("host") + ":" + getConfig().getString("port") + "§8'");
+            Logger.error.println("Failed to connect to Redis <'" + getConfig().getString("host") + ":" + getConfig().getString("port") + "'>");
         }
     }
 

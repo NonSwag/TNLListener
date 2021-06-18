@@ -66,49 +66,49 @@ public abstract class Settings {
                     if (value != null) {
                         ((Setting<String>) setting).setValue(value);
                     }
-                    Logger.debug.println("§aLoaded setting §8'§6" + setting.getKey() + "§8'§a with value §8'§6" + setting.getValue() + "§8'");
+                    Logger.debug.println("Loaded setting <'" + setting.getKey() + "'> with value <'" + setting.getValue() + "'>");
                 } else if (setting.getValue() instanceof Boolean) {
                     Boolean value = getConfig().getBoolean(setting.getKey());
                     ((Setting<Boolean>) setting).setValue(value);
-                    Logger.debug.println("§aLoaded setting §8'§6" + setting.getKey() + "§8'§a with value §8'§6" + setting.getValue() + "§8'");
+                    Logger.debug.println("Loaded setting <'" + setting.getKey() + "'> with value <'" + setting.getValue() + "'>");
                 } else if (setting.getValue() instanceof Byte) {
                     Byte value = getConfig().getByte(setting.getKey());
                     ((Setting<Byte>) setting).setValue(value);
-                    Logger.debug.println("§aLoaded setting §8'§6" + setting.getKey() + "§8'§a with value §8'§6" + setting.getValue() + "§8'");
+                    Logger.debug.println("Loaded setting <'" + setting.getKey() + "'> with value <'" + setting.getValue() + "'>");
                 } else if (setting.getValue() instanceof List) {
                     List<String> value = getConfig().getStringList(setting.getKey());
                     ((Setting<List<String>>) setting).setValue(value);
-                    Logger.debug.println("§aLoaded setting §8'§6" + setting.getKey() + "§8'§a with value §8'§6" + String.join("§8, §6", value) + "§8'");
+                    Logger.debug.println("Loaded setting <'" + setting.getKey() + "'> with value <'" + String.join(", ", value) + "'>");
                 } else if (setting.getValue() instanceof Integer) {
                     Integer value = getConfig().getInteger(setting.getKey());
                     ((Setting<Integer>) setting).setValue(value);
-                    Logger.debug.println("§aLoaded setting §8'§6" + setting.getKey() + "§8'§a with value §8'§6" + setting.getValue() + "§8'");
+                    Logger.debug.println("Loaded setting <'" + setting.getKey() + "'> with value <'" + setting.getValue() + "'>");
                 } else {
-                    Logger.warn.println("§cUnset Setting Type §8§4'" + setting.getValue().getClass().getSimpleName() + "§8'", new IOException("unset setting type"));
+                    Logger.warn.println("Unset Setting Type <'" + setting.getValue().getClass().getSimpleName() + "'>", new IOException("unset setting type"));
                 }
             } else {
                 if (setting.getValue() instanceof String) {
                     String value = (String) setting.getValue();
                     getConfig().setValue(setting.getKey(), value);
-                    Logger.debug.println("§aAdded setting §8'§6" + setting.getKey() + "§8'§a with value §8'§6" + value + "§8'");
+                    Logger.debug.println("Added setting <'" + setting.getKey() + "'> with value <'" + value + "'>");
                 } else if (setting.getValue() instanceof Boolean) {
                     Boolean value = (Boolean) setting.getValue();
                     getConfig().setValue(setting.getKey(), value);
-                    Logger.debug.println("§aAdded setting §8'§6" + setting.getKey() + "§8'§a with value §8'§6" + value + "§8'");
+                    Logger.debug.println("Added setting <'" + setting.getKey() + "'> with value <'" + value + "'>");
                 } else if (setting.getValue() instanceof Byte) {
                     Byte value = (Byte) setting.getValue();
                     getConfig().setValue(setting.getKey(), value);
-                    Logger.debug.println("§aAdded setting §8'§6" + setting.getKey() + "§8'§a with value §8'§6" + value + "§8'");
+                    Logger.debug.println("Added setting <'" + setting.getKey() + "'> with value <'" + value + "'>");
                 } else if (setting.getValue() instanceof List) {
                     List<String> value = (List<String>) setting.getValue();
                     getConfig().setValue(setting.getKey(), value);
-                    Logger.debug.println("§aAdded setting §8'§6" + setting.getKey() + "§8'§a with value §8'§6" + String.join("§8, §6", value) + "§8'");
+                    Logger.debug.println("Added setting <'" + setting.getKey() + "'> with value <'" + String.join(", ", value) + "'>");
                 } else if (setting.getValue() instanceof Integer) {
                     Integer value = (Integer) setting.getValue();
                     getConfig().setValue(setting.getKey(), value);
-                    Logger.debug.println("§aAdded setting §8'§6" + setting.getKey() + "§8'§a with value §8'§6" + value + "§8'");
+                    Logger.debug.println("Added setting <'" + setting.getKey() + "'> with value <'" + value + "'>");
                 } else {
-                    Logger.error.println("§cUnset Setting Type §8'§4" + setting.getValue().getClass().getSimpleName() + "§8'", new IOException("unset setting type"));
+                    Logger.error.println("Unset Setting Type <'" + setting.getValue().getClass().getSimpleName() + "'>", new IOException("unset setting type"));
                 }
             }
         }

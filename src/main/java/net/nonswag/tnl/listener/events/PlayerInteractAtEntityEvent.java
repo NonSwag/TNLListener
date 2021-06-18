@@ -5,7 +5,6 @@ import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import org.bukkit.entity.Entity;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 public class PlayerInteractAtEntityEvent extends TNLEvent {
 
@@ -27,27 +26,5 @@ public class PlayerInteractAtEntityEvent extends TNLEvent {
     @Nonnull
     public Entity getEntity() {
         return entity;
-    }
-
-    @Override
-    public String toString() {
-        return "PlayerInteractAtEntityEvent{" +
-                "player=" + player +
-                ", entity=" + entity +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        PlayerInteractAtEntityEvent that = (PlayerInteractAtEntityEvent) o;
-        return player.equals(that.player) && entity.equals(that.entity);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), player, entity);
     }
 }

@@ -18,7 +18,7 @@ public abstract class TNLPlayerRespawn {
             packet = new net.minecraft.server.v1_15_R1.PacketPlayOutRespawn(((net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer) player).getEntityPlayer().dimension,
                     0, net.minecraft.server.v1_15_R1.WorldType.NORMAL, ((net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer) player).getEntityPlayer().server.getGamemode());
         } else {
-            Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
         return packet;

@@ -3,7 +3,6 @@ package net.nonswag.tnl.listener.api.title;
 import org.bukkit.ChatColor;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 public class Title {
 
@@ -91,30 +90,6 @@ public class Title {
         return new Title.Animation(this, design);
     }
 
-    @Override
-    public String toString() {
-        return "Title{" +
-                "title='" + title + '\'' +
-                ", subtitle='" + subtitle + '\'' +
-                ", timeStay=" + timeStay +
-                ", timeIn=" + timeIn +
-                ", timeOut=" + timeOut +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Title title1 = (Title) o;
-        return timeStay == title1.timeStay && timeIn == title1.timeIn && timeOut == title1.timeOut && title.equals(title1.title) && subtitle.equals(title1.subtitle);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, subtitle, timeStay, timeIn, timeOut);
-    }
-
     public static class Animation {
 
         @Nonnull
@@ -135,27 +110,6 @@ public class Title {
         @Nonnull
         public Design getDesign() {
             return design;
-        }
-
-        @Override
-        public String toString() {
-            return "Animation{" +
-                    "title=" + title +
-                    ", design=" + design +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Animation animation = (Animation) o;
-            return title.equals(animation.title) && design == animation.design;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(title, design);
         }
     }
 
@@ -195,28 +149,6 @@ public class Title {
         @Nonnull
         public ChatColor getExtraColor() {
             return extraColor;
-        }
-
-        @Override
-        public String toString() {
-            return "Design{" +
-                    "primaryColor=" + primaryColor +
-                    ", secondaryColor=" + secondaryColor +
-                    ", extraColor=" + extraColor +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Design design = (Design) o;
-            return primaryColor == design.primaryColor && secondaryColor == design.secondaryColor && extraColor == design.extraColor;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(primaryColor, secondaryColor, extraColor);
         }
     }
 }

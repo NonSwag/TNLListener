@@ -53,7 +53,7 @@ public class TNLListener {
         }
         this.version = version;
         if (getVersion().equals(ServerVersion.UNKNOWN)) {
-            Logger.error.println("Your server version is not supported §8(§4" + Bukkit.getVersion() + "§8)");
+            Logger.error.println("Your server version is not supported (" + Bukkit.getVersion() + ")");
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException ignored) {
@@ -69,23 +69,23 @@ public class TNLListener {
                 String value = Settings.getConfig().getString("server-" + server);
                 if (value != null && !value.isEmpty()) {
                     if (value.equalsIgnoreCase("host:port")) {
-                        Logger.error.println("§cYou have to setup the server §8'§4" + server + "§8'§c correctly");
+                        Logger.error.println("You have to setup the server <'" + server + "'> correctly");
                     } else {
                         try {
                             Server s = new Server(server, new InetSocketAddress(value.split(":")[0], Integer.parseInt(value.split(":")[1])));
                             getServerHashMap().put(s.getName(), s);
-                            Logger.debug.println("§aInitialized new server §8'§6" + s.getName() + "§8' §8(§7" + s.getInetSocketAddress().getHostString() + ":" + s.getInetSocketAddress().getPort() + "§8)");
+                            Logger.debug.println("Initialized new server <'" + s.getName() + "'> (" + s.getInetSocketAddress().getHostString() + ":" + s.getInetSocketAddress().getPort() + ")");
                         } catch (Exception e) {
-                            Logger.error.println("§cFailed to load server §8'§4" + server + "§8'", "§cThe ip-address format is §8'§4host:port§8' (§4example localhost:25565§8)", e);
+                            Logger.error.println("Failed to load server <'" + server + "'>", "The ip-address format is 'host:port' (example localhost:25565)", e.getMessage());
                         }
                     }
                 } else {
                     Settings.getConfig().setValue("server-" + server, "host:port");
-                    Logger.debug.println("§aFound new server §8'§6" + server + "§8'");
+                    Logger.debug.println("Found new server <'" + server + "'>");
                 }
             } else {
                 Settings.getConfig().setValue("server-" + server, "host:port");
-                Logger.debug.println("§aFound new server §8'§6" + server + "§8'");
+                Logger.debug.println("Found new server <'" + server + "'>");
             }
         }
         if (Settings.DELETE_OLD_LOGS.getValue()) deleteOldLogs();
@@ -108,13 +108,13 @@ public class TNLListener {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R1.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.legacy.CommandListener());
             }
-            Logger.debug.println("§aLoading §6TNLListener §8(§7" + getVersion().name().replace("_", ".") + "§8)");
+            Logger.debug.println("Loading TNLListener (" + getVersion().name().replace("_", ".") + ")");
             eventManager.registerListener(new WorldListener());
             eventManager.registerListener(new JoinListener());
             eventManager.registerListener(new KickListener());
             eventManager.registerListener(new QuitListener());
         } catch (Throwable t) {
-            Logger.error.println("§cFailed to register listener", t);
+            Logger.error.println("Failed to register listener", t);
         }
         for (Player all : Bukkit.getOnlinePlayers()) {
             TNLPlayer player = TNLPlayer.cast(all);
@@ -176,9 +176,9 @@ public class TNLListener {
                 for (File all : files) {
                     if (all.isFile() && all.getName().endsWith(".log.gz")) {
                         if (!all.delete()) {
-                            Logger.error.println("§cFailed to delete file §8'§4" + all.getAbsolutePath() + "§8'");
+                            Logger.error.println("§cFailed to delete file §8'§4" + all.getAbsolutePath() + "§8<'");
                         } else {
-                            Logger.debug.println("§aDeleted old log file §8'§6" + all.getAbsolutePath() + "§8'");
+                            Logger.debug.println("§aDeleted old log file §8'§6" + all.getAbsolutePath() + "§8<'");
                         }
                     }
                 }

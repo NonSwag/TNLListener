@@ -72,7 +72,7 @@ public class Sidebar {
                     team.setPrefix(content);
                 }
             } else {
-                Logger.error.println("§cVersion §8'§4" + TNLListener.getInstance().getVersion().getRecentVersion() + "§8'§c is not registered please report this error to an contributor");
+                Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
                 throw new IllegalStateException();
             }
             showScore(score);
@@ -171,14 +171,6 @@ public class Sidebar {
         public static Entry getById(int entry) {
             for (Entry value : values()) if (value.getEntry() == entry) return value;
             return null;
-        }
-
-        @Override
-        public String toString() {
-            return "Entry{" +
-                    "name='" + name + '\'' +
-                    ", entry=" + entry +
-                    '}';
         }
     }
 }

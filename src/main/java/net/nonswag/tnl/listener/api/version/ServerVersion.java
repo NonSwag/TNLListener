@@ -40,6 +40,10 @@ public enum ServerVersion {
         return getVersions().get(getVersions().size() - 1);
     }
 
+    public boolean isAtLeast(@Nonnull ServerVersion version) {
+        return getProtocol() >= version.getProtocol();
+    }
+
     @Nonnull
     @Override
     public String toString() {
