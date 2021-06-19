@@ -2,11 +2,13 @@ package net.nonswag.tnl.listener.api.player;
 
 import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
+import net.nonswag.tnl.listener.api.annotation.Info;
 import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
 import net.nonswag.tnl.listener.api.chat.Conversation;
 import net.nonswag.tnl.listener.api.entity.TNLEntity;
 import net.nonswag.tnl.listener.api.entity.TNLEntityPlayer;
 import net.nonswag.tnl.listener.api.file.FileCreator;
+import net.nonswag.tnl.listener.api.gamemode.Gamemode;
 import net.nonswag.tnl.listener.api.gui.GUI;
 import net.nonswag.tnl.listener.api.gui.GUIItem;
 import net.nonswag.tnl.listener.api.item.TNLItem;
@@ -1010,16 +1012,29 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         return getBukkitPlayer().getBedLocation();
     }
 
+    @Info("use TNLPlayer#getGamemode()")
+    @Deprecated
     @Nonnull
     @Override
     default GameMode getGameMode() {
         return getBukkitPlayer().getGameMode();
     }
 
+    @Info("use TNLPlayer#setGamemode(Gamemode)")
+    @Deprecated
     @Override
     default void setGameMode(@Nonnull GameMode gameMode) {
         if (Bukkit.isPrimaryThread()) getBukkitPlayer().setGameMode(gameMode);
         else Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().setGameMode(gameMode));
+    }
+
+    @Nonnull
+    default Gamemode getGamemode() {
+        return Gamemode.cast(getGameMode());
+    }
+
+    default void setGamemode(@Nonnull Gamemode gamemode) {
+        setGameMode(gamemode.bukkit());
     }
 
     @Override
