@@ -15,7 +15,6 @@ import net.nonswag.tnl.listener.api.item.TNLItem;
 import net.nonswag.tnl.listener.api.logger.Color;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.message.*;
-import net.nonswag.tnl.listener.api.message.Placeholder;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.packet.*;
 import net.nonswag.tnl.listener.api.permission.PermissionManager;
@@ -173,6 +172,7 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         getBukkitPlayer().playSound(location, sound, volume, pitch);
     }
 
+    @Info("Use TNLPlayer#playSound(Location, Sound, float, float)")
     @Deprecated
     @Override
     default void playSound(@Nonnull Location location, @Nonnull String sound, float volume, float pitch) {
@@ -486,26 +486,40 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         getBukkitPlayer().setAllowFlight(flight);
     }
 
+    @Info("Use TNLPlayer#hidePlayer(Plugin, TNLPlayer)")
     @Deprecated
     @Override
     default void hidePlayer(@Nonnull Player player) {
         getBukkitPlayer().hidePlayer(player);
     }
 
+    @Info("Use TNLPlayer#hidePlayer(Plugin, TNLPlayer)")
+    @Deprecated
     @Override
     default void hidePlayer(@Nonnull Plugin plugin, @Nonnull Player player) {
         getBukkitPlayer().hidePlayer(plugin, player);
     }
 
+    @Info("Use TNLPlayer#showPlayer(Plugin, TNLPlayer)")
     @Deprecated
     @Override
     default void showPlayer(@Nonnull Player player) {
         getBukkitPlayer().showPlayer(player);
     }
 
+    @Info("Use TNLPlayer#showPlayer(Plugin, TNLPlayer)")
+    @Deprecated
     @Override
     default void showPlayer(@Nonnull Plugin plugin, @Nonnull Player player) {
         getBukkitPlayer().showPlayer(plugin, player);
+    }
+
+    default void showPlayer(@Nonnull Plugin plugin, @Nonnull TNLPlayer player) {
+        getBukkitPlayer().showPlayer(plugin, player.getBukkitPlayer());
+    }
+
+    default void hidePlayer(@Nonnull Plugin plugin, @Nonnull TNLPlayer player) {
+        getBukkitPlayer().hidePlayer(plugin, player.getBukkitPlayer());
     }
 
     @Override
@@ -941,17 +955,15 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         else Bukkit.getScheduler().runTask(Bootstrap.getInstance(), () -> getBukkitPlayer().closeInventory());
     }
 
-    @Deprecated
     @Override
     @Nonnull
     default ItemStack getItemInHand() {
-        return getBukkitPlayer().getItemInHand();
+        return getInventory().getItemInMainHand();
     }
 
-    @Deprecated
     @Override
     default void setItemInHand(@Nullable ItemStack itemStack) {
-        getBukkitPlayer().setItemInHand(itemStack);
+        getInventory().setItemInMainHand(itemStack);
     }
 
     @Override
@@ -1072,31 +1084,19 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         return getBukkitPlayer().undiscoverRecipes(recipes);
     }
 
-    @Deprecated
     @Override
     @Nullable
-    default Entity getShoulderEntityLeft() {
-        return getBukkitPlayer().getShoulderEntityLeft();
-    }
+    Entity getShoulderEntityLeft();
 
-    @Deprecated
     @Override
-    default void setShoulderEntityLeft(@Nullable Entity entity) {
-        getBukkitPlayer().setShoulderEntityLeft(entity);
-    }
+    void setShoulderEntityLeft(@Nullable Entity entity);
 
-    @Deprecated
     @Override
     @Nullable
-    default Entity getShoulderEntityRight() {
-        return getBukkitPlayer().getShoulderEntityRight();
-    }
+    Entity getShoulderEntityRight();
 
-    @Deprecated
     @Override
-    default void setShoulderEntityRight(@Nullable Entity entity) {
-        getBukkitPlayer().setShoulderEntityRight(entity);
-    }
+    void setShoulderEntityRight(@Nullable Entity entity);
 
     @Override
     default double getEyeHeight() {
@@ -1575,15 +1575,16 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     @Deprecated
     @Override
     default boolean isPersistent() {
-        return getBukkitPlayer().isPersistent();
+        throw new UnsupportedOperationException("method is not supported");
     }
 
     @Deprecated
     @Override
     default void setPersistent(boolean persistent) {
-        getBukkitPlayer().setPersistent(persistent);
+        throw new UnsupportedOperationException("method is not supported");
     }
 
+    @Info("Use TNLPlayer#getPassengers()")
     @Deprecated
     @Override
     @Nullable
@@ -1591,6 +1592,7 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         return getBukkitPlayer().getPassenger();
     }
 
+    @Info("Use TNLPlayer#addPassenger(Entity)")
     @Deprecated
     @Override
     default boolean setPassenger(@Nonnull Entity entity) {
@@ -1611,6 +1613,14 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     @Override
     default boolean removePassenger(@Nonnull Entity entity) {
         return getBukkitPlayer().removePassenger(entity);
+    }
+
+    default boolean addPassenger(@Nonnull TNLEntity entity) {
+        return getBukkitPlayer().addPassenger(entity.getBukkitEntity());
+    }
+
+    default boolean removePassenger(@Nonnull TNLEntity entity) {
+        return getBukkitPlayer().removePassenger(entity.getBukkitEntity());
     }
 
     @Override
@@ -1668,7 +1678,7 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     @Nonnull
     @Override
     default EntityType getType() {
-        return getBukkitPlayer().getType();
+        return EntityType.PLAYER;
     }
 
     @Override

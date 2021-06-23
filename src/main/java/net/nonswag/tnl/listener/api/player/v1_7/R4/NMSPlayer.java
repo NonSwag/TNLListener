@@ -232,6 +232,28 @@ public class NMSPlayer implements TNLPlayer {
         return virtualStorage;
     }
 
+    @Nullable
+    @Override
+    public Entity getShoulderEntityLeft() {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
+    @Override
+    public void setShoulderEntityLeft(@Nullable Entity entity) {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
+    @Nullable
+    @Override
+    public Entity getShoulderEntityRight() {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
+    @Override
+    public void setShoulderEntityRight(@Nullable Entity entity) {
+        throw new UnsupportedOperationException("method is not supported in this version");
+    }
+
     @Nonnull
     @Override
     public Player getBukkitPlayer() {

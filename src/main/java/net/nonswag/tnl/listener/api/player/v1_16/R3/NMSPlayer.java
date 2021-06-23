@@ -287,6 +287,28 @@ public class NMSPlayer implements TNLPlayer {
         return virtualStorage;
     }
 
+    @Nullable
+    @Override
+    public Entity getShoulderEntityLeft() {
+        return getCraftPlayer().getShoulderEntityLeft();
+    }
+
+    @Override
+    public void setShoulderEntityLeft(@Nullable Entity entity) {
+        getCraftPlayer().setShoulderEntityLeft(entity);
+    }
+
+    @Nullable
+    @Override
+    public Entity getShoulderEntityRight() {
+        return getCraftPlayer().getShoulderEntityRight();
+    }
+
+    @Override
+    public void setShoulderEntityRight(@Nullable Entity entity) {
+        getCraftPlayer().setShoulderEntityRight(entity);
+    }
+
     @Override
     public void setArrowCount(int arrows) {
         getEntityPlayer().setArrowCount(arrows);
