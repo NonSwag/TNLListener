@@ -304,11 +304,4 @@ public class Language {
     public static List<Language> getLanguages() {
         return languages;
     }
-
-    public static void main(String[] args) {
-        for (Language language : getLanguages()) {
-            System.out.println("@Nonnull public static final Language " + language.getName().replace(" ", "_").toUpperCase() +
-                    " = new Language(\"" + language.getName() + "\", \"" + language.getShorthand() + "\");");
-        }
-    }
 }
