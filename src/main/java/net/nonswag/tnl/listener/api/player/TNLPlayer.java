@@ -695,6 +695,8 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         return getBukkitPlayer().getClientViewDistance();
     }
 
+    @Info("Use TNLPlayer#getLanguage()")
+    @Deprecated
     @Override
     @Nonnull
     default String getLocale() {
@@ -708,7 +710,12 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
 
     @Override
     default void openBook(@Nonnull ItemStack itemStack) {
+        closeGUI(false);
         getBukkitPlayer().openBook(itemStack);
+    }
+
+    default void openBook(@Nonnull TNLItem item) {
+        openBook(item.build());
     }
 
     @Override
@@ -2302,7 +2309,7 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
 
     default void bungeeConnect(@Nonnull net.nonswag.tnl.listener.api.server.Server server) {
         try {
-            if (server.getStatus().isOnline()) {
+            if (!server.getStatus().isOffline()) {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
                 dataOutputStream.writeUTF("Connect");
@@ -2321,10 +2328,29 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
         return getVirtualStorage().get("current-gui", GUI.class).getValue();
     }
 
-    default void closeGUI() {
+    default void closeGUI(boolean update) {
         if (getGUI() != null) getGUI().getViewers().remove(this);
         getVirtualStorage().remove("current-gui");
-        if (getSignMenu() == null) sendPacket(TNLCloseWindow.create());
+        if (getSignMenu() == null && update) sendPacket(TNLCloseWindow.create());
+    }
+
+    default void closeGUI() {
+        closeGUI(true);
+    }
+
+    default void closeGUIAfter(long millis) {
+        closeGUIAfter(millis, true);
+    }
+
+    default void closeGUIAfter(long millis, boolean update) {
+        new Thread(() -> {
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException ignored) {
+            } finally {
+                closeGUI(update);
+            }
+        }).start();
     }
 
     @Nullable

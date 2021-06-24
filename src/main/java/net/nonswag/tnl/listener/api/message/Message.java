@@ -32,31 +32,31 @@ public abstract class Message {
     public static final ChatComponent KICKED_SPAMMING = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.KICKED_SPAMMING), "§cSpamming is prohibited");
 
     @Nonnull
-    public static final ChatComponent NO_PERMISSION_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.NO_PERMISSION), "§4%prefix%§c You have no Rights §8(§4%permission%§8)");
+    public static final ChatComponent NO_PERMISSION_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.NO_PERMISSION), "§4%prefix%§c You have no Rights §8(§4%permission%§8)");
     @Nonnull
-    public static final ChatComponent DISABLED_COMMAND_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.DISABLED_COMMAND), "§4%prefix%§c The Command §8(§4%command%§8)§c is disabled");
+    public static final ChatComponent DISABLED_COMMAND_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.DISABLED_COMMAND), "§4%prefix%§c The Command §8(§4%command%§8)§c is disabled");
     @Nonnull
-    public static final ChatComponent UNKNOWN_COMMAND_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.UNKNOWN_COMMAND), "§4%prefix%§c The Command §8(§4%command%§8)§c doesn't exist");
+    public static final ChatComponent UNKNOWN_COMMAND_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.UNKNOWN_COMMAND), "§4%prefix%§c The Command §8(§4%command%§8)§c doesn't exist");
     @Nonnull
-    public static final ChatComponent PLAYER_COMMAND_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.PLAYER_COMMAND), "§4%prefix%§c This is a player command");
+    public static final ChatComponent PLAYER_COMMAND_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.PLAYER_COMMAND), "§4%prefix%§c This is a player command");
     @Nonnull
-    public static final ChatComponent CONSOLE_COMMAND_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.CONSOLE_COMMAND), "§4%prefix%§c This is a console command");
+    public static final ChatComponent CONSOLE_COMMAND_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.CONSOLE_COMMAND), "§4%prefix%§c This is a console command");
     @Nonnull
-    public static final ChatComponent KICKED_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.KICKED), "§4%prefix% §cYou got kicked%nl%§4%reason%");
+    public static final ChatComponent KICKED_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.KICKED), "§4%prefix% §cYou got kicked%nl%§4%reason%");
     @Nonnull
-    public static final ChatComponent FIRST_JOIN_MESSAGE_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.FIRST_JOIN_MESSAGE), "§6%prefix%§6 %player%§a joined the game §8(§7the first time§8)");
+    public static final ChatComponent FIRST_JOIN_MESSAGE_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.FIRST_JOIN_MESSAGE), "§6%prefix%§6 %player%§a joined the game §8(§7the first time§8)");
     @Nonnull
-    public static final ChatComponent JOIN_MESSAGE_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.JOIN_MESSAGE), "§6%prefix%§6 %player%§a joined the game");
+    public static final ChatComponent JOIN_MESSAGE_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.JOIN_MESSAGE), "§6%prefix%§6 %player%§a joined the game");
     @Nonnull
-    public static final ChatComponent QUIT_MESSAGE_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.QUIT_MESSAGE), "§4%prefix%§4 %player%§c left the game");
+    public static final ChatComponent QUIT_MESSAGE_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.QUIT_MESSAGE), "§4%prefix%§4 %player%§c left the game");
     @Nonnull
-    public static final ChatComponent WORLD_SAVED_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.WORLD_SAVED), "§6%prefix%§a Saved the world §6%world%");
+    public static final ChatComponent WORLD_SAVED_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.WORLD_SAVED), "§6%prefix%§a Saved the world §6%world%");
     @Nonnull
-    public static final ChatComponent CHANGED_GAMEMODE_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.CHANGED_GAMEMODE), "§6%prefix%§a Your gamemode is now §6%gamemode%");
+    public static final ChatComponent CHANGED_GAMEMODE_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.CHANGED_GAMEMODE), "§6%prefix%§a Your gamemode is now §6%gamemode%");
     @Nonnull
-    public static final ChatComponent PLAYER_NOT_ONLINE_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.PLAYER_NOT_ONLINE), "§4%prefix%§4 %player%§c is not online");
+    public static final ChatComponent PLAYER_NOT_ONLINE_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.PLAYER_NOT_ONLINE), "§4%prefix%§4 %player%§c is not online");
     @Nonnull
-    public static final ChatComponent NOT_A_PLAYER_EN = new ChatComponent(new LanguageKey(Language.ENGLISH, MessageKey.NOT_A_PLAYER), "§4%prefix%§4 %player%§c is not a player");
+    public static final ChatComponent NOT_A_PLAYER_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.NOT_A_PLAYER), "§4%prefix%§4 %player%§c is not a player");
 
     @Nonnull
     public static final ChatComponent NO_PERMISSION_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.NO_PERMISSION), "§4%prefix%§c Darauf hast du keine Rechte §8(§4%permission%§8)");
@@ -99,7 +99,7 @@ public abstract class Message {
     }
 
     public static void init() {
-        for (Language language : Language.values()) {
+        for (Language language : Language.getLanguages()) {
             JsonConfig jsonConfig = new JsonConfig("plugins/Listener/Messages/", language.getFile());
             for (MessageKey key : MessageKey.getKeys()) {
                 String string = "§4%prefix%§c Undefined message <'" + key.getKey() + "'> for language <'" + language.getName() + "'>";
