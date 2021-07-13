@@ -7,7 +7,7 @@ import net.nonswag.tnl.listener.api.player.TNLPlayer;
 import net.nonswag.tnl.listener.api.plugin.PluginUpdate;
 import net.nonswag.tnl.listener.api.server.Server;
 import net.nonswag.tnl.listener.api.settings.Settings;
-import net.nonswag.tnl.listener.api.version.ServerVersion;
+import net.nonswag.tnl.listener.api.version.Version;
 import net.nonswag.tnl.listener.listeners.JoinListener;
 import net.nonswag.tnl.listener.listeners.KickListener;
 import net.nonswag.tnl.listener.listeners.QuitListener;
@@ -35,24 +35,22 @@ public class TNLListener {
     @Nonnull
     private final HashMap<String, Server> serverHashMap = new HashMap<>();
     @Nonnull
-    private final ServerVersion version;
+    private final Version version;
     @Nonnull
     private final String serverName = ServerProperties.getInstance().getOrDefault("server-name", new File("").getAbsoluteFile().getName());
 
     protected TNLListener() {
-        ServerVersion version = ServerVersion.UNKNOWN;
-        for (ServerVersion serverVersion : ServerVersion.values()) {
-            if (!serverVersion.equals(ServerVersion.UNKNOWN)) {
-                for (String v : serverVersion.getVersions()) {
-                    if (Bukkit.getVersion().toLowerCase().contains(v)) {
-                        version = serverVersion;
-                        break;
-                    }
+        Version version = Version.UNKNOWN;
+        for (Version serverVersion : Version.values()) if (!serverVersion.equals(Version.UNKNOWN)) {
+            for (String v : serverVersion.getVersions()) {
+                if (Bukkit.getVersion().toLowerCase().contains(v)) {
+                    version = serverVersion;
+                    break;
                 }
             }
         }
         this.version = version;
-        if (getVersion().equals(ServerVersion.UNKNOWN)) {
+        if (getVersion().equals(Version.UNKNOWN)) {
             Logger.error.println("Your server version is not supported (" + Bukkit.getVersion() + ")");
             try {
                 Thread.sleep(3000);
@@ -93,22 +91,26 @@ public class TNLListener {
         Bukkit.getMessenger().registerOutgoingPluginChannel(Bootstrap.getInstance(), "BungeeCord");
         if (Settings.AUTO_UPDATER.getValue()) new PluginUpdate(Bootstrap.getInstance()).downloadUpdate();
         try {
-            if (getVersion().equals(ServerVersion.v1_16_4)) {
+            if (getVersion().equals(Version.v1_17)) {
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_17.R1.PacketListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.CommandListener());
+                eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.InteractListener());
+            } else if (getVersion().equals(Version.v1_16_4)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_16.R3.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.CommandListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.InteractListener());
-            } else if (getVersion().equals(ServerVersion.v1_15_2)) {
+            } else if (getVersion().equals(Version.v1_15_2)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_15.R1.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.CommandListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.modern.InteractListener());
-            } else if (getVersion().equals(ServerVersion.v1_7_6)) {
+            } else if (getVersion().equals(Version.v1_7_6)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R4.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.legacy.CommandListener());
-            } else if (getVersion().equals(ServerVersion.v1_7_2)) {
+            } else if (getVersion().equals(Version.v1_7_2)) {
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.v1_7.R1.PacketListener());
                 eventManager.registerListener(new net.nonswag.tnl.listener.listeners.legacy.CommandListener());
             }
-            Logger.debug.println("Loading TNLListener (" + getVersion().name().replace("_", ".") + ")");
+            Logger.debug.println("Loading TNLListener (" + getVersion() + ")");
             eventManager.registerListener(new WorldListener());
             eventManager.registerListener(new JoinListener());
             eventManager.registerListener(new KickListener());
@@ -164,7 +166,7 @@ public class TNLListener {
     }
 
     @Nonnull
-    public ServerVersion getVersion() {
+    public Version getVersion() {
         return version;
     }
 
@@ -176,9 +178,9 @@ public class TNLListener {
                 for (File all : files) {
                     if (all.isFile() && all.getName().endsWith(".log.gz")) {
                         if (!all.delete()) {
-                            Logger.error.println("§cFailed to delete file §8'§4" + all.getAbsolutePath() + "§8<'");
+                            Logger.error.println("Failed to delete file <'" + all.getAbsolutePath() + "§8'>");
                         } else {
-                            Logger.debug.println("§aDeleted old log file §8'§6" + all.getAbsolutePath() + "§8<'");
+                            Logger.debug.println("Deleted old log file <'" + all.getAbsolutePath() + "'>");
                         }
                     }
                 }

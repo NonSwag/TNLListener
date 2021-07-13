@@ -1,5 +1,7 @@
 package net.nonswag.tnl.listener.api.player;
 
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.connection.UserConnection;
 import net.nonswag.tnl.listener.Bootstrap;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.annotation.Info;
@@ -25,8 +27,7 @@ import net.nonswag.tnl.listener.api.settings.Settings;
 import net.nonswag.tnl.listener.api.sign.SignMenu;
 import net.nonswag.tnl.listener.api.storage.VirtualStorage;
 import net.nonswag.tnl.listener.api.title.Title;
-import net.nonswag.tnl.listener.api.version.ProtocolVersion;
-import net.nonswag.tnl.listener.api.version.ServerVersion;
+import net.nonswag.tnl.listener.api.version.Version;
 import net.nonswag.tnl.listener.events.InventoryLoadEvent;
 import net.nonswag.tnl.listener.events.InventorySaveEvent;
 import net.nonswag.tnl.listener.events.PlayerChatEvent;
@@ -2491,8 +2492,13 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
     void setGlowing(@Nonnull Entity entity, boolean glowing);
 
     @Nonnull
-    default ProtocolVersion getVersion() {
-        return ProtocolVersion.UNKNOWN;
+    default Version getVersion() {
+        Version version = TNLListener.getInstance().getVersion();
+        if (Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
+            UserConnection client = Via.getManager().getConnectionManager().getConnectedClient(getUniqueId());
+            if (client != null) return Version.valueOf(client.getProtocolInfo().getProtocolVersion(), version);
+        }
+        return version;
     }
 
     void uninject();
@@ -2532,16 +2538,18 @@ public interface TNLPlayer extends TNLEntityPlayer, Player {
 
     @Nonnull
     static TNLPlayer cast(@Nonnull Player player) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(Version.v1_17)) {
+            return net.nonswag.tnl.listener.api.player.v1_17.R1.NMSPlayer.cast(player);
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_16_4)) {
             return net.nonswag.tnl.listener.api.player.v1_16.R3.NMSPlayer.cast(player);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_15_2)) {
             return net.nonswag.tnl.listener.api.player.v1_15.R1.NMSPlayer.cast(player);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_6)) {
             return net.nonswag.tnl.listener.api.player.v1_7.R4.NMSPlayer.cast(player);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_2)) {
             return net.nonswag.tnl.listener.api.player.v1_7.R1.NMSPlayer.cast(player);
         } else {
-            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");
+            Logger.error.println("Version <'" + TNLListener.getInstance().getVersion() + "'> is not registered please report this error to an contributor");
             throw new IllegalStateException();
         }
     }

@@ -364,7 +364,7 @@ public class NMSPlayer implements TNLPlayer {
                     uninject();
                 }
             } else {
-                Logger.error.println("Failed to inject '" + getName() + "'>", "The player can't be offline");
+                Logger.error.println("Failed to inject <'" + getName() + "'>", "The player can't be offline");
                 disconnect("%prefix%\n" + "§cYou are online but your connection is offline?!");
             }
         } catch (Exception e) {

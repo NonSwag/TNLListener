@@ -3,7 +3,7 @@ package net.nonswag.tnl.listener.api.item;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.gui.GUIItem;
 import net.nonswag.tnl.listener.api.logger.Logger;
-import net.nonswag.tnl.listener.api.version.ServerVersion;
+import net.nonswag.tnl.listener.api.version.Version;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -47,6 +47,11 @@ public interface TNLItem {
     @Nonnull
     default String getName() {
         return getItemMeta() != null ? getItemMeta().getDisplayName() : "";
+    }
+
+    @Nonnull
+    default List<String> getLore() {
+        return getItemMeta() != null ? (getItemMeta().getLore() != null ? getItemMeta().getLore() : new ArrayList<>()) : new ArrayList<>();
     }
 
     @Nullable
@@ -313,6 +318,13 @@ public interface TNLItem {
     }
 
     @Nonnull
+    default TNLItem addLore(@Nonnull String... lore) {
+        List<String> list = getLore();
+        list.addAll(Arrays.asList(lore));
+        return setLore(list);
+    }
+
+    @Nonnull
     default TNLItem removeLore() {
         if (getItemMeta() != null) {
             getItemMeta().setLore(null);
@@ -353,13 +365,13 @@ public interface TNLItem {
 
     @Nonnull
     static TNLItem create(@Nonnull ItemStack itemStack) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(Version.v1_16_4)) {
             return new net.nonswag.tnl.listener.api.item.v1_16.R3.NMSItem(itemStack);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_15_2)) {
             return new net.nonswag.tnl.listener.api.item.v1_15.R1.NMSItem(itemStack);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_6)) {
             return new net.nonswag.tnl.listener.api.item.v1_7.R4.NMSItem(itemStack);
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_2)) {
             return new net.nonswag.tnl.listener.api.item.v1_7.R1.NMSItem(itemStack);
         } else {
             Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");

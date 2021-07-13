@@ -4,7 +4,7 @@ import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.entity.TNLEntity;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
-import net.nonswag.tnl.listener.api.version.ServerVersion;
+import net.nonswag.tnl.listener.api.version.Version;
 import org.bukkit.entity.Entity;
 
 import javax.annotation.Nonnull;
@@ -14,13 +14,13 @@ public abstract class TNLEntityStatus {
     @Nonnull
     public static Object create(int id, @Nonnull Status status) {
         Object packet;
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(Version.v1_16_4)) {
             packet = new net.minecraft.server.v1_16_R3.PacketPlayOutEntityStatus();
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_15_2)) {
             packet = new net.minecraft.server.v1_15_R1.PacketPlayOutEntityStatus();
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_6)) {
             packet = new net.minecraft.server.v1_7_R4.PacketPlayOutEntityStatus();
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_2)) {
             packet = new net.minecraft.server.v1_7_R1.PacketPlayOutEntityStatus();
         } else {
             Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");

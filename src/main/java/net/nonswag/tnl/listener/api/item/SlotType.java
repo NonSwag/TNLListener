@@ -2,7 +2,7 @@ package net.nonswag.tnl.listener.api.item;
 
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.logger.Logger;
-import net.nonswag.tnl.listener.api.version.ServerVersion;
+import net.nonswag.tnl.listener.api.version.Version;
 
 import javax.annotation.Nonnull;
 
@@ -19,7 +19,7 @@ public enum SlotType {
 
     @Nonnull
     public Object toNMS() {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(Version.v1_16_4)) {
             if (equals(MAIN_HAND)) {
                 return net.minecraft.server.v1_16_R3.EnumItemSlot.MAINHAND;
             } else if (equals(OFF_HAND)) {
@@ -35,7 +35,7 @@ public enum SlotType {
             } else {
                 throw new UnsupportedOperationException("method is not supported in this version");
             }
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_15_2)) {
             if (equals(MAIN_HAND)) {
                 return net.minecraft.server.v1_15_R1.EnumItemSlot.MAINHAND;
             } else if (equals(OFF_HAND)) {
@@ -51,7 +51,7 @@ public enum SlotType {
             } else {
                 throw new UnsupportedOperationException("method is not supported in this version");
             }
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_6) || TNLListener.getInstance().getVersion().equals(Version.v1_7_2)) {
             if (equals(MAIN_HAND)) {
                 return 0;
             } else if (equals(BOOTS)) {
@@ -73,7 +73,7 @@ public enum SlotType {
 
     @Nonnull
     public static SlotType fromNMS(@Nonnull Object object) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(Version.v1_16_4)) {
             if (object.equals(net.minecraft.server.v1_16_R3.EnumItemSlot.MAINHAND)) {
                 return MAIN_HAND;
             } else if (object.equals(net.minecraft.server.v1_16_R3.EnumItemSlot.OFFHAND)) {
@@ -89,7 +89,7 @@ public enum SlotType {
             } else {
                 throw new UnsupportedOperationException("method is not supported in this version");
             }
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_15_2)) {
             if (object.equals(net.minecraft.server.v1_15_R1.EnumItemSlot.MAINHAND)) {
                 return MAIN_HAND;
             } else if (object.equals(net.minecraft.server.v1_15_R1.EnumItemSlot.OFFHAND)) {
@@ -105,7 +105,7 @@ public enum SlotType {
             } else {
                 throw new UnsupportedOperationException("method is not supported in this version");
             }
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6) || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_6) || TNLListener.getInstance().getVersion().equals(Version.v1_7_2)) {
             if (object.equals(0)) {
                 return MAIN_HAND;
             } else if (object.equals(1)) {

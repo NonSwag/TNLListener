@@ -24,10 +24,12 @@ public class PluginUpdate {
     @Nonnull
     private String latestVersion = "1.0";
     private boolean upToDate = false;
+    private boolean failed = false;
 
     public PluginUpdate(@Nonnull String plugin, @Nonnull String currentVersion) {
         this.plugin = plugin;
         this.currentVersion = currentVersion;
+        update();
     }
 
     public PluginUpdate(@Nonnull Plugin plugin) {
@@ -38,6 +40,8 @@ public class PluginUpdate {
         try {
             HttpsURLConnection connection = (HttpsURLConnection) new URL("https://www.thenextlvl.net/themes/PluginAPI.html").openConnection();
             connection.setRequestMethod("GET");
+            connection.setConnectTimeout(3000);
+            connection.setReadTimeout(3000);
             connection.connect();
             InputStream inputStream = connection.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -58,10 +62,12 @@ public class PluginUpdate {
             connection.disconnect();
         } catch (Exception e) {
             Logger.error.println("Failed to Update '" + getPlugin() + "'>", e.getMessage());
+            setFailed(true);
         }
     }
 
     public void downloadUpdate() {
+        if (isFailed()) return;
         if (!isUpToDate()) {
             try {
                 FileDownloader.downloadFile("https://www.thenextlvl.net/plugins/" + getPlugin() + ".jar", new File("plugins/updates").getAbsolutePath());
@@ -81,6 +87,10 @@ public class PluginUpdate {
         this.upToDate = upToDate;
     }
 
+    public void setFailed(boolean failed) {
+        this.failed = failed;
+    }
+
     @Nonnull
     public String getPlugin() {
         return plugin;
@@ -98,5 +108,9 @@ public class PluginUpdate {
 
     public boolean isUpToDate() {
         return upToDate;
+    }
+
+    public boolean isFailed() {
+        return failed;
     }
 }

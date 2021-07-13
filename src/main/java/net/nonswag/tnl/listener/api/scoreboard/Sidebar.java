@@ -3,7 +3,7 @@ package net.nonswag.tnl.listener.api.scoreboard;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.player.TNLPlayer;
-import net.nonswag.tnl.listener.api.version.ServerVersion;
+import net.nonswag.tnl.listener.api.version.Version;
 import org.bukkit.ChatColor;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -56,16 +56,16 @@ public class Sidebar {
     public Sidebar setScore(int score, @Nonnull String content) {
         Team team = getTeamByScore(score);
         if (team != null) {
-            if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)
-                    || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)
+            if (TNLListener.getInstance().getVersion().equals(Version.v1_15_2)
+                    || TNLListener.getInstance().getVersion().equals(Version.v1_16_4)
                    ) {
                 if (content.length() > 64) {
                     team.setPrefix(content.substring(0, 63));
                 } else {
                     team.setPrefix(content);
                 }
-            } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)
-                    || TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
+            } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_2)
+                    || TNLListener.getInstance().getVersion().equals(Version.v1_7_6)) {
                 if (content.length() > 32) {
                     team.setPrefix(content.substring(0, 31));
                 } else {

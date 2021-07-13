@@ -1,12 +1,27 @@
-package net.nonswag.tnl.listener.api.player.v1_15.R1;
+package net.nonswag.tnl.listener.api.player.v1_17.R1;
 
+import com.google.common.annotations.Beta;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import io.netty.channel.*;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.core.BlockPosition;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.chat.ChatMessage;
+import net.minecraft.network.chat.ChatMessageType;
+import net.minecraft.network.chat.IChatBaseComponent;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.syncher.DataWatcher;
+import net.minecraft.network.syncher.DataWatcherRegistry;
+import net.minecraft.server.level.BossBattleServer;
+import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.server.level.WorldServer;
+import net.minecraft.server.network.PlayerConnection;
+import net.minecraft.world.entity.EntityLiving;
+import net.minecraft.world.level.block.entity.TileEntitySign;
 import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.bossbar.TNLBossBar;
-import net.nonswag.tnl.listener.api.bossbar.v1_15.R1.NMSBossBar;
+import net.nonswag.tnl.listener.api.bossbar.v1_17.R1.NMSBossBar;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.object.Generic;
 import net.nonswag.tnl.listener.api.player.Skin;
@@ -19,9 +34,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -34,12 +49,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+@Beta
 public class NMSPlayer implements TNLPlayer {
 
     @Nonnull
     private static final HashMap<UUID, List<String>> bossBars = new HashMap<>();
     @Nonnull
     private static final HashMap<UUID, NMSBossBar> bossHashMap = new HashMap<>();
+
     @Nonnull
     private final Player bukkitPlayer;
     @Nonnull
@@ -64,17 +81,13 @@ public class NMSPlayer implements TNLPlayer {
 
     @Nullable
     public static NMSPlayer cast(@Nullable CommandSender sender) {
-        if (sender instanceof Player) {
-            return cast((Player) sender);
-        }
+        if (sender instanceof Player) return cast((Player) sender);
         return null;
     }
 
     @Nullable
     public static NMSPlayer cast(@Nullable HumanEntity humanEntity) {
-        if (humanEntity instanceof Player) {
-            return cast((Player) humanEntity);
-        }
+        if (humanEntity instanceof Player) return cast((Player) humanEntity);
         return null;
     }
 
@@ -88,26 +101,20 @@ public class NMSPlayer implements TNLPlayer {
 
     @Nullable
     public static NMSPlayer cast(@Nullable LivingEntity livingEntity) {
-        if (livingEntity instanceof Player) {
-            return cast((Player) livingEntity);
-        }
+        if (livingEntity instanceof Player) return cast((Player) livingEntity);
         return null;
     }
 
     @Nullable
     public static NMSPlayer cast(@Nonnull String string) {
         Player player = Bukkit.getPlayer(string);
-        if (player != null) {
-            return cast(player);
-        }
+        if (player != null) return cast(player);
         return null;
     }
 
     @Nullable
     public static NMSPlayer cast(@Nullable Object object) {
-        if (object instanceof Player) {
-            return cast(((Player) object));
-        }
+        if (object instanceof Player) return cast(((Player) object));
         return null;
     }
 
@@ -125,23 +132,23 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     @Nonnull
     public PlayerConnection getPlayerConnection() {
-        return getEntityPlayer().playerConnection;
+        return getEntityPlayer().b;
     }
 
     @Override
     @Nonnull
     public NetworkManager getNetworkManager() {
-        return getPlayerConnection().networkManager;
+        return getPlayerConnection().a;
     }
 
     @Override
     public int getPing() {
-        return getEntityPlayer().ping;
+        throw new UnsupportedOperationException("method is not supported in this version");
     }
 
     @Override
     public void setPing(int ping) {
-        getEntityPlayer().ping = ping;
+        throw new UnsupportedOperationException("method is not supported in this version");
     }
 
     @Override
@@ -157,16 +164,13 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void openVirtualSignEditor(@Nonnull SignMenu signMenu) {
-        if (getGUI() != null) getGUI().getViewers().remove(this);
-        getVirtualStorage().remove("current-gui");
         Location location = new Location(getWorld(), getLocation().getBlockX(), getLocation().getBlockY() - 5, getLocation().getBlockZ());
         signMenu.setLocation(location);
         BlockPosition position = new BlockPosition(location.getX(), location.getY(), location.getZ());
         PacketPlayOutOpenSignEditor editor = new PacketPlayOutOpenSignEditor(position);
-        TileEntitySign tileEntitySign = new TileEntitySign();
-        tileEntitySign.setLocation(getWorldServer(), position);
+        TileEntitySign tileEntitySign = new TileEntitySign(position, null);
         for (int line = 0; line < signMenu.getLines().length; line++) {
-            tileEntitySign.lines[line] = new ChatMessage(signMenu.getLines()[line]);
+            tileEntitySign.d[line] = new ChatMessage(signMenu.getLines()[line]);
         }
         Material material = Material.getMaterial(signMenu.getType().name());
         if (material != null) sendBlockChange(location, material.createBlockData());
@@ -194,21 +198,12 @@ public class NMSPlayer implements TNLPlayer {
     }
 
     @Override
-    public void hideTabListName(@Nonnull TNLPlayer[] players) {
-        for (TNLPlayer all : players) {
-            if (!all.getUniqueId().equals(getUniqueId())) {
-                sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ((NMSPlayer) all).getEntityPlayer()));
-            }
-        }
-    }
-
-    @Override
     public void disguise(@Nonnull Generic<?> entity, @Nonnull TNLPlayer receiver) {
         if (!receiver.getUniqueId().equals(getUniqueId()) && entity.getParameter() instanceof EntityLiving) {
             receiver.sendPacket(new PacketPlayOutEntityDestroy(this.getId()));
             ((EntityLiving) entity.getParameter()).setLocation(getLocation().getX(), getLocation().getY(), getLocation().getZ(), getLocation().getYaw(), getLocation().getPitch());
-            ((EntityLiving) entity.getParameter()).world = this.getWorldServer();
-            Reflection.setField(entity, net.minecraft.server.v1_15_R1.Entity.class, "id", this.getId());
+            ((EntityLiving) entity.getParameter()).t = this.getWorldServer();
+            Reflection.setField(entity, net.minecraft.server.v1_16_R3.Entity.class, "id", this.getId());
             receiver.sendPacket(new PacketPlayOutSpawnEntityLiving(((EntityLiving) entity.getParameter())));
         }
     }
@@ -251,7 +246,7 @@ public class NMSPlayer implements TNLPlayer {
     public void sendBossBar(@Nonnull TNLBossBar<?> bossBar) {
         TNLBossBar.BOSS_BARS.put(bossBar.getId(), bossBar);
         if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
-            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.ADD, ((NMSBossBar) bossBar).getBossBar().getHandle()));
+            sendPacket(PacketPlayOutBoss.createAddPacket(((NMSBossBar) bossBar).getBossBar().getHandle()));
             List<String> bars = getBossBars(getUniqueId());
             bars.add(bossBar.getId());
             getBossBars().put(getUniqueId(), bars);
@@ -262,14 +257,13 @@ public class NMSPlayer implements TNLPlayer {
     @Override
     public void updateBossBar(@Nonnull TNLBossBar<?> bossBar) {
         TNLBossBar.BOSS_BARS.put(bossBar.getId(), bossBar);
-        if (!getBossBars(getUniqueId()).contains(bossBar.getId())) {
-            sendBossBar(bossBar);
-        } else {
+        if (!getBossBars(getUniqueId()).contains(bossBar.getId())) sendBossBar(bossBar);
+        else {
             BossBattleServer handle = ((NMSBossBar) bossBar).getBossBar().getHandle();
-            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_NAME, handle));
-            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_PCT, handle));
-            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_PROPERTIES, handle));
-            sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.UPDATE_STYLE, handle));
+            sendPacket(PacketPlayOutBoss.createUpdateNamePacket(handle));
+            sendPacket(PacketPlayOutBoss.createUpdateProgressPacket(handle));
+            sendPacket(PacketPlayOutBoss.createUpdatePropertiesPacket(handle));
+            sendPacket(PacketPlayOutBoss.createUpdateStylePacket(handle));
         }
     }
 
@@ -277,7 +271,7 @@ public class NMSPlayer implements TNLPlayer {
     public void hideBossBar(@Nonnull TNLBossBar<?> bossBar) {
         TNLBossBar<?> bar = TNLBossBar.get(bossBar.getId());
         if (bar != null) bossBar = bar;
-        sendPacket(new PacketPlayOutBoss(PacketPlayOutBoss.Action.REMOVE, ((NMSBossBar) bossBar).getBossBar().getHandle()));
+        sendPacket(PacketPlayOutBoss.createRemovePacket(((NMSBossBar) bossBar).getBossBar().getHandle().i()));
         List<String> bars = getBossBars(getUniqueId());
         bars.remove(bossBar.getId());
         getBossBars().put(getUniqueId(), bars);
@@ -286,7 +280,7 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void sendActionbar(@Nonnull String actionbar) {
-        sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + actionbar + "\"}"), ChatMessageType.a((byte) 2)));
+        sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + actionbar + "\"}"), ChatMessageType.a((byte) 2), getUniqueId()));
     }
 
     @Override
@@ -336,10 +330,10 @@ public class NMSPlayer implements TNLPlayer {
 
     @Override
     public void setGlowing(boolean glowing, @Nonnull TNLPlayer player) {
-        boolean current = ((NMSPlayer) player).getEntityPlayer().glowing;
-        ((NMSPlayer) player).getEntityPlayer().glowing = glowing;
+        boolean current = ((NMSPlayer) player).getEntityPlayer().hasGlowingTag();
+        ((NMSPlayer) player).getEntityPlayer().setGlowingTag(glowing);
         sendPacket(new PacketPlayOutEntityMetadata(player.getId(), ((NMSPlayer) player).getEntityPlayer().getDataWatcher(), true));
-        ((NMSPlayer) player).getEntityPlayer().glowing = current;
+        ((NMSPlayer) player).getEntityPlayer().setGlowingTag(current);
     }
 
     @Override
@@ -361,7 +355,7 @@ public class NMSPlayer implements TNLPlayer {
                             PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet<?>) packetObject));
                             if (event.call()) super.channelRead(channelHandlerContext, event.getPacket());
                         } catch (Exception e) {
-                            Logger.error.println(e);
+                            Logger.error.println(e.getMessage());
                             uninject();
                         }
                     }
@@ -372,12 +366,12 @@ public class NMSPlayer implements TNLPlayer {
                             PlayerPacketEvent<Packet<?>> event = new PlayerPacketEvent<>(NMSPlayer.this, ((Packet<?>) packetObject));
                             if (event.call()) super.write(channelHandlerContext, event.getPacket(), channelPromise);
                         } catch (Exception e) {
-                            Logger.error.println(e);
+                            Logger.error.println(e.getMessage());
                             uninject();
                         }
                     }
                 };
-                ChannelPipeline pipeline = getNetworkManager().channel.pipeline();
+                ChannelPipeline pipeline = getNetworkManager().k.pipeline();
                 try {
                     pipeline.addBefore("packet_handler", getName() + "-TNLListener", channelDuplexHandler);
                 } catch (Throwable ignored) {
@@ -389,14 +383,14 @@ public class NMSPlayer implements TNLPlayer {
             }
         } catch (Exception e) {
             uninject();
-            Logger.error.println(e);
+            Logger.error.println(e.getMessage());
         }
     }
 
     @Override
     public void uninject() {
         try {
-            Channel channel = getNetworkManager().channel;
+            Channel channel = getNetworkManager().k;
             if (channel.pipeline().get(getName() + "-TNLListener") != null) {
                 channel.eventLoop().submit(() -> {
                     channel.pipeline().remove(getName() + "-TNLListener");

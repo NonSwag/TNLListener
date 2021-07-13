@@ -4,7 +4,7 @@ import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.math.Range;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
-import net.nonswag.tnl.listener.api.version.ServerVersion;
+import net.nonswag.tnl.listener.api.version.Version;
 
 import javax.annotation.Nonnull;
 
@@ -13,10 +13,10 @@ public abstract class TNLOpenWindow {
     @Nonnull
     public static Object create(@Nonnull Type type, @Nonnull String title) {
         Object packet;
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(Version.v1_16_4)) {
             packet = new net.minecraft.server.v1_16_R3.PacketPlayOutOpenWindow();
             Reflection.setField(packet, "c", new net.minecraft.server.v1_16_R3.ChatMessage(title));
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_15_2)) {
             packet = new net.minecraft.server.v1_15_R1.PacketPlayOutOpenWindow();
             Reflection.setField(packet, "c", new net.minecraft.server.v1_15_R1.ChatMessage(title));
         } else {

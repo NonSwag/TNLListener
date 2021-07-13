@@ -4,7 +4,7 @@ import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.gui.GUIItem;
 import net.nonswag.tnl.listener.api.item.TNLItem;
 import net.nonswag.tnl.listener.api.logger.Logger;
-import net.nonswag.tnl.listener.api.version.ServerVersion;
+import net.nonswag.tnl.listener.api.version.Version;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,13 +14,13 @@ public abstract class TNLSetSlot {
 
     @Nonnull
     public static Object create(@Nonnull Inventory inventory, int slot, @Nonnull ItemStack item) {
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(Version.v1_16_4)) {
             return new net.minecraft.server.v1_16_R3.PacketPlayOutSetSlot(inventory.getId(), slot, org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack.asNMSCopy(item));
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_15_2)) {
             return new net.minecraft.server.v1_15_R1.PacketPlayOutSetSlot(inventory.getId(), slot, org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack.asNMSCopy(item));
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_6)) {
             return new net.minecraft.server.v1_7_R4.PacketPlayOutSetSlot(inventory.getId(), slot, org.bukkit.craftbukkit.v1_7_R4.inventory.CraftItemStack.asNMSCopy(item));
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_2)) {
             return new net.minecraft.server.v1_7_R1.PacketPlayOutSetSlot(inventory.getId(), slot, org.bukkit.craftbukkit.v1_7_R1.inventory.CraftItemStack.asNMSCopy(item));
         } else {
             Logger.error.println("Version <'" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");

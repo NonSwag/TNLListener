@@ -37,7 +37,6 @@ public class Placeholder {
         public static void register(@Nonnull Placeholder placeholder) {
             if (!PLACEHOLDERS.containsKey(placeholder.getPlaceholder())) {
                 PLACEHOLDERS.put(placeholder.getPlaceholder(), placeholder.getObject().toString());
-                Logger.debug.println("Registered static placeholder <'" + placeholder.getPlaceholder() + "'> with value <'" + placeholder.getObject() + "'>");
             } else {
                 Logger.error.println("A static placeholder named <'" + placeholder.getPlaceholder() + "'> is already registered");
             }
@@ -46,14 +45,12 @@ public class Placeholder {
         public static void unregister(@Nonnull String placeholder) {
             if (PLACEHOLDERS.containsKey(placeholder)) {
                 PLACEHOLDERS.remove(placeholder);
-                Logger.debug.println("Unregistered static placeholder <'" + placeholder + "'>");
             } else Logger.error.println("A static placeholder named <'" + placeholder + "'> is not registered");
         }
 
         public static void updateValue(@Nonnull Placeholder placeholder) {
             if (PLACEHOLDERS.containsKey(placeholder.getPlaceholder())) {
                 PLACEHOLDERS.put(placeholder.getPlaceholder(), placeholder.getObject().toString());
-                Logger.debug.println("Updated static placeholder <'" + placeholder.getPlaceholder() + "'>", "Changed value to <'" + placeholder.getObject() + "'>");
             } else Logger.error.println("A static placeholder named <'" + placeholder + "'> is not registered");
         }
 

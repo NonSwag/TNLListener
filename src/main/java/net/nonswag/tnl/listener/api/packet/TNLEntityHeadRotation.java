@@ -4,7 +4,7 @@ import net.nonswag.tnl.listener.TNLListener;
 import net.nonswag.tnl.listener.api.entity.TNLEntity;
 import net.nonswag.tnl.listener.api.logger.Logger;
 import net.nonswag.tnl.listener.api.reflection.Reflection;
-import net.nonswag.tnl.listener.api.version.ServerVersion;
+import net.nonswag.tnl.listener.api.version.Version;
 
 import javax.annotation.Nonnull;
 
@@ -13,13 +13,13 @@ public abstract class TNLEntityHeadRotation {
     @Nonnull
     public static Object create(int id, float yaw) {
         Object packet;
-        if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_16_4)) {
+        if (TNLListener.getInstance().getVersion().equals(Version.v1_16_4)) {
             packet = new net.minecraft.server.v1_16_R3.PacketPlayOutEntityHeadRotation();
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_15_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_15_2)) {
             packet = new net.minecraft.server.v1_15_R1.PacketPlayOutEntityHeadRotation();
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_6)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_6)) {
             packet = new net.minecraft.server.v1_7_R4.PacketPlayOutEntityHeadRotation();
-        } else if (TNLListener.getInstance().getVersion().equals(ServerVersion.v1_7_2)) {
+        } else if (TNLListener.getInstance().getVersion().equals(Version.v1_7_2)) {
             packet = new net.minecraft.server.v1_7_R1.PacketPlayOutEntityHeadRotation();
         } else {
             Logger.error.println("Version '" + TNLListener.getInstance().getVersion().getRecentVersion() + "'> is not registered please report this error to an contributor");

@@ -15,6 +15,8 @@ public class FileDownloader {
     public static void downloadFile(@Nonnull URL url, @Nonnull File directory) throws IOException {
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
+        connection.setConnectTimeout(3000);
+        connection.setReadTimeout(3000);
         connection.connect();
         int responseCode = connection.getResponseCode();
         if (responseCode == HttpsURLConnection.HTTP_OK) {

@@ -294,10 +294,9 @@ public class Language {
                     return language;
                 }
             }
-            return Language.UNKNOWN;
-        } catch (IllegalArgumentException | NullPointerException e) {
-            return Language.UNKNOWN;
+        } catch (IllegalArgumentException | NullPointerException ignored) {
         }
+        return Language.UNKNOWN;
     }
 
     @Nonnull
